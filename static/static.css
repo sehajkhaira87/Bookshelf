@@ -80,3 +80,57 @@ body{
         transform:scale(1);
     }
 }
+.hero{
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;  
+    width: 100%;
+    padding-right: 60px;
+    padding-top: 30px;
+}
+
+.hero-text{
+    width:45%;
+}
+
+.hero-image{
+    transform: translateY(-105px);
+}
+
+.hero-image img{
+    width:550px;
+    max-width:650px;
+}
+.cat{
+    position: absolute;
+    top: 123px;
+    right: 260px;
+    width: 90px;
+    z-index: 20;
+}
+
+.cat img{
+    width: 120px;
+}
+.hero-text{
+    position:absolute;
+    left:120px;
+    top:280px;
+}
+
+.hero-text h1{
+    font-size:72px;
+    font-weight:700;
+    color:#111;
+}
+
+
+.hero-title{
+    overflow:hidden;
+}
+
+.hero-title .char{
+    display:inline-block;
+    transform-origin:50% 100%;
+}
+
