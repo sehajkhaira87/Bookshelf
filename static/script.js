@@ -1,3 +1,15 @@
+const lenis = new Lenis({
+    duration: 1.2,
+    smoothWheel: true,
+    touchMultiplier: 2
+});
+
+function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+}
+
+requestAnimationFrame(raf);
 const loader = document.getElementById("loader");
 
 setTimeout(() => {

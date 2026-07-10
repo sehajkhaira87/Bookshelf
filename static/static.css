@@ -133,4 +133,6 @@ body{
     display:inline-block;
     transform-origin:50% 100%;
 }
-
+body{
+    min-height:300vh;
+}
