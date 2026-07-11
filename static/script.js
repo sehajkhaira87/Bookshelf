@@ -1,3 +1,8 @@
+if ("scrollRestoration" in history) {
+    history.scrollRestoration = "manual";
+}
+
+window.scrollTo(0, 0);
 const lenis = new Lenis({
     duration: 1.2,
     smoothWheel: true,
@@ -32,3 +37,46 @@ setTimeout(() => {
     });
 
 }, 1500);
+const bulb = document.querySelector(".bulb");
+
+let targetRotation = 0;
+let currentRotation = 0;
+let velocity = 0;
+
+document.addEventListener("mousemove", (e) => {
+
+    const mouseX = e.clientX / window.innerWidth;
+
+    targetRotation = (mouseX - 0.5) * 8;
+
+});
+
+function animateBulb(){
+
+
+    const force = (targetRotation - currentRotation) * 0.08;
+
+    velocity += force;
+
+    velocity *= 0.93;
+
+    currentRotation += velocity;
+    currentRotation = Math.max(-8, Math.min(8, currentRotation));
+
+    const xOffset = Math.sin(currentRotation * Math.PI / 180) * 18;
+
+bulb.style.transform = `
+translateX(${xOffset}px)
+rotate(${currentRotation}deg)
+`;
+    
+    requestAnimationFrame(animateBulb);
+
+}
+
+animateBulb();
+document.querySelector(".bulb").classList.add("on");
+setTimeout(() => {
+    document.querySelector(".bulb").classList.add("on");
+}, 1500);
+

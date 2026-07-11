@@ -28,6 +28,9 @@
 
 
     <section class="hero">
+        <div class="bulb">
+    <img src="{{ url_for('static', filename='images/bulb.svg') }}" alt="Bulb">
+</div>
 <div class="hero-text">
     <h1 class="hero-title">Let's Start</h1>
 </div>
@@ -47,6 +50,7 @@
    <script src="https://unpkg.com/lenis@1.3.11/dist/lenis.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+    
 
 </body>
 </html>
