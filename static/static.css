@@ -1,31 +1,43 @@
+/* ==========================================
+   FONT
+========================================== */
 
 @font-face {
     font-family: "Canela";
-    src: url("/static/font/CanelaDeck-Light-Trial.otf") format("opentype");
+    src: url("/static/font/Canela-Light-Trial.otf") format("opentype");
     font-weight: 300;
     font-style: normal;
 }
 
-html,
-body {
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-}/* Remove browser default spacing */
+
+/* ==========================================
+   RESET
+========================================== */
+
 *{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
+
+html,
 body{
-    margin: 0;
-    padding: 0;
+    margin:0;
+    padding:0;
+    overflow-x:hidden;
 }
 
-/* Loader */
-#loader{
+body{
+    min-height:300vh;
+}
 
-    position: fixed;
+
+/* ==========================================
+   LOADER
+========================================== */
+
+#loader{
+    position:fixed;
     top:0;
     left:0;
 
@@ -40,49 +52,21 @@ body{
 
     z-index:9999;
 
-    transition: transform 1.2s ease-in-out;
-
+    transition:transform 1.2s ease-in-out;
 }
 
 #loader img{
-    width: 260px;
-    height: auto;
+    width:280px;
+    height:auto;
+    animation:fadeIn 1.5s ease;
 }
+
 .hide-loader{
-    transform: translateY(-100%);
-}
-.navbar{
-    padding:15px 24px;
+    transform:translateY(-100%);
 }
 
-
-
-.logo{
-    display: flex;
-    align-items: center;
-    gap: 15px;
-
-    position: relative;
-    left: -30px;   /* Move left */
-}
-
-.logo h2{
-    color:white;
-    font-size:30px;
-    font-weight:600;
-}
-.logo img{
-    width: 130px;
-    height: auto;
-}
-.logo{
-    margin-top: -25px;
-}
-#loader img{
-    width: 280px;
-    animation: fadeIn 1.5s ease;
-}
 @keyframes fadeIn{
+
     from{
         opacity:0;
         transform:scale(0.8);
@@ -92,43 +76,69 @@ body{
         opacity:1;
         transform:scale(1);
     }
+
 }
+
+
+/* ==========================================
+   NAVBAR
+========================================== */
+
+.navbar{
+    padding:15px 24px;
+}
+
+
+/* ==========================================
+   LOGO
+========================================== */
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:15px;
+
+    position:relative;
+    left:-30px;
+
+    margin-top:-25px;
+}
+
+.logo img{
+    width:130px;
+    height:auto;
+}
+
+.logo h2{
+    color:white;
+    font-size:30px;
+    font-weight:600;
+}
+
+
+/* ==========================================
+   HERO SECTION
+========================================== */
+
 .hero{
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-start;  
-    width: 100%;
-    padding-right: 60px;
-    padding-top: 30px;
+    display:flex;
+    justify-content:flex-end;
+    align-items:flex-start;
+
+    width:100%;
+
+    padding-right:-5px;
+    padding-top:30px;
 }
+
+
+/* ==========================================
+   HERO TEXT
+========================================== */
 
 .hero-text{
     width:45%;
-}
 
-.hero-image{
-    transform: translateY(-105px);
-}
-
-.hero-image img{
-    width: 550px;
-    max-width: 650px;
-
-    filter: drop-shadow(0 35px 40px rgba(0,0,0,.15));
-}
-
-.cat{
-    position: absolute;
-    top: 123px;
-    right: 260px;
-    width: 90px;
-    z-index: 20;
-}
-
-.cat img{
-    width: 120px;
-}
-.hero-text{
     position:absolute;
     left:120px;
     top:280px;
@@ -141,51 +151,114 @@ body{
 }
 
 
+/* ==========================================
+   HERO TITLE
+========================================== */
+
 .hero-title{
-    overflow:hidden;
-    font-family: "Canela", serif;
-    font-weight: 300;
-     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: geometricPrecision;
+
+    position:absolute;
+
+    left:75px;
+    top:390px;
+
+    width:1500px;
+
+    font-family:"Canela";
+    font-size:210px;
+    line-height:.8;
+    letter-spacing:-0.06em;
 }
 
 .hero-title .char{
     display:inline-block;
     transform-origin:50% 100%;
 }
-body{
-    min-height:300vh;
+
+.hero-title span{
+    display:block;
 }
+
+.second-line{
+    margin-left:430px;
+}
+
+
+/* ==========================================
+   HERO IMAGE
+========================================== */
+
+.hero-image{
+    transform:translateY(220px,-105px);
+    
+}
+
+.hero-image img{
+    width:620px;
+    max-width:none;
+
+
+   filter:
+        drop-shadow(0 18px 20px rgba(0,0,0,.08))
+        drop-shadow(0 45px 55px rgba(0,0,0,.12))
+        drop-shadow(0 90px 120px rgba(0,0,0,.10));
+}
+
+/* ==========================================
+   CAT
+========================================== */
+
+.cat{
+    position:absolute;
+    top:240px;
+    right:255px;
+
+    width:120px;
+
+    z-index:20;
+}
+
+.cat img{
+    width:140px;
+}
+
+
+/* ==========================================
+   HERO GLOW
+========================================== */
+
 .hero::before{
-    content: "";
 
-    position: absolute;
+    content:"";
 
-    width: 900px;
-    height: 900px;
+    position:absolute;
 
-    right: -180px;
-    top: -220px;
+    width:900px;
+    height:900px;
 
-    border-radius: 50%;
+    right:-180px;
+    top:-220px;
+
+    border-radius:50%;
 
     background:
-        radial-gradient(
-            circle,
-            rgba(255,245,215,0.95) 0%,
-            rgba(255,241,190,0.65) 18%,
-            rgba(255,248,225,0.30) 45%,
-            rgba(255,255,255,0) 75%
-        );
+    radial-gradient(
+        circle,
+        rgba(255,245,215,0.95) 0%,
+        rgba(255,241,190,0.65) 18%,
+        rgba(255,248,225,0.30) 45%,
+        rgba(255,255,255,0) 75%
+    );
 
-    filter: blur(130px);
+    filter:blur(130px);
 
-    pointer-events: none;
+    pointer-events:none;
 
-    z-index: -1;
+    z-index:-1;
 }
+
 .hero::after{
+
     content:"";
 
     position:absolute;
@@ -199,20 +272,27 @@ body{
     border-radius:50%;
 
     background:
-        radial-gradient(
-            circle,
-            rgba(255,252,245,.55) 0%,
-            rgba(255,250,235,.18) 55%,
-            transparent 80%
-        );
+    radial-gradient(
+        circle,
+        rgba(255,252,245,.55) 0%,
+        rgba(255,250,235,.18) 55%,
+        transparent 80%
+    );
 
-    filter: blur(220px);
+    filter:blur(220px);
 
     pointer-events:none;
 
     z-index:-2;
 }
+
+
+/* ==========================================
+   BULB
+========================================== */
+
 .bulb{
+
     position:absolute;
 
     top:-10px;
@@ -225,9 +305,13 @@ body{
     transform-origin:50% 0%;
 }
 
-
+.bulb img{
+    width:80%;
+    display:block;
+}
 
 .bulb::after{
+
     content:"";
 
     position:absolute;
@@ -243,40 +327,39 @@ body{
     border-radius:50%;
 
     background:
-radial-gradient(
-    circle at center,
-    rgba(255, 248, 220, 0.95) 0%,
-    rgba(255, 232, 170, 0.75) 18%,
-    rgba(255, 215, 120, 0.45) 38%,
-    rgba(255, 180, 80, 0.20) 60%,
-    rgba(255, 150, 40, 0.08) 78%,
-    rgba(255, 120, 20, 0.00) 100%
-);
+    radial-gradient(
+        circle at center,
+        rgba(255,248,220,0.95) 0%,
+        rgba(255,232,170,0.75) 18%,
+        rgba(255,215,120,0.45) 38%,
+        rgba(255,180,80,0.20) 60%,
+        rgba(255,150,40,0.08) 78%,
+        rgba(255,120,20,0.00) 100%
+    );
 
     filter:blur(90px);
-    animation: bulbGlow 4s ease-in-out infinite;
 
-    z-index:-1;
+    animation:bulbGlow 4s ease-in-out infinite;
 
     pointer-events:none;
+
+    z-index:-1;
 }
+
 .bulb.on::after{
     opacity:1;
 }
-.bulb img{
-    width:80%;
-    display:block;
-}
-@keyframes bulbGlow {
+
+@keyframes bulbGlow{
 
     0%,100%{
-        opacity: .82;
-        transform: translate(-50%, -50%) scale(1);
+        opacity:.82;
+        transform:translate(-50%,-50%) scale(1);
     }
 
     50%{
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.08);
+        opacity:1;
+        transform:translate(-50%,-50%) scale(1.08);
     }
 
 }

@@ -80,3 +80,36 @@ setTimeout(() => {
     document.querySelector(".bulb").classList.add("on");
 }, 1500);
 
+document.querySelectorAll(".hero-title-line").forEach(line => {
+    new SplitType(line, {
+        types: "chars"
+    });
+});
+
+gsap.from(".char", {
+    opacity: 0,
+    y: 120,
+    rotationX: -90,
+    filter: "blur(20px)",
+    stagger: 0.04,
+    duration: 1.2,
+    ease: "power4.out"
+});
+ScrollTrigger.create({
+    trigger: ".hero",
+    start: "top top",
+    end: "+=800",
+    scrub: true,
+
+    onUpdate: self => {
+
+        gsap.set(".hero-title-line", {
+            y: self.progress * -180
+        });
+
+        gsap.set(".hero-title-line--2", {
+            y: self.progress * -260
+        });
+
+    }
+});
