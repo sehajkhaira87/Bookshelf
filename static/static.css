@@ -25,6 +25,7 @@ body{
     margin:0;
     padding:0;
     overflow-x:hidden;
+    background-image: url("images/background.png");
 }
 
 body{
@@ -121,6 +122,8 @@ body{
 ========================================== */
 
 .hero{
+    
+    
     display:flex;
     justify-content:flex-end;
     align-items:flex-start;
@@ -129,6 +132,9 @@ body{
 
     padding-right:-5px;
     padding-top:30px;
+    
+
+    overflow:hidden;
 }
 
 
@@ -197,12 +203,9 @@ body{
     width:620px;
     max-width:none;
 
-
-   filter:
-        drop-shadow(0 18px 20px rgba(0,0,0,.08))
-        drop-shadow(0 45px 55px rgba(0,0,0,.12))
-        drop-shadow(0 90px 120px rgba(0,0,0,.10));
+    
 }
+
 
 /* ==========================================
    CAT
