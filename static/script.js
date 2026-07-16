@@ -1,3 +1,4 @@
+gsap.registerPlugin(ScrollTrigger);
 if ("scrollRestoration" in history) {
     history.scrollRestoration = "manual";
 }
@@ -21,20 +22,45 @@ setTimeout(() => {
 
     loader.classList.add("hide-loader");
 
-    // Split text into characters
-    const text = new SplitType(".hero-title", {
-        types: "chars"
-    });
+   // Animate the line
+gsap.set(".tag-line", {
+    scaleX: 0,
+    transformOrigin: "left center"
+});
 
-    gsap.from(text.chars, {
-        opacity: 0,
-        y: 120,
-        rotationX: -90,
-        filter: "blur(20px)",
-        stagger: 0.04,
-        duration: 1.2,
-        ease: "power4.out"
-    });
+gsap.to(".tag-line", {
+    scaleX: 1,
+    duration: 1.8,
+    ease: "power3.out",
+    delay: 2.3
+});
+
+// Animate the "CURATED FOR STUDENTS" text
+gsap.from(".tag-text", {
+    opacity: 0,
+    x: 20,
+    duration: 1.7,
+    delay: 2.5,
+    ease: "power3.out"
+});
+
+// Split the heading into characters
+const text = new SplitType(".hero-title", {
+    types: "chars"
+});
+
+// Animate every character
+gsap.from(text.chars, {
+    opacity: 0,
+    y: 120,
+    rotationX: -90,
+    filter: "blur(20px)",
+    stagger: 0.03,
+    duration: 1.2,
+    ease: "power4.out",
+    delay: 0.9
+});
+
 
 }, 1500);
 const bulb = document.querySelector(".bulb");
@@ -47,7 +73,7 @@ document.addEventListener("mousemove", (e) => {
 
     const mouseX = e.clientX / window.innerWidth;
 
-    targetRotation = (mouseX - 0.5) * 8;
+    targetRotation = (mouseX - 0.5) * 4;
 
 });
 
@@ -80,10 +106,8 @@ setTimeout(() => {
     document.querySelector(".bulb").classList.add("on");
 }, 1500);
 
-document.querySelectorAll(".hero-title-line").forEach(line => {
-    new SplitType(line, {
-        types: "chars"
-    });
+new SplitType(".hero-title", {
+    types: "chars"
 });
 
 gsap.from(".char", {

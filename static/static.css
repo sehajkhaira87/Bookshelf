@@ -25,11 +25,7 @@ body{
     margin:0;
     padding:0;
     overflow-x:hidden;
-    background-image:url("images/background.png");
-    background-repeat:no-repeat;
-    background-position:center;
-    background-attachment:fixed; 
-    background-size:cover;
+    
     
     
     
@@ -95,7 +91,92 @@ body{
 ========================================== */
 
 .navbar{
-    padding:15px 24px;
+    padding:15px -150px;
+    margin-right: -440px;
+    margin-top: 20px;
+    
+    
+    
+}
+.nav-links{
+    display:flex;
+    align-items:center;
+    gap:42px;
+    margin-left:auto;
+    margin-right: -150px; 
+}
+
+.nav-links a{
+    position:relative;
+
+    text-decoration:none;
+    color:#2b2b2b;
+
+    font-size:17px;
+    font-weight:500;
+    letter-spacing:.4px;
+
+    transition:.35s ease;
+}
+
+.nav-links a::after{
+
+    content:"";
+
+    position:absolute;
+    left:0;
+    bottom:-6px;
+
+    width:0%;
+    height:2px;
+
+    background:#111;
+
+    transition:.35s ease;
+}
+
+.nav-links a:hover{
+
+    color:#000;
+}
+
+.nav-links a:hover::after{
+
+    width:100%;
+}
+
+.login-btn{
+    display:flex;
+    align-items:center;
+    gap:18px;
+
+    background:#f6f4f1;
+    color:#f5efe4;
+    text-decoration:none;
+
+    padding:14px 26px;
+    border-radius:999px;
+
+    font-size:15px;
+    font-weight:500;
+
+    transition:all .35s ease;
+
+}
+.login-btn::after{
+    display:none;
+}
+.arrow{
+    transition:transform .35s ease;
+}
+.login-btn:hover{
+    background:#ffd5a2;
+    transform:translateY(-2px);
+    box-shadow:0 10px 30px rgb(255, 198, 124);
+}
+
+.login-btn:hover .arrow{
+    transform:translateX(6px);
 }
 
 
@@ -109,9 +190,9 @@ body{
     gap:15px;
 
     position:relative;
-    left:-30px;
+    left:-1045px;
 
-    margin-top:-25px;
+    margin-top:-80px;
 }
 
 .logo img{
@@ -142,6 +223,12 @@ body{
     margin: 0;
 
     overflow:hidden;
+    background-image:url("images/back.png");
+    background-repeat:no-repeat;
+    background-position:center;
+    background-attachment:fixed; 
+    background-size:cover;
+    
 
     /*background-image:url("images/background.png");
     background-size:cover;
@@ -177,6 +264,9 @@ body{
 .hero-title{
 
     position:absolute;
+    letter-spacing: -1px;
+    line-height: .88;
+    word-spacing: 10px;
 
     left:75px;
     top:390px;
@@ -209,6 +299,9 @@ body{
 
 .hero-image{
     transform:translateY(220px,-105px);
+    position: relative;
+    top: 150px;
+    right:-10px;
     
 }
 
@@ -216,7 +309,25 @@ body{
     width:620px;
     max-width:none;
 
+    filter:
+        drop-shadow(0 20px 25px rgba(0,0,0,.7))
+        drop-shadow(0 45px 60px rgba(0,0,0,.25));
     
+}
+.hero-image::after{
+    content: "";
+    position: absolute;
+
+    width: 95%;
+    height: 85%;
+
+    left: 3%;
+    top: 5%;
+
+    background: rgba(0,0,0,.35);
+    filter: blur(45px);
+
+    z-index: -1;
 }
 
 
@@ -226,8 +337,8 @@ body{
 
 .cat{
     position:absolute;
-    top:210px;
-    right:255px;
+    top:190px;
+    right:240px;
 
     width:120px;
 
@@ -312,7 +423,7 @@ body{
     position:absolute;
 
     top:-10px;
-    left:1000px;
+    left:900px;
 
     width:140px;
 
@@ -322,8 +433,9 @@ body{
 }
 
 .bulb img{
-    width:80%;
+    width:25%;
     display:block;
+
 }
 
 .bulb::after{
@@ -378,4 +490,68 @@ body{
         transform:translate(-50%,-50%) scale(1.08);
     }
 
+}
+
+
+
+
+.hero-tag{
+    display:flex;
+    align-items:center;
+    gap:16px;
+
+    font-family:"Inter", sans-serif;
+    font-size:14px;
+    font-weight:500;
+
+    letter-spacing:.35em;
+    text-transform:uppercase;
+
+    color:#9C7A58;
+
+    margin-bottom:28px;
+}
+.tag-line{
+    display:inline-block;
+
+    width:80px;
+    height:2px;
+
+    background:#C8A77A;
+
+    transform:scaleX(0);
+    transform-origin:left center;
+}
+
+.hero-title{
+    display:flex;
+    flex-direction:column;
+
+    font-family:"Canela";
+    font-size:7rem;
+
+    line-height:.88;
+
+    letter-spacing:-3px;
+
+    color:#1E1A17;
+
+    margin:0;
+    margin-top: -350px;
+    margin-left: -80px;
+}
+
+.hero-title span{
+    display:block;
+    
+}
+.tag-line{
+    display:block;
+
+    width:70px;
+    height:2px;
+
+    background:#C8A77A;
+
+    transform:scaleX(1);
 }

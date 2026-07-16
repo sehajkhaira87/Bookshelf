@@ -9,17 +9,7 @@
 </head>
 
 <body>
-    <header class="navbar">
-
-    <div class="logo">
-
-        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo">
-
-       
-
-    </div>
-
-</header>
+    
 
 
     <div id="loader">
@@ -29,10 +19,37 @@
 
 
     <section class="hero">
+        <header class="navbar">
+       <nav class="nav-links">
+        <a href="#">Home</a>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+        <a href="#" class="login-btn">
+    <span>Login</span>
+    <span class="arrow">→</span>
+</a>
+    </nav>
+
+    <div class="logo">
+
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo">
+    </div>
+    
+
+</header>
         <div class="bulb">
     <img src="{{ url_for('static', filename='images/bulb.svg') }}" alt="Bulb">
 </div>
 <div class="hero-text">
+    <p class="hero-tag">
+        <span class="tag-line"></span>
+    <span class="tag-text">CURATED FOR STUDENTS</span>
+</p>
+<h1 class="hero-title">
+    <span>EVERYTHING</span>
+    <span>EXACTLY WHERE</span>
+    <span>IT BELONGS.</span>
+</h1>
     <!--<h1 class="hero-title">
     <span class="hero-title-line">BOOKSHELF</span>
     <span class="hero-title-line hero-title-line--2">IS YOURS</span>
@@ -53,6 +70,10 @@
 
    <script src="https://unpkg.com/lenis@1.3.11/dist/lenis.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/split-type"></script>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     
 
