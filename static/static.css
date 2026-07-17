@@ -760,3 +760,14 @@ body{
     opacity:.35;
 
 }
+.features-container{
+
+    transform-origin:center center;
+
+}
+
+.divider{
+
+    transform-origin:top center;
+
+}
