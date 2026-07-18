@@ -6,16 +6,16 @@ if ("scrollRestoration" in history) {
 window.scrollTo(0, 0);
 const lenis = new Lenis({
     duration: 1.2,
-    smoothWheel: true,
-    touchMultiplier: 2
+    smoothWheel: true
 });
 
-function raf(time) {
-    lenis.raf(time);
-    requestAnimationFrame(raf);
-}
+lenis.on("scroll", ScrollTrigger.update);
 
-requestAnimationFrame(raf);
+gsap.ticker.add((time) => {
+    lenis.raf(time * 1000);
+});
+
+gsap.ticker.lagSmoothing(0);
 const loader = document.getElementById("loader");
 
 setTimeout(() => {
@@ -221,3 +221,148 @@ featuresTl.from(".features-container", {
     ease: "power2.out"
 
 }, "-=0.3");
+
+// ================= PARALLAX SCROLL =================
+
+// Hero Text
+gsap.to(".hero-text", {
+
+    y: -180,
+
+    ease: "none",
+
+    scrollTrigger: {
+        trigger: ".hero",
+        start: "top top",
+        end: "bottom top",
+        scrub: 2
+    }
+
+});
+
+// Bookshelf
+gsap.to(".hero-image", {
+
+    y: -100,
+
+    ease: "none",
+
+    scrollTrigger: {
+        trigger: ".hero",
+        start: "top top",
+        end: "bottom top",
+        scrub: 2
+    }
+
+});
+
+// Features
+gsap.to(".features-container", {
+
+    y: -60,
+
+    ease: "none",
+
+    scrollTrigger: {
+        trigger: ".hero",
+        start: "top top",
+        end: "bottom top",
+        scrub: 2
+    }
+
+});
+
+// Bulb
+gsap.to(".bulb", {
+
+    y: -40,
+
+    ease: "none",
+
+    scrollTrigger: {
+        trigger: ".hero",
+        start: "top top",
+        end: "bottom top",
+        scrub: 2
+    }
+
+});
+gsap.to(".cat", {
+
+    y: -100,
+
+    ease: "none",
+
+    scrollTrigger: {
+        trigger: ".hero",
+        start: "top top",
+        end: "bottom top",
+        scrub: 2
+    }
+
+});
+
+
+
+const canvas = document.getElementById("sequence-canvas");
+const context = canvas.getContext("2d");
+
+const frameCount = 120;
+
+canvas.width = 1280;
+canvas.height = 720;
+
+const currentFrame = (index) =>
+    `/static/frames/frame_${String(index + 1).padStart(4, "0")}.png`;
+
+const images = [];
+const frame = {
+    current: 0
+};
+
+for (let i = 0; i < frameCount; i++) {
+    const img = new Image();
+    img.src = currentFrame(i);
+    images.push(img);
+}
+
+images[0].onload = render;
+
+function render() {
+
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    context.drawImage(
+        images[frame.current],
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+}
+gsap.to(frame, {
+
+    current: frameCount - 1,
+
+    snap: "current",
+
+    ease: "none",
+
+    scrollTrigger: {
+
+        trigger: ".sequence-section",
+
+        start: "top top",
+
+        end: "bottom bottom",
+
+        scrub: 1,
+
+        pin: true
+
+    },
+
+    onUpdate: render
+
+});
