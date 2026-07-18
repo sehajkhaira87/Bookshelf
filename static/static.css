@@ -771,3 +771,25 @@ body{
     transform-origin:top center;
 
 }
+
+
+
+
+.sequence-section{
+
+    height:300vh;
+    position:relative;
+
+}
+
+#sequence-canvas{
+
+    position:sticky;
+    top:0;
+
+    width:100%;
+    height:100vh;
+
+    display:block;
+
+}
