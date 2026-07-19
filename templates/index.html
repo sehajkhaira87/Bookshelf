@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOOKSHELF</title>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="stylesheet" href="{{ url_for('static', filename='static.css') }}">
 </head>
 
@@ -39,9 +41,12 @@
 
 
 </header>
-        <div class="bulb">
-    <img src="{{ url_for('static', filename='images/bulb.svg') }}" alt="Bulb">
-</div>
+        <canvas id="rope-canvas"></canvas>
+        <div class="bulb-wrapper">
+            <div class="bulb">
+                <img src="{{ url_for('static', filename='images/bulb.svg') }}" alt="Bulb">
+            </div>
+        </div>
 <div class="hero-text">
     <p class="hero-tag">
         <span class="tag-line"></span>
@@ -60,10 +65,10 @@
     
 
         <div class="hero-image">
-            <img src="{{ url_for('static', filename='images/Bookshelf.svg') }}" alt="Bookshelf">
+            <img src="{{ url_for('static', filename='images/Bookshelf.svg') }}" alt="Bookshelf" decoding="async">
         </div>
         <div class="cat">
-    <img src="{{ url_for('static', filename='images/cat.svg') }}" alt="Cat">
+    <img src="{{ url_for('static', filename='images/cat.svg') }}" alt="Cat" decoding="async">
 </div>
 
 

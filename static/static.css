@@ -7,6 +7,7 @@
     src: url("/static/font/Canela-Light-Trial.otf") format("opentype");
     font-weight: 300;
     font-style: normal;
+    font-display: swap;
 }
 
 
@@ -231,7 +232,6 @@ body{
     background-image:url("images/back.png");
     background-repeat:no-repeat;
     background-position:center;
-    background-attachment:fixed;
     background-size:cover;
 }
 
@@ -240,13 +240,16 @@ body{
    HERO TEXT
 ========================================== */
 
+/* ==========================================
+   HERO TEXT
+========================================== */
+
 .hero-text{
     position:absolute;
-
-    left:120px;
-    top:280px;
-
-    width:min(45%,700px);
+    left: clamp(20px, 8vw, 120px);
+    top: clamp(80px, 25vh, 280px);
+    width: auto;
+    z-index: 10;
 }
 
 .hero-text h1{
@@ -260,19 +263,14 @@ body{
    HERO TITLE
 ========================================== */
 .hero-title{
-    position: absolute;
-
-    left: 75px;          /* Keep your original horizontal position */
-    top: 390px;          /* Keep your original vertical position */
-
-    width: min(90vw, 1500px);
-
+    display:flex;
+    flex-direction:column;
     font-family: "Canela";
-
-    font-size: clamp(9rem, 10vw, 210px);
-
-    line-height: .8;
+    font-size: clamp(4rem, min(9vw, 18vh), 210px);
+    line-height: .88;
     letter-spacing: -0.06em;
+    color:#1E1A17;
+    margin:0;
 }
 
 .hero-title .char{
@@ -285,7 +283,7 @@ body{
 }
 
 .second-line{
-    margin-left:430px;
+    margin-left: max(300px, 25vw);
 }
 
 
@@ -296,7 +294,7 @@ body{
 .hero-image{
     position: absolute;
 
-    top: 150px;
+    top: clamp(50px, 15vh, 150px);
     right: -5px;
 
     width: min(42vw, 650px);
@@ -310,11 +308,7 @@ body{
     height:auto;
     display:block;
 
-
-    filter:
-        drop-shadow(0 20px 25px rgba(0,0,0,.7))
-        drop-shadow(0 45px 60px rgba(0,0,0,.25));
-    
+    filter: drop-shadow(0 20px 40px rgba(0,0,0,.45));
 }
 .hero-image::after{
     content: "";
@@ -326,8 +320,8 @@ body{
     left: 3%;
     top: 5%;
 
-    background: rgba(0,0,0,.35);
-    filter: blur(45px);
+    background: rgba(0,0,0,.25);
+    filter: blur(20px);
 
     z-index: -1;
 }
@@ -339,10 +333,10 @@ body{
 
 .cat{
     position:absolute;
-    top:190px;
-    right:240px;
+    top: clamp(70px, 19vh, 190px);
+    right: clamp(100px, 16vw, 240px);
 
-    width:120px;
+    width: min(10vw, 120px);
 
     z-index:20;
 }
@@ -379,11 +373,13 @@ body{
         rgba(255,255,255,0) 75%
     );
 
-    filter:blur(130px);
+    filter:blur(40px);
 
     pointer-events:none;
 
     z-index:-1;
+
+    contain:strict;
 }
 
 .hero::after{
@@ -413,6 +409,8 @@ body{
     pointer-events:none;
 
     z-index:-2;
+
+    contain:strict;
 }
 
 
@@ -421,22 +419,35 @@ body{
 ========================================== */
 
 
+.bulb-wrapper {
+    position:absolute;
+    top:-10px;
+    left:60%;
+    transform:translateX(-50%);
+    width:140px;
+    z-index:1100;
+    will-change: transform;
+    pointer-events: all;
+}
+
+#rope-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1099;
+    pointer-events: none;
+}
+
 .bulb{
 
-    position:absolute;
-
-    top:-10px;
-
-    left:60%;
-
-    transform:translateX(-50%);
-
-    width:140px;
-
-    z-index:100;
-
-    transform-origin:50% 0%;
-    animation: bulbSwing 8s ease-in-out infinite;
+    width:100%;
+    position: relative;
+    /* The glass top is approx 44px down from the top of the 125px tall image. 
+       We set the pivot to the top of the glass so it rotates correctly at the end of the rope */
+    transform-origin: 50% 44px;
+    will-change: transform;
 
 }
 
@@ -444,7 +455,11 @@ body{
 .bulb img{
     width:25%;
     display:block;
-
+    margin: 0 auto;
+    /* Hide the top 35% (the straight string) using a mask, so only the glass shows.
+       This preserves the layout size while hiding the stiff string. */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 35%, black 35%);
+    mask-image: linear-gradient(to bottom, transparent 35%, black 35%);
 }
 
 .bulb::after{
@@ -457,7 +472,7 @@ body{
     height:300px;
 
     left:50%;
-    top:55%;
+    top:85%;
 
     transform:translate(-50%,-50%);
 
@@ -476,15 +491,21 @@ body{
 
     filter:blur(90px);
 
-    animation:bulbGlow 4s ease-in-out infinite;
+    /* animation and opacity controlled by .bulb.on::after below */
+    opacity: 0;
+    animation: none;
+    transition: opacity 0.5s ease;
 
     pointer-events:none;
 
     z-index:-1;
+
+    contain:strict;
 }
 
 .bulb.on::after{
-    opacity:1;
+    opacity: 1;
+    animation: bulbGlow 4s ease-in-out infinite;
 }
 
 @keyframes bulbGlow{
@@ -518,7 +539,7 @@ body{
 
     color:#9C7A58;
 
-    margin-bottom:28px;
+    margin-bottom: clamp(10px, 3vh, 28px);
 }
 .tag-line{
     display:inline-block;
@@ -530,29 +551,6 @@ body{
 
     transform:scaleX(0);
     transform-origin:left center;
-}
-
-.hero-title{
-    display:flex;
-    flex-direction:column;
-
-    font-family:"Canela";
-    font-size:7rem;
-
-    line-height:.88;
-
-    letter-spacing:-3px;
-
-    color:#1E1A17;
-
-    margin:0;
-    margin-top: -350px;
-    margin-left: -80px;
-}
-
-.hero-title span{
-    display:block;
-    
 }
 .tag-line{
     display:block;
@@ -574,7 +572,8 @@ body{
 
     justify-content:center;
 
-    margin-top:clamp(-260px,-18vw,-180px);
+    /* Responsive to both width and height to prevent collision on short screens */
+    margin-top: clamp(-260px, max(-25vh, -18vw), -80px);
 
     margin-bottom:120px;
 
@@ -597,11 +596,9 @@ body{
 
     border-radius:32px;
 
-    background:rgba(255,255,255,.18);
+    background:rgba(255,255,255,.55);
 
-    backdrop-filter:blur(18px);
-
-    border:1px solid rgba(255,255,255,.25);
+    border:1px solid rgba(255,255,255,.35);
 
     box-shadow:
         0 20px 60px rgba(0,0,0,.08);
@@ -727,7 +724,7 @@ body{
 
 .feature-item:hover .feature-icon img{
 
-    filter:drop-shadow(0 8px 18px rgba(210,170,90,.25));
+    opacity:.9;
 
 }
 
@@ -755,7 +752,7 @@ body{
 
     transition:
         transform .35s ease,
-        filter .35s ease;
+        opacity .35s ease;
 
 }
 
@@ -811,6 +808,7 @@ body{
 
     height:300vh;
     position:relative;
+    contain:layout style;
 
 }
 
@@ -825,3 +823,80 @@ body{
     display:block;
 
 }
+
+.hero-text, .hero-image, .features-container, .cat {
+    will-change: transform;
+}
+
+/* hero: only contain style, not layout — layout containment breaks filter */
+.hero {
+    contain: style;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ================= BULB INTERACTIVE ================= */
+
+/* Grab cursor on the wrapper (the actual hit target) */
+.bulb-wrapper {
+    cursor: grab;
+}
+.bulb-wrapper:active {
+    cursor: grabbing;
+}
+.bulb {
+    touch-action: none;
+}
+
+/* Glow is OFF by default, ON via .on class — already handled above in original rules */
+
+/* Flicker keyframe — fires when toggled on */
+@keyframes flicker {
+    0%   { opacity: 0; }
+    15%  { opacity: 0.9; }
+    30%  { opacity: 0.05; }
+    50%  { opacity: 0.85; }
+    65%  { opacity: 0.2; }
+    80%  { opacity: 1; }
+    100% { opacity: 1; }
+}
+
+.bulb.flicker::after {
+    animation: flicker 0.7s ease-in-out forwards;
+}
+
+/* Lights-off: hero dims when bulb is clicked off */
+.hero {
+    transition: filter 0.7s ease;
+}
+
+.hero.lights-off {
+    filter: brightness(0.38) saturate(0.5);
+}/ *   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  
+       S H O R T   L A P T O P   S P E C I F I C   M E D I A   Q U E R Y  
+ = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =   * /  
+ @ m e d i a   ( m a x - h e i g h t :   5 0 0 p x )   {  
+         . f e a t u r e s   {  
+                 m a r g i n - t o p :   - 3 0 p x ;  
+         }  
+         . f e a t u r e s - c o n t a i n e r   {  
+                 p a d d i n g :   2 0 p x   3 0 p x ;  
+         }  
+         . h e r o - t e x t   {  
+                 t o p :   6 0 p x ;  
+         }  
+         . h e r o - t i t l e   {  
+                 f o n t - s i z e :   c l a m p ( 3 r e m ,   1 5 v h ,   1 0 0 p x ) ;  
+         }  
+         . h e r o - i m a g e   {  
+                 w i d t h :   m i n ( 3 5 v w ,   4 0 0 p x ) ;  
+         }  
+ }  
+ 
