@@ -237,11 +237,12 @@ body{
 ========================================== */
 
 .hero-text{
-    width:45%;
-
     position:absolute;
+
     left:120px;
     top:280px;
+
+    width:min(45%,700px);
 }
 
 .hero-text h1{
@@ -254,23 +255,20 @@ body{
 /* ==========================================
    HERO TITLE
 ========================================== */
-
 .hero-title{
+    position: absolute;
 
-    position:absolute;
-    letter-spacing: -1px;
-    line-height: .88;
-    word-spacing: 10px;
+    left: 75px;          /* Keep your original horizontal position */
+    top: 390px;          /* Keep your original vertical position */
 
-    left:75px;
-    top:390px;
+    width: min(90vw, 1500px);
 
-    width:1500px;
+    font-family: "Canela";
 
-    font-family:"Canela";
-    font-size:210px;
-    line-height:.8;
-    letter-spacing:-0.06em;
+    font-size: clamp(9rem, 10vw, 210px);
+
+    line-height: .8;
+    letter-spacing: -0.06em;
 }
 
 .hero-title .char{
@@ -292,16 +290,22 @@ body{
 ========================================== */
 
 .hero-image{
-    transform:translateY(220px,-105px);
-    position: relative;
+    position: absolute;
+
     top: 150px;
-    right:-10px;
-    
+    right: -5px;
+
+    width: min(42vw, 650px);
+
+    display: flex;
+    justify-content: flex-end;
 }
 
 .hero-image img{
-    width:620px;
-    max-width:none;
+    width:100%;
+    height:auto;
+    display:block;
+
 
     filter:
         drop-shadow(0 20px 25px rgba(0,0,0,.7))
@@ -412,19 +416,26 @@ body{
    BULB
 ========================================== */
 
+
 .bulb{
 
     position:absolute;
 
     top:-10px;
-    left:900px;
+
+    left:60%;
+
+    transform:translateX(-50%);
 
     width:140px;
 
     z-index:100;
 
     transform-origin:50% 0%;
+    animation: bulbSwing 8s ease-in-out infinite;
+
 }
+
 
 .bulb img{
     width:25%;
@@ -559,7 +570,7 @@ body{
 
     justify-content:center;
 
-    margin-top:-270px;
+    margin-top:-230px;
 
     margin-bottom:120px;
 
@@ -567,9 +578,10 @@ body{
 
 .features-container{
 
-    width:80%;
+    
+    width:min(88%,1650px);
+    flex-wrap:wrap;
 
-    max-width:1650px;
 
     display:flex;
 
@@ -589,6 +601,28 @@ body{
 
     box-shadow:
         0 20px 60px rgba(0,0,0,.08);
+
+    @media (max-width: 1400px){
+
+    .features-container{
+        width:90%;
+        padding:36px;
+    }
+
+    .feature-text h3{
+        font-size:24px;
+    }
+
+    .feature-text p{
+        font-size:16px;
+    }
+
+    .feature-icon{
+        width:44px;
+        height:44px;
+    }
+
+}
 
 }
 
