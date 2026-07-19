@@ -6,6 +6,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOOKSHELF</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='static.css') }}">
+    <link rel="preload" as="image" href="{{ url_for('static', filename='images/back.png') }}">
+    <script>
+        function setDeviceLayout() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            document.body.classList.remove('layout-mac', 'layout-windows', 'layout-small');
+            
+            if (height <= 450) { // e.g., extremely squat split screens or older constrained laptops
+                document.body.classList.add('layout-small');
+            } else if (width < 1440) { // e.g., 1366x768 typical Windows laptops
+                document.body.classList.add('layout-windows');
+            } else {
+                document.body.classList.add('layout-mac'); // Default/original layout
+            }
+        }
+        
+        window.addEventListener('resize', setDeviceLayout);
+        document.addEventListener('DOMContentLoaded', setDeviceLayout);
+        setDeviceLayout(); // run immediately in head
+    </script>
 </head>
 
 <body>
@@ -13,7 +34,7 @@
 
 
     <div id="loader">
-    <img src="{{ url_for('static', filename='images/logoblack.png') }}" alt="Bookshelf Logo">
+    <img src="{{ url_for('static', filename='images/logoblack.png') }}" alt="Bookshelf Logo" fetchpriority="high">
 </div>
 
 
@@ -58,10 +79,10 @@
     
 
         <div class="hero-image">
-            <img src="{{ url_for('static', filename='images/Bookshelf.svg') }}" alt="Bookshelf">
+            <img src="{{ url_for('static', filename='images/Bookshelf.svg') }}" alt="Bookshelf" loading="lazy">
         </div>
         <div class="cat">
-    <img src="{{ url_for('static', filename='images/cat.svg') }}" alt="Cat">
+    <img src="{{ url_for('static', filename='images/cat.svg') }}" alt="Cat" loading="lazy">
 </div>
 
 
@@ -76,7 +97,7 @@
         <div class="feature-item">
 
             <div class="feature-icon">
-                <img src="{{ url_for('static', filename='images/book.svg') }}" alt="">
+                <img src="{{ url_for('static', filename='images/book.svg') }}" alt="" loading="lazy">
             </div>
 
             <div class="feature-text">
@@ -92,7 +113,7 @@
         <div class="feature-item">
 
             <div class="feature-icon">
-                <img src="{{ url_for('static', filename='images/clock.svg') }}" alt="">
+                <img src="{{ url_for('static', filename='images/clock.svg') }}" alt="" loading="lazy">
             </div>
 
             <div class="feature-text">
@@ -108,7 +129,7 @@
         <div class="feature-item">
 
             <div class="feature-icon">
-                <img src="{{ url_for('static', filename='images/verified.svg') }}" alt="">
+                <img src="{{ url_for('static', filename='images/verified.svg') }}" alt="" loading="lazy">
             </div>
 
             <div class="feature-text">
@@ -124,7 +145,7 @@
         <div class="feature-item">
 
             <div class="feature-icon">
-                <img src="{{ url_for('static', filename='images/users.svg') }}" alt="">
+                <img src="{{ url_for('static', filename='images/users.svg') }}" alt="" loading="lazy">
             </div>
 
             <div class="feature-text">

@@ -226,7 +226,7 @@ body{
     background-image:url("images/back.png");
     background-repeat:no-repeat;
     background-position:center;
-    background-attachment:fixed; 
+    /* background-attachment:fixed removed — causes jank on Windows */
     background-size:cover;
     
 
@@ -248,6 +248,10 @@ body{
     position:absolute;
     left:120px;
     top:280px;
+
+    z-index:10;
+
+    will-change:transform;
 }
 
 .hero-text h1{
@@ -302,7 +306,8 @@ body{
     position: relative;
     top: 150px;
     right:-10px;
-    
+
+    will-change:transform;
 }
 
 .hero-image img{
@@ -377,7 +382,7 @@ body{
         rgba(255,255,255,0) 75%
     );
 
-    filter:blur(130px);
+    filter:blur(60px);
 
     pointer-events:none;
 
@@ -406,7 +411,7 @@ body{
         transparent 80%
     );
 
-    filter:blur(220px);
+    filter:blur(90px);
 
     pointer-events:none;
 
@@ -430,6 +435,8 @@ body{
     z-index:100;
 
     transform-origin:50% 0%;
+
+    will-change:transform;
 }
 
 .bulb img{
@@ -465,7 +472,7 @@ body{
         rgba(255,120,20,0.00) 100%
     );
 
-    filter:blur(90px);
+    filter:blur(40px);
 
     animation:bulbGlow 4s ease-in-out infinite;
 
@@ -565,9 +572,15 @@ body{
 
     justify-content:center;
 
-    margin-top:-270px;
+    /* Viewport-relative so it adapts to Windows display scaling */
+    margin-top:max(-270px, -24vh);
 
     margin-bottom:120px;
+
+    position:relative;
+    z-index:5;
+
+    contain:layout style paint;
 
 }
 
@@ -764,6 +777,8 @@ body{
 
     transform-origin:center center;
 
+    will-change:transform;
+
 }
 
 .divider{
@@ -780,6 +795,8 @@ body{
     height:300vh;
     position:relative;
 
+    contain:layout style paint;
+
 }
 
 #sequence-canvas{
@@ -793,3 +810,97 @@ body{
     display:block;
 
 }
+
+
+/* ================= DEVICE-SPECIFIC OVERRIDES ================= */
+
+/* Applied via JS for standard 1366x768 / 1536x864 screens */
+body.layout-windows .hero {
+    position: relative;
+    /* Scale the entire hero layout proportionally from top-left */
+    transform: scale(0.7);
+    transform-origin: top left;
+    width: 142.8%; /* 100 / 0.7 to counteract scale width reduction */
+    margin-bottom: -20vh; /* Adjust space taken since scaling doesn't affect document flow */
+}
+
+body.layout-windows .features {
+    margin-top: max(-450px, -40vh); /* More aggressive pull up to meet the scaled hero */
+}
+
+body.layout-windows .sequence-section {
+    margin-top: -15vh; 
+}
+
+
+/* Applied via JS for very squat/old laptops (height <= 450px) */
+body.layout-small .hero {
+    position: relative;
+    transform: scale(0.45);
+    transform-origin: top left;
+    width: 222%; /* 100 / 0.45 */
+    margin-bottom: -50vh;
+}
+
+body.layout-small .features {
+    margin-top: max(-600px, -60vh);
+}
+
+body.layout-small .sequence-section {
+    margin-top: -30vh; 
+}
+
+/* Fix navbar/logo alignment for scaled layouts */
+body.layout-windows .navbar,
+body.layout-small .navbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: 0;
+    margin-top: 0;
+    box-sizing: border-box;
+}
+
+body.layout-windows .navbar {
+    padding: 15px 70px;
+}
+body.layout-small .navbar {
+    padding: 10px 100px;
+}
+
+body.layout-windows .nav-links,
+body.layout-small .nav-links {
+    margin-right: 0;
+}
+
+body.layout-windows .logo,
+body.layout-small .logo {
+    position: static;
+    margin-top: 0;
+    left: 0;
+    order: -1;
+}
+
+/* Counter-scale the navbar elements so they don't become tiny */
+
+/* Windows (0.7 inverse) */
+body.layout-windows .nav-links { gap: 60px; }
+body.layout-windows .nav-links a { font-size: 24px; }
+body.layout-windows .login-btn { 
+    font-size: 21px; 
+    padding: 20px 37px; 
+}
+body.layout-windows .logo img { width: 185px; }
+
+/* Small (0.45 inverse) */
+body.layout-small .nav-links { gap: 93px; }
+body.layout-small .nav-links a { font-size: 38px; }
+body.layout-small .login-btn { 
+    font-size: 33px; 
+    padding: 31px 58px; 
+}
+body.layout-small .logo img { width: 288px; }
