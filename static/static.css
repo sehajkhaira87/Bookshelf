@@ -102,7 +102,7 @@ body{
     justify-content: space-between;
     align-items: center;
 
-    padding: 10px 60px;
+    padding:18px clamp(30px,4vw,70px);
 
     z-index: 1000;
 }
@@ -195,13 +195,17 @@ body{
 .logo{
     display:flex;
     align-items:center;
+
     position:relative;
-    left:-50px;
+
+    left:0;
 }
 
 .logo img{
-    width:130px;
+    width:115px;
+    height:auto;
 }
+
 
 .logo h2{
     color:white;
