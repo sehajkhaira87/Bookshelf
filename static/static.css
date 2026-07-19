@@ -574,7 +574,7 @@ body{
 
     justify-content:center;
 
-    margin-top:-230px;
+    margin-top:clamp(-260px,-18vw,-180px);
 
     margin-bottom:120px;
 
@@ -583,7 +583,7 @@ body{
 .features-container{
 
     
-    width:min(88%,1650px);
+   width:min(82%,1450px);
     flex-wrap:wrap;
 
 
