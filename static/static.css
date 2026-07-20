@@ -836,9 +836,7 @@ background:rgba(255,255,255,.18);
 }
 
 /* hero: only contain style, not layout — layout containment breaks filter */
-.hero {
-    contain: style;
-}
+
 
 /* Reduce motion for users who prefer it */
 @media (prefers-reduced-motion: reduce) {
