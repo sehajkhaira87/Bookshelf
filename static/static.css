@@ -97,13 +97,15 @@ body{
     top: -18px;
     left: 0;
 
+    padding:18px clamp(8px,1.5vw,25px);
+
     width: 100%;
 
     display: flex;
     justify-content: space-between;
     align-items: center;
 
-    padding:18px clamp(30px,4vw,70px);
+    
 
     z-index: 1000;
 }
@@ -203,8 +205,11 @@ body{
 }
 
 .logo img{
-    width:115px;
-    height:auto;
+    width: clamp(110px, 9vw, 145px);
+    height: auto;
+    display: block;
+
+    transition: transform .35s ease;
 }
 
 
@@ -240,14 +245,11 @@ body{
    HERO TEXT
 ========================================== */
 
-/* ==========================================
-   HERO TEXT
-========================================== */
 
 .hero-text{
     position:absolute;
     left: clamp(20px, 8vw, 120px);
-    top: clamp(80px, 25vh, 280px);
+    top: clamp(100px, 28vh, 300px);
     width: auto;
     z-index: 10;
 }
@@ -267,7 +269,7 @@ body{
     flex-direction:column;
     font-family: "Canela";
     font-size: clamp(4rem, min(9vw, 18vh), 210px);
-    line-height: .88;
+    line-height: .95;
     letter-spacing: -0.06em;
     color:#1E1A17;
     margin:0;
@@ -333,7 +335,7 @@ body{
 
 .cat{
     position:absolute;
-    top: clamp(70px, 19vh, 190px);
+    top: clamp(82px, 20vh, 195px);
     right: clamp(100px, 16vw, 240px);
 
     width: min(10vw, 120px);
@@ -420,14 +422,12 @@ body{
 
 
 .bulb-wrapper {
-    position:absolute;
-    top:-10px;
-    left:60%;
-    transform:translateX(-50%);
-    width:140px;
-    z-index:1100;
-    will-change: transform;
-    pointer-events: all;
+    position: absolute;
+    top: clamp(-15px, -1vh, -5px);
+    left: 60%;
+    transform: translateX(-50%);
+    width: clamp(100px, 8vw, 130px);
+    z-index: 1100;
 }
 
 #rope-canvas {
@@ -573,9 +573,8 @@ body{
     justify-content:center;
 
     /* Responsive to both width and height to prevent collision on short screens */
-    margin-top: clamp(-260px, max(-25vh, -18vw), -80px);
-
-    margin-bottom:120px;
+margin-top: clamp(-360px, max(-32vh, -23vw), -130px);
+    margin-bottom:20px;
 
 }
 
@@ -596,7 +595,15 @@ body{
 
     border-radius:32px;
 
-    background:rgba(255,255,255,.55);
+background:rgba(255,255,255,.18);
+
+    backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.25);
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.08);
+
 
     border:1px solid rgba(255,255,255,.35);
 

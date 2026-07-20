@@ -437,6 +437,7 @@ featuresTl.from(".features-container", {
 const canvas = document.getElementById("sequence-canvas");
 const context = canvas.getContext("2d", { alpha: false });
 
+
 const frameCount = 120;
 
 // Scale canvas to actual viewport — avoids drawing at unnecessarily high resolution
