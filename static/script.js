@@ -96,10 +96,14 @@ let clickStartTime = 0;
 let lastDragX      = 0;
 let lastDragTime   = 0;
 let dragAngleVel   = 0;
+let grabAngleOffset = 0;
+let grabDistOffset  = 0;
 
 // Physics tracking
 let lastTime       = 0;
 let currentSag     = 0;
+let currentRopeLength = ROPE_LENGTH;
+let ropeLengthVel  = 0;
 
 // Parallax tracking
 let bulbParallaxY  = 0;
@@ -130,8 +134,8 @@ window.addEventListener("resize", () => {
 // ---- Compute bulb position from angle (hero-relative) ----
 function getBulbPos() {
     return {
-        x: anchorX + Math.sin(angle) * ROPE_LENGTH,
-        y: Math.cos(angle) * ROPE_LENGTH
+        x: anchorX + Math.sin(angle) * currentRopeLength,
+        y: Math.cos(angle) * currentRopeLength
     };
 }
 
@@ -143,6 +147,14 @@ function angleToPoint(px, py) {
     return Math.atan2(dx, Math.max(10, dy));
 }
 
+// ---- Get distance from anchor to a screen point ----
+function distToPoint(px, py) {
+    const heroRect = heroEl.getBoundingClientRect();
+    const dx = (px - heroRect.left) - anchorX;
+    const dy = (py - heroRect.top);
+    return Math.sqrt(dx * dx + dy * dy);
+}
+
 // ---- Mouse tracking ----
 document.addEventListener("mousemove", (e) => {
     mouseX = e.clientX;
@@ -151,6 +163,8 @@ document.addEventListener("mousemove", (e) => {
 // ---- DRAG: MOUSE ----
 bulbWrapper.addEventListener("mousedown", (e) => {
     isDragging     = true;
+    grabAngleOffset = angle - angleToPoint(e.clientX, e.clientY);
+    grabDistOffset  = currentRopeLength - distToPoint(e.clientX, e.clientY);
     clickStartX    = e.clientX;
     clickStartTime = Date.now();
     lastDragX      = e.clientX;
@@ -166,10 +180,14 @@ document.addEventListener("mousemove", (e) => {
     const dt  = Math.max(1, now - lastDragTime);
 
     const prevAngle = angle;
-    angle = angleToPoint(e.clientX, e.clientY);
+    angle = angleToPoint(e.clientX, e.clientY) + grabAngleOffset;
     angle = Math.max(-MAX_SWING, Math.min(MAX_SWING, angle));
     const rawVel = (angle - prevAngle) / dt * 16;
     dragAngleVel = dragAngleVel * 0.4 + rawVel * 0.6; // smooth throw momentum
+
+    const targetLength = distToPoint(e.clientX, e.clientY) + grabDistOffset;
+    const stretch = targetLength - ROPE_LENGTH;
+    currentRopeLength = Math.max(ROPE_LENGTH * 0.5, ROPE_LENGTH + stretch * 0.4); // rubber band stretch
 
     lastDragX    = e.clientX;
     lastDragTime = now;
@@ -193,6 +211,8 @@ document.addEventListener("mouseup", (e) => {
 bulbWrapper.addEventListener("touchstart", (e) => {
     const t        = e.touches[0];
     isDragging     = true;
+    grabAngleOffset = angle - angleToPoint(t.clientX, t.clientY);
+    grabDistOffset  = currentRopeLength - distToPoint(t.clientX, t.clientY);
     clickStartX    = t.clientX;
     clickStartTime = Date.now();
     lastDragX      = t.clientX;
@@ -208,10 +228,14 @@ document.addEventListener("touchmove", (e) => {
     const dt  = Math.max(1, now - lastDragTime);
 
     const prevAngle = angle;
-    angle = angleToPoint(t.clientX, t.clientY);
+    angle = angleToPoint(t.clientX, t.clientY) + grabAngleOffset;
     angle = Math.max(-MAX_SWING, Math.min(MAX_SWING, angle));
     const rawVel = (angle - prevAngle) / dt * 16;
     dragAngleVel = dragAngleVel * 0.4 + rawVel * 0.6; // smooth throw momentum
+
+    const targetLength = distToPoint(t.clientX, t.clientY) + grabDistOffset;
+    const stretch = targetLength - ROPE_LENGTH;
+    currentRopeLength = Math.max(ROPE_LENGTH * 0.5, ROPE_LENGTH + stretch * 0.4); // rubber band stretch
 
     lastDragX    = t.clientX;
     lastDragTime = now;
@@ -323,6 +347,12 @@ function animateBulb(time) {
         angleVel *= Math.pow(DAMPING, dtScale);
         angle    += angleVel * dtScale;
         angle     = Math.max(-MAX_SWING, Math.min(MAX_SWING, angle));
+
+        // Rope length spring physics
+        const lengthForce = (ROPE_LENGTH - currentRopeLength) * 0.2;
+        ropeLengthVel += lengthForce * dtScale;
+        ropeLengthVel *= 0.85; // Damping
+        currentRopeLength += ropeLengthVel * dtScale;
     }
 
     // Position the wrapper from the pendulum math
