@@ -80,10 +80,10 @@ const ropeCtx     = ropeCanvas.getContext("2d");
 
 // Pendulum config
 const ROPE_LENGTH    = 50;     // visual rope length in CSS px
-const GRAVITY        = 0.004;  // stronger gravity for a heavier, glass-like feel
-const DAMPING        = 0.992;  // increased air friction so it doesn't swing forever
-const MOUSE_STRENGTH = 0.0001; // barely noticeable magnetic effect
-const MAX_SWING      = Math.PI / 3; // cap at 60 degreesnt pendulum angle in radians
+const GRAVITY        = 0.006;  // slightly stronger gravity for more realistic weight
+const DAMPING        = 0.988;  // optimized air friction to allow for ~2s of natural oscillation before settling
+const MOUSE_STRENGTH = 0.0002; // soft magnetic effect
+const MAX_SWING      = Math.PI / 2.5; // wider cap for more freedom
 let angle         = 0;    // current pendulum angle in radians
 let angleVel      = 0;    // angular velocity
 let bulbRunning   = true;
@@ -96,6 +96,10 @@ let clickStartTime = 0;
 let lastDragX      = 0;
 let lastDragTime   = 0;
 let dragAngleVel   = 0;
+
+// Physics tracking
+let lastTime       = 0;
+let currentSag     = 0;
 
 // Parallax tracking
 let bulbParallaxY  = 0;
@@ -163,8 +167,9 @@ document.addEventListener("mousemove", (e) => {
 
     const prevAngle = angle;
     angle = angleToPoint(e.clientX, e.clientY);
-    angle = Math.max(-1.2, Math.min(1.2, angle));
-    dragAngleVel = (angle - prevAngle) / dt * 16;
+    angle = Math.max(-MAX_SWING, Math.min(MAX_SWING, angle));
+    const rawVel = (angle - prevAngle) / dt * 16;
+    dragAngleVel = dragAngleVel * 0.4 + rawVel * 0.6; // smooth throw momentum
 
     lastDragX    = e.clientX;
     lastDragTime = now;
@@ -204,8 +209,9 @@ document.addEventListener("touchmove", (e) => {
 
     const prevAngle = angle;
     angle = angleToPoint(t.clientX, t.clientY);
-    angle = Math.max(-1.2, Math.min(1.2, angle));
-    dragAngleVel = (angle - prevAngle) / dt * 16;
+    angle = Math.max(-MAX_SWING, Math.min(MAX_SWING, angle));
+    const rawVel = (angle - prevAngle) / dt * 16;
+    dragAngleVel = dragAngleVel * 0.4 + rawVel * 0.6; // smooth throw momentum
 
     lastDragX    = t.clientX;
     lastDragTime = now;
@@ -240,7 +246,7 @@ function toggleLight() {
 }
 
 // ---- DRAW FLEXIBLE ROPE ----
-function drawRope() {
+function drawRope(dtScale = 1) {
     const cw = ropeCanvas.clientWidth;
     const ch = ropeCanvas.clientHeight;
     ropeCtx.clearRect(0, 0, cw, ch);
@@ -253,18 +259,21 @@ function drawRope() {
 
     // Control point: placed at ~40% along the rope with dynamic sag
     const t = 0.4;
-    let sagTotal = 0;
+    let targetSag = 0;
     if (isDragging) {
         // Bend noticeably when dragging the heavy bulb against the cord
         const sagVel = Math.abs(dragAngleVel) * 150;
         const sagDir = dragAngleVel > 0 ? -1 : 1;
-        sagTotal = (2 + sagVel) * sagDir;
+        targetSag = (2 + sagVel) * sagDir;
     } else {
         // Bend very slightly due to air resistance when free-swinging
         const sagVel = Math.abs(angleVel) * 30;
         const sagDir = angleVel > 0 ? -1 : 1;
-        sagTotal = sagVel * sagDir;
+        targetSag = sagVel * sagDir;
     }
+
+    // Smoothly interpolate sag for realistic rope tension
+    currentSag += (targetSag - currentSag) * (1 - Math.pow(0.7, dtScale));
 
     // The "straight" midpoint along the rope
     const midX = startX + (endX - startX) * t;
@@ -272,8 +281,8 @@ function drawRope() {
 
     // Perpendicular to the rope direction for the sag
     const ropeAngle = Math.atan2(endY - startY, endX - startX);
-    const cpX = midX + Math.cos(ropeAngle + Math.PI/2) * sagTotal;
-    const cpY = midY + Math.sin(ropeAngle + Math.PI/2) * sagTotal;
+    const cpX = midX + Math.cos(ropeAngle + Math.PI/2) * currentSag;
+    const cpY = midY + Math.sin(ropeAngle + Math.PI/2) * currentSag;
 
     ropeCtx.beginPath();
     ropeCtx.moveTo(startX, startY);
@@ -285,24 +294,35 @@ function drawRope() {
 }
 
 // ---- ANIMATION LOOP ----
-function animateBulb() {
+function animateBulb(time) {
     if (!bulbRunning) return;
+
+    let dt = 16.666;
+    if (time) {
+        dt = time - lastTime;
+        if (dt > 100 || dt <= 0) dt = 16.666; // Handle tab switching / lag
+    } else {
+        time = performance.now();
+    }
+    lastTime = time;
+
+    const dtScale = dt / 16.666;
 
     if (!isDragging) {
         // Gravity: restoring force toward angle=0 (hanging straight down)
-        const gravityForce = -GRAVITY * Math.sin(angle);
+        const gravityForce = -GRAVITY * Math.sin(angle) * dtScale;
         angleVel += gravityForce;
 
         // Gentle mouse follow
         const heroRect = heroEl.getBoundingClientRect();
         const relMouse = (mouseX - heroRect.left) / heroRect.width;
         const targetAngle = (relMouse - 0.6) * 0.06;
-        const mouseForce = (targetAngle - angle) * MOUSE_STRENGTH;
+        const mouseForce = (targetAngle - angle) * MOUSE_STRENGTH * dtScale;
         angleVel += mouseForce;
 
-        angleVel *= DAMPING;
-        angle    += angleVel;
-        angle     = Math.max(-1.2, Math.min(1.2, angle));
+        angleVel *= Math.pow(DAMPING, dtScale);
+        angle    += angleVel * dtScale;
+        angle     = Math.max(-MAX_SWING, Math.min(MAX_SWING, angle));
     }
 
     // Position the wrapper from the pendulum math
@@ -312,11 +332,13 @@ function animateBulb() {
     bulbWrapper.style.top = `${bulbPos.y - 44}px`;
 
     // Rotate the inner bulb to follow the swing
-    const angleDeg = angle * (180 / Math.PI);
+    // Use angleVel to add a slight tilt when swinging fast, adds realism
+    const rotationTilt = angleVel * 20; 
+    const angleDeg = angle * (180 / Math.PI) + rotationTilt;
     bulbEl.style.transform = `rotate(${angleDeg}deg)`;
 
     // Draw the flexible rope
-    drawRope();
+    drawRope(dtScale);
 
     // Apply parallax to canvas
     ropeCanvas.style.transform = `translateY(${bulbParallaxY}px)`;
@@ -324,7 +346,7 @@ function animateBulb() {
     requestAnimationFrame(animateBulb);
 }
 
-animateBulb();
+requestAnimationFrame(animateBulb);
 
 // Turn on glow
 bulbEl.classList.add("on");
