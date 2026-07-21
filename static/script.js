@@ -3,7 +3,19 @@ if ("scrollRestoration" in history) {
     history.scrollRestoration = "manual";
 }
 
-window.scrollTo(0, 0);
+window.addEventListener("load", () => {
+
+    requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+
+        lenis.scrollTo(0, {
+            immediate: true
+        });
+
+        ScrollTrigger.refresh();
+    });
+
+});
 const lenis = new Lenis({
     duration: 1.2,
     smoothWheel: true
@@ -70,7 +82,7 @@ setTimeout(() => {
 
 }, 1500);
 
-// ================= BULB PHYSICS & INTERACTION =================
+// BULB PHYSICS & INTERACTION
 
 const bulbEl      = document.querySelector(".bulb");
 const bulbWrapper = document.querySelector(".bulb-wrapper");
@@ -79,31 +91,23 @@ const ropeCanvas  = document.getElementById("rope-canvas");
 const ropeCtx     = ropeCanvas.getContext("2d");
 
 // Pendulum config
-const ROPE_LENGTH    = 50;     // visual rope length in CSS px
-const GRAVITY        = 0.006;  // slightly stronger gravity for more realistic weight
-const DAMPING        = 0.988;  // optimized air friction to allow for ~2s of natural oscillation before settling
-const MOUSE_STRENGTH = 0.0002; // soft magnetic effect
-const MAX_SWING      = Math.PI / 2.5; // wider cap for more freedom
-let angle         = 0;    // current pendulum angle in radians
-let angleVel      = 0;    // angular velocity
+const ROPE_LENGTH    = 50;     
+const GRAVITY        = 0.004;  
+const DAMPING        = 0.992;  
+const MOUSE_STRENGTH = 0.0001; 
+const MAX_SWING      = Math.PI / 3; 
+let angle         = 0;    
+let angleVel      = 0;    
 let bulbRunning   = true;
 let isDragging    = false;
 let isLightOn     = true;
 
-// Drag tracking
+// Drag 
 let clickStartX    = 0;
 let clickStartTime = 0;
 let lastDragX      = 0;
 let lastDragTime   = 0;
 let dragAngleVel   = 0;
-let grabAngleOffset = 0;
-let grabDistOffset  = 0;
-
-// Physics tracking
-let lastTime       = 0;
-let currentSag     = 0;
-let currentRopeLength = ROPE_LENGTH;
-let ropeLengthVel  = 0;
 
 // Parallax tracking
 let bulbParallaxY  = 0;
@@ -131,15 +135,15 @@ window.addEventListener("resize", () => {
     sizeRopeCanvas();
 }, { passive: true });
 
-// ---- Compute bulb position from angle (hero-relative) ----
+// Compute bulb position 
 function getBulbPos() {
     return {
-        x: anchorX + Math.sin(angle) * currentRopeLength,
-        y: Math.cos(angle) * currentRopeLength
+        x: anchorX + Math.sin(angle) * ROPE_LENGTH,
+        y: Math.cos(angle) * ROPE_LENGTH
     };
 }
 
-// ---- Get angle from anchor to a screen point ----
+
 function angleToPoint(px, py) {
     const heroRect = heroEl.getBoundingClientRect();
     const dx = (px - heroRect.left) - anchorX;
@@ -147,24 +151,13 @@ function angleToPoint(px, py) {
     return Math.atan2(dx, Math.max(10, dy));
 }
 
-// ---- Get distance from anchor to a screen point ----
-function distToPoint(px, py) {
-    const heroRect = heroEl.getBoundingClientRect();
-    const dx = (px - heroRect.left) - anchorX;
-    const dy = (py - heroRect.top);
-    return Math.sqrt(dx * dx + dy * dy);
-}
 
-// ---- Mouse tracking ----
 document.addEventListener("mousemove", (e) => {
     mouseX = e.clientX;
 }, { passive: true });
 
-// ---- DRAG: MOUSE ----
 bulbWrapper.addEventListener("mousedown", (e) => {
     isDragging     = true;
-    grabAngleOffset = angle - angleToPoint(e.clientX, e.clientY);
-    grabDistOffset  = currentRopeLength - distToPoint(e.clientX, e.clientY);
     clickStartX    = e.clientX;
     clickStartTime = Date.now();
     lastDragX      = e.clientX;
@@ -180,14 +173,9 @@ document.addEventListener("mousemove", (e) => {
     const dt  = Math.max(1, now - lastDragTime);
 
     const prevAngle = angle;
-    angle = angleToPoint(e.clientX, e.clientY) + grabAngleOffset;
-    angle = Math.max(-MAX_SWING, Math.min(MAX_SWING, angle));
-    const rawVel = (angle - prevAngle) / dt * 16;
-    dragAngleVel = dragAngleVel * 0.4 + rawVel * 0.6; // smooth throw momentum
-
-    const targetLength = distToPoint(e.clientX, e.clientY) + grabDistOffset;
-    const stretch = targetLength - ROPE_LENGTH;
-    currentRopeLength = Math.max(ROPE_LENGTH * 0.5, ROPE_LENGTH + stretch * 0.4); // rubber band stretch
+    angle = angleToPoint(e.clientX, e.clientY);
+    angle = Math.max(-1.2, Math.min(1.2, angle));
+    dragAngleVel = (angle - prevAngle) / dt * 16;
 
     lastDragX    = e.clientX;
     lastDragTime = now;
@@ -203,16 +191,14 @@ document.addEventListener("mouseup", (e) => {
     if (elapsed < 300 && moved < 8) {
         toggleLight();
     } else {
-        angleVel = dragAngleVel; // preserve full throw momentum
+        angleVel = dragAngleVel; 
     }
 });
 
-// ---- DRAG: TOUCH ----
+
 bulbWrapper.addEventListener("touchstart", (e) => {
     const t        = e.touches[0];
     isDragging     = true;
-    grabAngleOffset = angle - angleToPoint(t.clientX, t.clientY);
-    grabDistOffset  = currentRopeLength - distToPoint(t.clientX, t.clientY);
     clickStartX    = t.clientX;
     clickStartTime = Date.now();
     lastDragX      = t.clientX;
@@ -228,14 +214,9 @@ document.addEventListener("touchmove", (e) => {
     const dt  = Math.max(1, now - lastDragTime);
 
     const prevAngle = angle;
-    angle = angleToPoint(t.clientX, t.clientY) + grabAngleOffset;
-    angle = Math.max(-MAX_SWING, Math.min(MAX_SWING, angle));
-    const rawVel = (angle - prevAngle) / dt * 16;
-    dragAngleVel = dragAngleVel * 0.4 + rawVel * 0.6; // smooth throw momentum
-
-    const targetLength = distToPoint(t.clientX, t.clientY) + grabDistOffset;
-    const stretch = targetLength - ROPE_LENGTH;
-    currentRopeLength = Math.max(ROPE_LENGTH * 0.5, ROPE_LENGTH + stretch * 0.4); // rubber band stretch
+    angle = angleToPoint(t.clientX, t.clientY);
+    angle = Math.max(-1.2, Math.min(1.2, angle));
+    dragAngleVel = (angle - prevAngle) / dt * 16;
 
     lastDragX    = t.clientX;
     lastDragTime = now;
@@ -251,11 +232,11 @@ document.addEventListener("touchend", (e) => {
     if (elapsed < 300 && moved < 8) {
         toggleLight();
     } else {
-        angleVel = dragAngleVel; // preserve full throw momentum
+        angleVel = dragAngleVel; 
     }
 });
 
-// ---- LIGHT TOGGLE ----
+
 function toggleLight() {
     isLightOn = !isLightOn;
     if (isLightOn) {
@@ -269,8 +250,8 @@ function toggleLight() {
     }
 }
 
-// ---- DRAW FLEXIBLE ROPE ----
-function drawRope(dtScale = 1) {
+
+function drawRope() {
     const cw = ropeCanvas.clientWidth;
     const ch = ropeCanvas.clientHeight;
     ropeCtx.clearRect(0, 0, cw, ch);
@@ -283,21 +264,18 @@ function drawRope(dtScale = 1) {
 
     // Control point: placed at ~40% along the rope with dynamic sag
     const t = 0.4;
-    let targetSag = 0;
+    let sagTotal = 0;
     if (isDragging) {
         // Bend noticeably when dragging the heavy bulb against the cord
         const sagVel = Math.abs(dragAngleVel) * 150;
         const sagDir = dragAngleVel > 0 ? -1 : 1;
-        targetSag = (2 + sagVel) * sagDir;
+        sagTotal = (2 + sagVel) * sagDir;
     } else {
         // Bend very slightly due to air resistance when free-swinging
         const sagVel = Math.abs(angleVel) * 30;
         const sagDir = angleVel > 0 ? -1 : 1;
-        targetSag = sagVel * sagDir;
+        sagTotal = sagVel * sagDir;
     }
-
-    // Smoothly interpolate sag for realistic rope tension
-    currentSag += (targetSag - currentSag) * (1 - Math.pow(0.7, dtScale));
 
     // The "straight" midpoint along the rope
     const midX = startX + (endX - startX) * t;
@@ -305,8 +283,8 @@ function drawRope(dtScale = 1) {
 
     // Perpendicular to the rope direction for the sag
     const ropeAngle = Math.atan2(endY - startY, endX - startX);
-    const cpX = midX + Math.cos(ropeAngle + Math.PI/2) * currentSag;
-    const cpY = midY + Math.sin(ropeAngle + Math.PI/2) * currentSag;
+    const cpX = midX + Math.cos(ropeAngle + Math.PI/2) * sagTotal;
+    const cpY = midY + Math.sin(ropeAngle + Math.PI/2) * sagTotal;
 
     ropeCtx.beginPath();
     ropeCtx.moveTo(startX, startY);
@@ -318,41 +296,24 @@ function drawRope(dtScale = 1) {
 }
 
 // ---- ANIMATION LOOP ----
-function animateBulb(time) {
+function animateBulb() {
     if (!bulbRunning) return;
-
-    let dt = 16.666;
-    if (time) {
-        dt = time - lastTime;
-        if (dt > 100 || dt <= 0) dt = 16.666; // Handle tab switching / lag
-    } else {
-        time = performance.now();
-    }
-    lastTime = time;
-
-    const dtScale = dt / 16.666;
 
     if (!isDragging) {
         // Gravity: restoring force toward angle=0 (hanging straight down)
-        const gravityForce = -GRAVITY * Math.sin(angle) * dtScale;
+        const gravityForce = -GRAVITY * Math.sin(angle);
         angleVel += gravityForce;
 
         // Gentle mouse follow
         const heroRect = heroEl.getBoundingClientRect();
         const relMouse = (mouseX - heroRect.left) / heroRect.width;
         const targetAngle = (relMouse - 0.6) * 0.06;
-        const mouseForce = (targetAngle - angle) * MOUSE_STRENGTH * dtScale;
+        const mouseForce = (targetAngle - angle) * MOUSE_STRENGTH;
         angleVel += mouseForce;
 
-        angleVel *= Math.pow(DAMPING, dtScale);
-        angle    += angleVel * dtScale;
-        angle     = Math.max(-MAX_SWING, Math.min(MAX_SWING, angle));
-
-        // Rope length spring physics
-        const lengthForce = (ROPE_LENGTH - currentRopeLength) * 0.2;
-        ropeLengthVel += lengthForce * dtScale;
-        ropeLengthVel *= 0.85; // Damping
-        currentRopeLength += ropeLengthVel * dtScale;
+        angleVel *= DAMPING;
+        angle    += angleVel;
+        angle     = Math.max(-1.2, Math.min(1.2, angle));
     }
 
     // Position the wrapper from the pendulum math
@@ -362,13 +323,11 @@ function animateBulb(time) {
     bulbWrapper.style.top = `${bulbPos.y - 44}px`;
 
     // Rotate the inner bulb to follow the swing
-    // Use angleVel to add a slight tilt when swinging fast, adds realism
-    const rotationTilt = angleVel * 20; 
-    const angleDeg = angle * (180 / Math.PI) + rotationTilt;
+    const angleDeg = angle * (180 / Math.PI);
     bulbEl.style.transform = `rotate(${angleDeg}deg)`;
 
     // Draw the flexible rope
-    drawRope(dtScale);
+    drawRope();
 
     // Apply parallax to canvas
     ropeCanvas.style.transform = `translateY(${bulbParallaxY}px)`;
@@ -376,13 +335,13 @@ function animateBulb(time) {
     requestAnimationFrame(animateBulb);
 }
 
-requestAnimationFrame(animateBulb);
+animateBulb();
 
 // Turn on glow
 bulbEl.classList.add("on");
 
-// ================= SCROLL PARALLAX =================
-// Consolidate all hero-section parallax into fewer ScrollTriggers
+//SCROLL PARALLAX 
+
 
 ScrollTrigger.create({
     trigger: ".hero",
@@ -400,7 +359,7 @@ ScrollTrigger.create({
     }
 });
 
-// ================= FEATURES TIMELINE =================
+//  FEATURES TIMELINE 
 
 const featuresTl = gsap.timeline({
 
@@ -412,7 +371,7 @@ const featuresTl = gsap.timeline({
 
 });
 
-// Glass panel appears — no blur filter animation
+
 featuresTl.from(".features-container", {
 
     opacity: 0,
@@ -424,7 +383,7 @@ featuresTl.from(".features-container", {
 
 })
 
-// Draw dividers
+
 .from(".divider", {
 
     scaleY: 0,
@@ -486,11 +445,11 @@ featuresTl.from(".features-container", {
 
 // ================= FRAME SEQUENCE (OPTIMIZED) =================
 
-const canvas = document.getElementById("sequence-canvas");
-const context = canvas.getContext("2d", { alpha: false });
+//const canvas = document.getElementById("sequence-canvas");
+//const context = canvas.getContext("2d", { alpha: false });//
 
 
-const frameCount = 120;
+/*const frameCount = 120;
 
 // Scale canvas to actual viewport — avoids drawing at unnecessarily high resolution
 function sizeCanvas() {
@@ -585,7 +544,7 @@ gsap.to(frame, {
 
     onUpdate: render
 
-});
+});*/
 
 // ================= CLEANUP =================
 // Pause bulb animation when it's off-screen to save CPU
@@ -599,3 +558,67 @@ ScrollTrigger.create({
     onEnterBack: () => { bulbRunning = true; animateBulb(); },
     onLeaveBack: () => { bulbRunning = false; }
 });
+
+
+
+// ================= PENCIL DRAW TRAIL (page2) =================
+(function () {
+  const page2 = document.querySelector(".page2");
+  if (!page2) return;
+
+  const svg    = page2.querySelector("#trail-svg");
+  const pencil = page2.querySelector("#pencil");
+  if (!svg || !pencil) return;
+
+  const TRAIL_LIFETIME = 1000;
+  const MAX_POINTS = 200;
+  let points = [];
+  let lastX = null, lastY = null, lastAngle = -45;
+  let active = false;
+
+  function addPoint(x, y) {
+    points.push({ x, y, t: performance.now() });
+    if (points.length > MAX_POINTS) points.shift();
+  }
+
+  function updatePencil(x, y) {
+    pencil.style.transform = `translate(${x - 23}px, ${y - 23}px)`;
+    if (lastX !== null) {
+      const dx = x - lastX, dy = y - lastY;
+      if (Math.hypot(dx, dy) > 1) lastAngle = Math.atan2(dy, dx) * 180 / Math.PI;
+    }
+    pencil.querySelector("g").setAttribute("transform", `rotate(${lastAngle + 45} 32 32)`);
+    lastX = x; lastY = y;
+  }
+
+  page2.addEventListener("mousemove", (e) => {
+    const rect = page2.getBoundingClientRect();
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    active = true;
+    updatePencil(x, y);
+    addPoint(x, y);
+  });
+
+  page2.addEventListener("mouseenter", () => { pencil.style.opacity = "1"; });
+  page2.addEventListener("mouseleave", () => { pencil.style.opacity = "0"; });
+
+  function render() {
+    const now = performance.now();
+    while (points.length && now - points[0].t > TRAIL_LIFETIME) points.shift();
+
+    let markup = "";
+    for (let i = 1; i < points.length; i++) {
+      const p0 = points[i - 1], p1 = points[i];
+      const life = 1 - Math.min((now - p1.t) / TRAIL_LIFETIME, 1);
+      const opacity = Math.max(life, 0) * 0.85;
+      if (opacity <= 0.01) continue;
+      const width = 1.5 + life * 2.2;
+      markup += `<line x1="${p0.x.toFixed(1)}" y1="${p0.y.toFixed(1)}" x2="${p1.x.toFixed(1)}" y2="${p1.y.toFixed(1)}"
+        stroke="#F2C14E" stroke-width="${width.toFixed(2)}" stroke-linecap="round"
+        opacity="${opacity.toFixed(3)}" />`;
+    }
+    svg.innerHTML = markup;
+    requestAnimationFrame(render);
+  }
+  requestAnimationFrame(render);
+})();
