@@ -622,3 +622,27 @@ ScrollTrigger.create({
   }
   requestAnimationFrame(render);
 })();
+
+// ================= PAGE 2 LOADER/CURTAIN EFFECT =================
+
+ScrollTrigger.create({
+    trigger: ".page1",
+    start: "top top",
+    // It stays pinned until the bottom of page1 is reached by the scrolling page2
+    end: "bottom top", 
+    pin: true,
+    pinSpacing: false // This is the magic part! It lets page2 scroll OVER the pinned page1
+});
+
+// Optional: Parallax fade out Page 1 as Page 2 slides over it
+gsap.to(".page1", {
+    opacity: 0.3,
+    filter: "blur(5px)", // Dims and blurs Page 1 as the loader slides up
+    ease: "none",
+    scrollTrigger: {
+        trigger: ".page2",
+        start: "top bottom", 
+        end: "top top",
+        scrub: true
+    }
+});

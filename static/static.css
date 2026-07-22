@@ -1,6 +1,6 @@
-/* ==========================================
+/* 
    FONT
-========================================== */
+ */
 
 @font-face {
     font-family: "Canela";
@@ -11,9 +11,9 @@
 }
 
 
-/* ==========================================
+/* 
    RESET
-========================================== */
+ */
 
 *{
     margin:0;
@@ -39,9 +39,9 @@ body{
 }
 
 
-/* ==========================================
+/* 
    LOADER
-========================================== */
+ */
 
 #loader{
     position:fixed;
@@ -87,9 +87,9 @@ body{
 }
 
 
-/* ==========================================
+/* 
    NAVBAR
-========================================== */
+ */
 
 .navbar{
     position: absolute;
@@ -185,9 +185,9 @@ body{
 }
 
 
-/* ==========================================
+/* 
    LOGO
-========================================== */
+ */
 
 .logo{
     display:flex;
@@ -214,9 +214,9 @@ body{
 }
 
 
-/* ==========================================
+/* 
    HERO SECTION
-========================================== */
+ */
 
 .hero{
     display:flex;
@@ -235,9 +235,9 @@ body{
 }
 
 
-/* ==========================================
+/* 
    HERO TEXT
-========================================== */
+ */
 
 
 .hero-text{
@@ -255,9 +255,9 @@ body{
 }
 
 
-/* ==========================================
+/* 
    HERO TITLE
-========================================== */
+ */
 .hero-title{
     display:flex;
     flex-direction:column;
@@ -283,9 +283,9 @@ body{
 }
 
 
-/* ==========================================
+/* 
    HERO IMAGE
-========================================== */
+ */
 
 .hero-image{
     position: absolute;
@@ -323,9 +323,9 @@ body{
 }
 
 
-/* ==========================================
+/* 
    CAT
-========================================== */
+ */
 
 .cat{
     position:absolute;
@@ -342,9 +342,9 @@ body{
 }
 
 
-/* ==========================================
+/* 
    HERO GLOW
-========================================== */
+ */
 
 .hero::before{
 
@@ -410,9 +410,9 @@ body{
 }
 
 
-/* ==========================================
-   BULB
-========================================== */
+
+/*bulb*/
+
 
 
 .bulb-wrapper {
@@ -438,8 +438,7 @@ body{
 
     width:100%;
     position: relative;
-    /* The glass top is approx 44px down from the top of the 125px tall image. 
-       We set the pivot to the top of the glass so it rotates correctly at the end of the rope */
+    
     transform-origin: 50% 44px;
     will-change: transform;
 
@@ -829,7 +828,7 @@ background:rgba(255,255,255,.18);
     will-change: transform;
 }
 
-/* hero: only contain style, not layout — layout containment breaks filter */
+
 .hero {
     contain: style;
 }
@@ -843,9 +842,7 @@ background:rgba(255,255,255,.18);
     }
 }
 
-/* ================= BULB INTERACTIVE ================= */
 
-/* Grab cursor on the wrapper (the actual hit target) */
 .bulb-wrapper {
     cursor: grab;
 }
@@ -856,9 +853,7 @@ background:rgba(255,255,255,.18);
     touch-action: none;
 }
 
-/* Glow is OFF by default, ON via .on class — already handled above in original rules */
 
-/* Flicker keyframe — fires when toggled on */
 @keyframes flicker {
     0%   { opacity: 0; }
     15%  { opacity: 0.9; }
@@ -881,9 +876,7 @@ background:rgba(255,255,255,.18);
 .hero.lights-off {
     filter: brightness(0.38) saturate(0.5);
 }
-/* ==========================================
-   SHORT LAPTOP SPECIFIC MEDIA QUERY
-========================================== */
+
 
 @media (max-height: 500px) {
 
@@ -947,4 +940,24 @@ background:rgba(255,255,255,.18);
     opacity: 0;
     transition: opacity .2s ease;
     filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
+}
+
+.page1 {
+    position: relative;
+    z-index: 1;
+    /* Optional: give it a dark background so it looks good when shadowed */
+    background: #fff; 
+}
+
+.page2 {
+    position: relative;
+    z-index: 10; /* Forces Page 2 to slide OVER Page 1 */
+    border-radius: 0;
+    
+    /* Adds the 'loader panel' look */
+    
+    box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.4);
+    
+    /* Ensure it has a solid background (you already have this) */
+    background: #1B140F; 
 }
