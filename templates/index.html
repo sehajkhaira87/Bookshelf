@@ -148,6 +148,7 @@
 </section>
 </div>
 <section class="page2">
+    <canvas id="book-canvas"></canvas>
     <svg id="trail-svg"></svg>
 
     <svg id="pencil" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
@@ -159,6 +160,8 @@
         <polygon points="30,54 34,54 32,60" fill="#3A3A3A"/>
       </g>
     </svg>
+ 
+    
 </section>
 
 <!--<section class="sequence-section">
@@ -177,16 +180,20 @@
     <script src="https://unpkg.com/split-type"></script>
     
 
-    <script type="importmap">
+   <script type="importmap">
 {
   "imports": {
-    "three": "https://unpkg.com/three@0.179.1/build/three.module.js"
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
   }
 }
 </script>
 
 <script type="module" src="{{ url_for('static', filename='three.js') }}"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+
+    
     
 
 </body>

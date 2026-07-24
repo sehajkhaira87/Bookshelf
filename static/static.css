@@ -942,22 +942,37 @@ background:rgba(255,255,255,.18);
     filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
 }
 
+/* ================= PAGE 1 & PAGE 2 CURTAIN EFFECT ================= */
+
 .page1 {
     position: relative;
     z-index: 1;
-    /* Optional: give it a dark background so it looks good when shadowed */
     background: #fff; 
+    padding-bottom: 120px; /* Bumper space so Page 2's shadow doesn't peek into Page 1 */
 }
 
 .page2 {
     position: relative;
+    min-height: 100vh;
     z-index: 10; /* Forces Page 2 to slide OVER Page 1 */
-    border-radius: 0;
-    
-    /* Adds the 'loader panel' look */
-    
+    border-radius: 0; /* Keeps edges razor sharp and straight */
     box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.4);
+    background: #1B140F;
+    overflow: hidden;
+    cursor: none; /* Hides default cursor so your custom pencil shows */
+}
+
+/* ================= PAGE 2 THREE.JS CANVAS ================= */
+
+#book-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
     
-    /* Ensure it has a solid background (you already have this) */
-    background: #1B140F; 
+    /* CRITICAL: Lets mouse movements pass through to your custom pencil trail */
+    pointer-events: none; 
+    z-index: 5;
 }
