@@ -105,7 +105,7 @@ function initBook3D(canvas, container) {
             const box    = new THREE.Box3().setFromObject(bookGroup);
             const center = box.getCenter(new THREE.Vector3());
             const size   = box.getSize(new THREE.Vector3());
-            const sc     = 2.2 / Math.max(size.x, size.y, size.z);
+            const sc     = 2.5 / Math.max(size.x, size.y, size.z);
             bookGroup.scale.setScalar(sc);
             bookGroup.position.copy(center.multiplyScalar(-sc));
             bookGroup.rotation.x = Math.PI / 2;
@@ -122,6 +122,7 @@ function initBook3D(canvas, container) {
                     }
                 }
             });
+            initScrollCueBook(bookGroup);
 
             bookPivot = new THREE.Group();
             bookPivot.add(bookGroup);
@@ -265,4 +266,49 @@ function initBook3D(canvas, container) {
     new IntersectionObserver(es => {
         es.forEach(e => { running = e.isIntersecting; if (running) requestAnimationFrame(animate); });
     }, { threshold: 0.05 }).observe(container);
+}
+
+
+function initScrollCueBook(sourceBookGroup) {
+    const cueCanvas = document.getElementById('scrollCueCanvas');
+    if (!cueCanvas) return;
+
+    const cueRenderer = new THREE.WebGLRenderer({
+        canvas: cueCanvas,
+        antialias: true,
+        alpha: true,
+    });
+    cueRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    cueRenderer.setSize(64, 68, false);
+    cueRenderer.outputColorSpace = THREE.SRGBColorSpace;
+    cueRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+    cueRenderer.toneMappingExposure = 1.0;
+
+    const cueScene  = new THREE.Scene();
+    const cueCamera = new THREE.PerspectiveCamera(35, 64 / 68, 0.1, 20);
+    cueCamera.position.set(0, 0, 4);
+
+    cueScene.add(new THREE.AmbientLight(0xfff5e0, 1.1));
+    const cueKey = new THREE.DirectionalLight(0xffd590, 1.8);
+    cueKey.position.set(2, 3, 3);
+    cueScene.add(cueKey);
+
+    const cueBook = sourceBookGroup.clone(true);
+
+    const box    = new THREE.Box3().setFromObject(cueBook);
+    const center = box.getCenter(new THREE.Vector3());
+    const size   = box.getSize(new THREE.Vector3());
+    const sc     = 1.7 / Math.max(size.x, size.y, size.z);
+    cueBook.scale.setScalar(sc);
+    cueBook.position.copy(center).multiplyScalar(-sc);
+    cueBook.rotation.x = 0.35;
+
+    cueScene.add(cueBook);
+
+    function animateCue(t) {
+        requestAnimationFrame(animateCue);
+        cueBook.rotation.y = t * 0.0005;
+        cueRenderer.render(cueScene, cueCamera);
+    }
+    requestAnimationFrame(animateCue);
 }

@@ -142,12 +142,22 @@
             </div>
 
         </div>
-
+<div class="scroll-cue" id="scrollCue" role="button" tabindex="0" aria-label="Scroll to explore">
+    <canvas id="scrollCueCanvas" class="scroll-cue-book" width="34" height="36"></canvas>
+    <span class="scroll-cue-dot"></span>
+</div>
     </div>
 
 </section>
 </div>
 <section class="page2">
+    <div class="page2-content">
+        <div class="transaction-step" id="step-1">Initializing secure connection...</div>
+        <div class="transaction-step" id="step-2">Verifying student credentials...</div>
+        <div class="transaction-step" id="step-3">Fetching requested bookshelf data...</div>
+        <div class="transaction-step" id="step-4">Transaction Complete! Enjoy your books.</div>
+    </div>
+    
     <canvas id="book-canvas"></canvas>
     <svg id="trail-svg"></svg>
 
@@ -163,6 +173,7 @@
  
     
 </section>
+
 
 <!--<section class="sequence-section">
 

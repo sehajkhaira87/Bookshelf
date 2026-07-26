@@ -649,3 +649,37 @@ gsap.to(".page1", {
 
 
 
+// ================= SCROLL CUE (jumping book) =================
+
+const scrollCue = document.getElementById("scrollCue");
+
+if (scrollCue) {
+    const goToPage2 = () => {
+        const page2 = document.querySelector(".page2");
+        if (page2) lenis.scrollTo(page2, { offset: 0, duration: 1.4 });
+    };
+
+    scrollCue.addEventListener("click", goToPage2);
+    scrollCue.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            goToPage2();
+        }
+    });
+
+    // Fade the cue out once the user actually starts scrolling past the
+    // hero, so it doesn't linger awkwardly once they're already past it
+    ScrollTrigger.create({
+        trigger: ".hero",
+        start: "top top",
+        end: "60% top",
+        scrub: true,
+        onUpdate: (self) => {
+            scrollCue.style.opacity = 1 - self.progress;
+            scrollCue.style.pointerEvents = self.progress > 0.8 ? "none" : "auto";
+        }
+    });
+}
+
+
+
