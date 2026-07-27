@@ -151,6 +151,44 @@
 </section>
 </div>
 <section class="page2">
+  <div class="page2-navbar-wrap">
+  <nav class="page2-navbar" id="page2Navbar">
+    <div class="p2nav-left">
+      <canvas id="navLogoCanvas" width="34" height="34"></canvas>
+      <span class="p2nav-word">bookshelf</span>
+      <span class="p2nav-tag">your shelf, unlocked</span>
+    </div>
+    <div class="p2nav-links">
+      <a href="#" data-nav>Notes</a>
+      <a href="#" data-nav>PYQs</a>
+      <a href="#" data-nav>Syllabus</a>
+    </div>
+    <div class="p2nav-right">
+      <button class="p2nav-search-btn" aria-label="Search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </button>
+      <a href="#" class="p2nav-login">Login</a>
+    </div>
+  </nav>
+</div>
+
+  <!-- torn bottom edge -->
+  <svg class="page2-navbar-edge" viewBox="0 0 1200 24" preserveAspectRatio="none">
+    <path d="M0,0 L1200,0 L1200,10
+      C1150,20 1100,4 1050,12
+      C1000,22 950,6 900,14
+      C850,22 800,4 750,10
+      C700,18 650,2 600,12
+      C550,22 500,4 450,10
+      C400,18 350,2 300,12
+      C250,22 200,4 150,10
+      C100,18 50,2 0,12 Z"
+      fill="#F4ECD8"/>
+  </svg>
+</div>
+    
     <div class="page2-content">
         <div class="transaction-step" id="step-1">Initializing secure connection...</div>
         <div class="transaction-step" id="step-2">Verifying student credentials...</div>
@@ -199,7 +237,9 @@
   }
 }
 </script>
-
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script type="module" src="{{ url_for('static', filename='three.js') }}"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 

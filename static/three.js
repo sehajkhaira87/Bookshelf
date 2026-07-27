@@ -173,6 +173,7 @@ function initBook3D(canvas, container) {
                                         idleStartTime = performance.now() * 0.001;
                                         startYOffset = bookPivot.rotation.y;
                                         introPlayed = true;
+                                        
                                     }
                                 });
 

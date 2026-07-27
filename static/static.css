@@ -1017,14 +1017,14 @@ background:rgba(255,255,255,.18);
 
 @keyframes scrollCueBounce {
     0%, 100% { transform: translateY(0) rotate(0deg); }
-    30%      { transform: translateY(-3px) rotate(-4deg); }
-    50%      { transform: translateY(-20px) rotate(3deg); }
-    70%      { transform: translateY(-3px) rotate(-2deg); }
+    30%      { transform: translateY(2px)  rotate(2deg); }
+    50%      { transform: translateY(16px) rotate(-3deg); }
+    70%      { transform: translateY(2px)  rotate(2deg); }
 }
 
 @keyframes scrollCueShadow {
-    0%, 100% { transform: scale(1);    opacity: .5; }
-    50%      { transform: scale(0.55); opacity: .22; }
+    0%, 100% { transform: scale(1);   opacity: .5; }
+    50%      { transform: scale(1.3); opacity: .65; }
 }
 
 /* Faster, more eager bounce on hover — reads as "wants to be clicked" */
@@ -1037,4 +1037,157 @@ background:rgba(255,255,255,.18);
     outline: 2px solid #C8A77A;
     outline-offset: 4px;
     border-radius: 8px;
+}
+
+
+/* ================= PAGE 2 SEARCH BAR ================= */
+
+.page2-search {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-16px);
+    width: min(680px, 88%);
+    z-index: 25;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .4s ease, transform .4s ease;
+}
+
+.page2-search.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+}
+
+.page2-search-form {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    background: rgba(255, 248, 235, 0.06);
+    border: 1px solid rgba(242, 193, 78, 0.25);
+    backdrop-filter: blur(14px);
+    border-radius: 999px;
+
+    padding: 10px 10px 10px 24px;
+}
+
+.page2-search-icon {
+    width: 20px;
+    height: 20px;
+    color: #F2C14E;
+    flex-shrink: 0;
+}
+
+.page2-search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+
+    font-family: "Inter", sans-serif;
+    font-size: 16px;
+    color: #F5EFE4;
+}
+
+.page2-search-input::placeholder {
+    color: rgba(245, 239, 228, 0.45);
+}
+
+.page2-search-btn {
+    background: #F2C14E;
+    color: #1B140F;
+    border: none;
+    border-radius: 999px;
+
+    padding: 12px 26px;
+    font-family: "Inter", sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: transform .25s ease, background .25s ease;
+    flex-shrink: 0;
+}
+
+.page2-search-btn:hover {
+    background: #ffd77a;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+    .page2-search-form { padding: 8px 8px 8px 18px; }
+    .page2-search-btn  { padding: 10px 18px; font-size: 14px; }
+}
+
+
+
+.page2-navbar-wrap {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 40;
+
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-100%);
+    transition: opacity .8s ease, transform .8s ease;
+}
+
+.page2-navbar-wrap.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+.page2-navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+
+    padding: 18px clamp(24px, 4vw, 64px) 22px;
+
+    background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+        linear-gradient(180deg, #F7F0DE 0%, #F1E7CE 100%);
+
+    border-bottom: 1px solid rgba(36,27,18,.15);
+
+    box-shadow:
+        0 25px 45px rgba(0,0,0,.55),
+        0 4px 10px rgba(0,0,0,.3);
+}
+/* Text/links now sit on light paper, so darken everything */
+.p2nav-word { color: #241B12; }
+
+.p2nav-tag {
+    color: rgba(36,27,18,.55);
+    border-left: 1px solid rgba(36,27,18,.2);
+}
+
+.p2nav-links a { color: rgba(36,27,18,.7); }
+.p2nav-links a:hover { color: #241B12; }
+.p2nav-links a::after {
+    background: #B4862A;
+    box-shadow: 0 0 6px rgba(180,134,42,.6);
+}
+
+.p2nav-search-btn { color: rgba(36,27,18,.65); }
+.p2nav-search-btn:hover { color: #B4862A; }
+
+.p2nav-login {
+    background: #241B12;
+    color: #F4ECD8;
+}
+.p2nav-login:hover {
+    box-shadow: 0 8px 20px rgba(0,0,0,.35);
+}
+
+
+
+@media (max-width: 720px) {
+    .p2nav-tag, .p2nav-links { display: none; }
 }

@@ -681,5 +681,17 @@ if (scrollCue) {
     });
 }
 
+// ================= PAGE 2 NAVBAR REVEAL (paper style) =================
+(function () {
+  const navbarWrap = document.querySelector(".page2-navbar-wrap");
+  if (!navbarWrap) return;
 
-
+  ScrollTrigger.create({
+    trigger: ".page2",
+    start: "top 40%",
+    once: true,
+    onEnter: () => {
+      setTimeout(() => navbarWrap.classList.add("is-visible"), 1800);
+    }
+  });
+})();
