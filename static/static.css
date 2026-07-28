@@ -1064,49 +1064,36 @@ background:rgba(255,255,255,.18);
 .page2-navbar {
     display: flex;
     align-items: center;
+    height: 84px;
     justify-content: space-between;
     gap: 24px;
+    position: relative;
+    overflow: visible;
 
-    padding: 22px clamp(24px, 4vw, 56px);
+    padding: 0 clamp(24px, 4vw, 56px);
 
     background: #F4EFE3;
     border-bottom: 1px solid rgba(36,27,18,.12);
 }
 
 .p2nav-left {
+    position: relative;
+    height: 100%;
     display: flex;
     align-items: center;
-    gap: 12px;
 }
 
 .p2nav-logo {
-    width: 34px;
-    height: auto;
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translate(-50%);
+    width: auto;
+    height: 140px;
+    max-height: 60px;
     display: block;
 }
 
-.p2nav-text {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.p2nav-word {
-    font-family: "Canela", serif;
-    font-weight: 700;
-    font-size: 24px;
-    color: #241B12;
-    line-height: 1;
-}
-
-.p2nav-tag {
-    font-family: "Inter", sans-serif;
-    font-size: 10.5px;
-    font-weight: 500;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: rgba(36,27,18,.45);
-}
 
 .p2nav-links {
     display: flex;
