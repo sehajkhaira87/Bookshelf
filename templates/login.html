@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Bookshelf</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+</head>
+<body>
+
+    <div class="login-wrap">
+        <div class="login-container">
+
+            <!-- LEFT: visual side -->
+            <div class="login-visual">
+                <div class="login-visual-glow"></div>
+                <img src="{{ url_for('static', filename='images/Bookshelf.svg') }}" alt="Bookshelf" class="login-visual-img">
+                <p class="login-visual-quote">"Everything, exactly where it belongs."</p>
+            </div>
+
+            <!-- RIGHT: form side -->
+            <div class="login-formside">
+                <div class="login-form-inner">
+
+                    <img src="{{ url_for('static', filename='images/logoblack.png') }}" alt="Bookshelf Logo" class="login-logo">
+
+                    <h1>Welcome back</h1>
+                    <p class="login-subtext">Log in to pick up right where you left off.</p>
+
+                    <form class="login-form">
+                        <div class="login-field">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" placeholder="you@example.com">
+                        </div>
+
+                        <div class="login-field">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" placeholder="••••••••">
+                        </div>
+
+                        <div class="login-row">
+                            <label class="login-remember">
+                                <input type="checkbox"> Remember me
+                            </label>
+                            <a href="#" class="login-forgot">Forgot password?</a>
+                        </div>
+
+                        <button type="submit" class="login-submit">Log In</button>
+
+                        <div class="login-divider"><span>or</span></div>
+
+                        <button type="button" class="login-google">
+                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
+                            Continue with Google
+                        </button>
+                    </form>
+
+                    <p class="login-signup">Don't have an account? <a href="#">Sign up</a></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
