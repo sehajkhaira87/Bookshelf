@@ -1,5 +1,20 @@
+#import os
+#import psycopg
+#from flask import g
+#from dotenv import load_dotenv
+
+#load_dotenv()
+#conn = psycopg.connect{
+#    host= os.getenv('DB_HOST')
+#}
+
 import os
-import psycopg2
+try:
+    import psycopg2 as psycopg
+except ImportError:
+    import psycopg
+
+from flask import g
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -13,18 +28,30 @@ DB_PORT = os.getenv("DB_PORT", "5432")
 DB_NAME = os.getenv("DB_NAME", "test")
 
 def get_db_connection():
-    
-    conn = psycopg2.connect(
+    """Establishes and returns a database connection."""
+    conn = psycopg.connect(
         user=DB_USER,
         password=DB_PASSWORD,
         host=DB_HOST,
         port=DB_PORT,
-        database=DB_NAME
+        dbname=DB_NAME
     )
     return conn
 
-def check_connection():
+def get_db():
+    """Returns the database connection stored in Flask's g object for the current request context."""
+    if 'db' not in g:
+        g.db = get_db_connection()
+    return g.db
 
+def close_db(e=None):
+    """Closes the database connection stored in Flask's g object."""
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
+def check_connection():
+    """Verifies database connection on application startup."""
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -36,4 +63,4 @@ def check_connection():
         return True
     except Exception as e:
         print(f" Database connection failed: {e}")
-        return False
+        return False
