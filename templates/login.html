@@ -1,13 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | BOOKSHELF</title>
+    <title>Login — Bookshelf</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
 </head>
 <body>
 
-    <h1>Welcome to the Login Page</h1>
+    <div class="login-wrap">
+        <div class="login-container">
+
+            <!-- LEFT: illustration side -->
+            <div class="login-visual">
+                <img src="{{ url_for('static', filename='images/Bookshelf.svg') }}" alt="Bookshelf" class="login-visual-img">
+            </div>
+
+            <!-- RIGHT: form side -->
+            <div class="login-formside">
+                <img src="{{ url_for('static', filename='images/logoblack.png') }}" alt="Bookshelf Logo" class="login-logo">
+
+                <h1>Welcome back!</h1>
+                <p class="login-subtext">Please enter your details</p>
+
+                <form class="login-form">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="you@example.com">
+
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••">
+
+                    <div class="login-row">
+                        <label class="login-remember">
+                            <input type="checkbox"> Remember me for 30 days
+                        </label>
+                        <a href="#" class="login-forgot">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="login-submit">Log In</button>
+
+                    <button type="button" class="login-google">
+                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
+                        Log in with Google
+                    </button>
+                </form>
+
+                <p class="login-signup">Don't have an account? <a href="#">Sign Up</a></p>
+            </div>
+
+        </div>
+    </div>
 
 </body>
 </html>

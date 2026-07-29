@@ -1062,18 +1062,16 @@ background:rgba(255,255,255,.18);
 }
 
 .page2-navbar {
-    display: flex;
-    align-items: center;
-    height: 84px;
-    justify-content: space-between;
-    gap: 24px;
+    height: 74px;
+    padding: 0 clamp(24px, 4vw, 56px);
     position: relative;
     overflow: visible;
-
-    padding: 0 clamp(24px, 4vw, 56px);
-
-    background: #F4EFE3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+     background: #F4EFE3;   
     border-bottom: 1px solid rgba(36,27,18,.12);
+
 }
 
 .p2nav-left {
@@ -1081,16 +1079,17 @@ background:rgba(255,255,255,.18);
     height: 100%;
     display: flex;
     align-items: center;
+    width: 160px; 
 }
 
 .p2nav-logo {
     position: absolute;
-    left: 0;
+    left: -40px;
     top: 50%;
-    transform: translate(-50%);
-    width: auto;
-    height: 140px;
-    max-height: 60px;
+    transform: translateY(-50%);
+    width: auto !important;
+    height: 115px !important;
+    max-height: none !important;
     display: block;
 }
 
@@ -1147,3 +1146,4 @@ background:rgba(255,255,255,.18);
 @media (max-width: 720px) {
     .p2nav-links { display: none; }
 }
+
