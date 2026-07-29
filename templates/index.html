@@ -5,8 +5,12 @@
     <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOOKSHELF</title>
-    <link rel="preconnect" href="https://unpkg.com" crossorigin>
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
+    <!-- model-viewer script for 3D models -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+
     <link rel="stylesheet" href="{{ url_for('static', filename='static.css') }}">
 </head>
 
@@ -146,7 +150,21 @@
     </div>
 
 </section>
-<section class="page2">
+<section class="page2" style="display: flex; justify-content: center; align-items: center; position: relative;">
+    
+    <!-- 3D Model Viewer embedded in the second page section -->
+    <model-viewer 
+        src="{{ url_for('static', filename='finalrender.glb') }}"
+        alt="A 3D model of our Bookshelf concept"
+        camera-controls
+        auto-rotate
+        shadow-intensity="1"
+        exposure="1.2"
+        environment-image="neutral"
+        style="width: 100%; max-width: 900px; height: 80vh; z-index: 10;">
+    </model-viewer>
+
+    <!-- Keeping the existing pencil trail SVG in the background -->
     <svg id="trail-svg"></svg>
 
     <svg id="pencil" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
