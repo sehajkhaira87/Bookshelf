@@ -503,6 +503,19 @@ function animateBulb() {
     requestAnimationFrame(animateBulb);
 }
 
+// Pause bulb rAF when hero is not visible
+const heroObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        bulbVisible = entry.isIntersecting;
+        if (bulbVisible && !bulbRAF) {
+            bulbRAF = requestAnimationFrame(animateBulb);
+        }
+    });
+}, { threshold: 0 });
+
+heroObserver.observe(heroSection);
+
+// Start bulb animation and glow
 animateBulb();
 
 // Turn on glow
@@ -530,85 +543,56 @@ ScrollTrigger.create({
 //  FEATURES TIMELINE 
 
 const featuresTl = gsap.timeline({
-
     scrollTrigger: {
         trigger: ".features",
         start: "top 80%",
         toggleActions: "play none none none"
     }
-
 });
 
 
 featuresTl.from(".features-container", {
-
     opacity: 0,
     scaleX: 0.82,
 
     duration: 1.35,
-
     ease: "power3.out"
-
 })
 
 
 .from(".divider", {
-
     scaleY: 0,
-
     transformOrigin: "top center",
-
     duration: 0.65,
-
     stagger: 0.07,
-
     ease: "power2.out"
-
 }, "-=0.5")
 
 // Icons
 .from(".feature-icon", {
-
     opacity: 0,
-
     scale: 0.88,
-
     duration: 0.55,
-
     stagger: 0.1,
-
     ease: "back.out(1.7)"
-
 }, "-=0.25")
 
 // Headings
 .from(".feature-text h3", {
-
     opacity: 0,
-
     y: 181,
-
     duration: 1.45,
-
     stagger: 0.08,
-
     ease: "power2.out"
-
 }, "-=0.35")
 
 // Paragraphs
 .from(".feature-text p", {
-
     opacity: 0,
-
     y: 12,
-
     duration: 0.7,
-
     stagger: 0.08,
-
     ease: "power2.out"
-
 }, "-=0.3");
 
 // ================= FRAME SEQUENCE (OPTIMIZED) =================
@@ -689,25 +673,15 @@ function render() {
 }
 
 gsap.to(frame, {
-
     current: frameCount - 1,
-
     snap: "current",
-
     ease: "none",
-
     scrollTrigger: {
-
         trigger: ".sequence-section",
-
         start: "top top",
-
         end: "bottom bottom",
-
         scrub: 1,
-
         pin: true
-
     },
 
     onUpdate: render

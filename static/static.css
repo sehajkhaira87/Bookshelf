@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* ==========================================
    FONT
 ========================================== */
@@ -948,3 +949,910 @@ background:rgba(255,255,255,.18);
     transition: opacity .2s ease;
     filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
 }
+=======
+/* ==========================================
+   FONT
+========================================== */
+
+@font-face {
+    font-family: "Canela";
+    src: url("/static/font/Canela-Light-Trial.otf") format("opentype");
+    font-weight: 300;
+    font-style: normal;
+}
+
+
+/* ==========================================
+   RESET
+========================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html,
+body{
+    margin:0;
+    padding:0;
+    overflow-x:hidden;
+    
+    
+    
+    
+}
+
+body{
+    min-height:300vh;
+
+    
+}
+
+
+/* ==========================================
+   LOADER
+========================================== */
+
+#loader{
+    position:fixed;
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100vh;
+
+    background:#000;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    z-index:9999;
+
+    transition:transform 1.2s ease-in-out;
+}
+
+#loader img{
+    width:280px;
+    height:auto;
+    animation:fadeIn 1.5s ease;
+}
+
+.hide-loader{
+    transform:translateY(-100%);
+}
+
+@keyframes fadeIn{
+
+    from{
+        opacity:0;
+        transform:scale(0.8);
+    }
+
+    to{
+        opacity:1;
+        transform:scale(1);
+    }
+
+}
+
+
+/* ==========================================
+   NAVBAR
+========================================== */
+
+.navbar{
+    padding:15px -150px;
+    margin-right: -440px;
+    margin-top: 20px;
+    
+    
+    
+}
+.nav-links{
+    display:flex;
+    align-items:center;
+    gap:42px;
+    margin-left:auto;
+    margin-right: -150px; 
+}
+
+.nav-links a{
+    position:relative;
+
+    text-decoration:none;
+    color:#2b2b2b;
+
+    font-size:17px;
+    font-weight:500;
+    letter-spacing:.4px;
+
+    transition:.35s ease;
+}
+
+.nav-links a::after{
+
+    content:"";
+
+    position:absolute;
+    left:0;
+    bottom:-6px;
+
+    width:0%;
+    height:2px;
+
+    background:#111;
+
+    transition:.35s ease;
+}
+
+.nav-links a:hover{
+
+    color:#000;
+}
+
+.nav-links a:hover::after{
+
+    width:100%;
+}
+
+.login-btn{
+    display:flex;
+    align-items:center;
+    gap:18px;
+
+    background:#f6f4f1;
+    color:#f5efe4;
+    text-decoration:none;
+
+    padding:14px 26px;
+    border-radius:999px;
+
+    font-size:15px;
+    font-weight:500;
+
+    transition:all .35s ease;
+
+}
+.login-btn::after{
+    display:none;
+}
+.arrow{
+    transition:transform .35s ease;
+}
+.login-btn:hover{
+    background:#ffd5a2;
+    transform:translateY(-2px);
+    box-shadow:0 10px 30px rgb(255, 198, 124);
+}
+
+.login-btn:hover .arrow{
+    transform:translateX(6px);
+}
+
+
+/* ==========================================
+   LOGO
+========================================== */
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:15px;
+
+    position:relative;
+    left:-1045px;
+
+    margin-top:-80px;
+}
+
+.logo img{
+    width:130px;
+    height:auto;
+}
+
+.logo h2{
+    color:white;
+    font-size:30px;
+    font-weight:600;
+}
+
+
+/* ==========================================
+   HERO SECTION
+========================================== */
+
+.hero{
+    
+    display:flex;
+    justify-content:flex-end;
+    align-items:flex-start;
+
+    width:100%;
+    height:100vh;
+
+    margin: 0;
+
+    overflow:hidden;
+    background-image:url("images/back.png");
+    background-repeat:no-repeat;
+    background-position:center;
+    /* background-attachment:fixed removed — causes jank on Windows */
+    background-size:cover;
+    
+
+    /*background-image:url("images/background.png");
+    background-size:cover;
+    background-position: center -300px;
+    background-repeat:no-repeat;*/
+
+}
+
+
+/* ==========================================
+   HERO TEXT
+========================================== */
+
+.hero-text{
+    width:45%;
+
+    position:absolute;
+    left:120px;
+    top:280px;
+
+    z-index:10;
+
+    will-change:transform;
+}
+
+.hero-text h1{
+    font-size:72px;
+    font-weight:700;
+    color:#111;
+}
+
+
+/* ==========================================
+   HERO TITLE
+========================================== */
+
+.hero-title{
+
+    position:absolute;
+    letter-spacing: -1px;
+    line-height: .88;
+    word-spacing: 10px;
+
+    left:75px;
+    top:390px;
+
+    width:1500px;
+
+    font-family:"Canela";
+    font-size:210px;
+    line-height:.8;
+    letter-spacing:-0.06em;
+}
+
+.hero-title .char{
+    display:inline-block;
+    transform-origin:50% 100%;
+}
+
+.hero-title span{
+    display:block;
+}
+
+.second-line{
+    margin-left:430px;
+}
+
+
+/* ==========================================
+   HERO IMAGE
+========================================== */
+
+.hero-image{
+    transform:translateY(220px,-105px);
+    position: relative;
+    top: 150px;
+    right:-10px;
+
+    will-change:transform;
+}
+
+.hero-image img{
+    width:620px;
+    max-width:none;
+
+    filter:
+        drop-shadow(0 20px 25px rgba(0,0,0,.7))
+        drop-shadow(0 45px 60px rgba(0,0,0,.25));
+    
+}
+.hero-image::after{
+    content: "";
+    position: absolute;
+
+    width: 95%;
+    height: 85%;
+
+    left: 3%;
+    top: 5%;
+
+    background: rgba(0,0,0,.35);
+    filter: blur(45px);
+
+    z-index: -1;
+}
+
+
+/* ==========================================
+   CAT
+========================================== */
+
+.cat{
+    position:absolute;
+    top:190px;
+    right:240px;
+
+    width:120px;
+
+    z-index:20;
+}
+
+.cat img{
+    width:140px;
+}
+
+
+/* ==========================================
+   HERO GLOW
+========================================== */
+
+.hero::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:900px;
+    height:900px;
+
+    right:-180px;
+    top:-220px;
+
+    border-radius:50%;
+
+    background:
+    radial-gradient(
+        circle,
+        rgba(255,245,215,0.95) 0%,
+        rgba(255,241,190,0.65) 18%,
+        rgba(255,248,225,0.30) 45%,
+        rgba(255,255,255,0) 75%
+    );
+
+    filter:blur(60px);
+
+    pointer-events:none;
+
+    z-index:-1;
+}
+
+.hero::after{
+
+    content:"";
+
+    position:absolute;
+
+    width:1200px;
+    height:1200px;
+
+    right:-350px;
+    top:-350px;
+
+    border-radius:50%;
+
+    background:
+    radial-gradient(
+        circle,
+        rgba(255,252,245,.55) 0%,
+        rgba(255,250,235,.18) 55%,
+        transparent 80%
+    );
+
+    filter:blur(90px);
+
+    pointer-events:none;
+
+    z-index:-2;
+}
+
+
+/* ==========================================
+   BULB
+========================================== */
+
+.bulb{
+
+    position:absolute;
+
+    top:-10px;
+    left:900px;
+
+    width:140px;
+
+    z-index:100;
+
+    transform-origin:50% 0%;
+
+    will-change:transform;
+}
+
+.bulb img{
+    width:25%;
+    display:block;
+
+}
+
+.bulb::after{
+
+    content:"";
+
+    position:absolute;
+
+    width:300px;
+    height:300px;
+
+    left:50%;
+    top:55%;
+
+    transform:translate(-50%,-50%);
+
+    border-radius:50%;
+
+    background:
+    radial-gradient(
+        circle at center,
+        rgba(255,248,220,0.95) 0%,
+        rgba(255,232,170,0.75) 18%,
+        rgba(255,215,120,0.45) 38%,
+        rgba(255,180,80,0.20) 60%,
+        rgba(255,150,40,0.08) 78%,
+        rgba(255,120,20,0.00) 100%
+    );
+
+    filter:blur(40px);
+
+    animation:bulbGlow 4s ease-in-out infinite;
+
+    pointer-events:none;
+
+    z-index:-1;
+}
+
+.bulb.on::after{
+    opacity:1;
+}
+
+@keyframes bulbGlow{
+
+    0%,100%{
+        opacity:.82;
+        transform:translate(-50%,-50%) scale(1);
+    }
+
+    50%{
+        opacity:1;
+        transform:translate(-50%,-50%) scale(1.08);
+    }
+
+}
+
+
+
+
+.hero-tag{
+    display:flex;
+    align-items:center;
+    gap:16px;
+
+    font-family:"Inter", sans-serif;
+    font-size:14px;
+    font-weight:500;
+
+    letter-spacing:.35em;
+    text-transform:uppercase;
+
+    color:#9C7A58;
+
+    margin-bottom:28px;
+}
+.tag-line{
+    display:inline-block;
+
+    width:80px;
+    height:2px;
+
+    background:#C8A77A;
+
+    transform:scaleX(0);
+    transform-origin:left center;
+}
+
+.hero-title{
+    display:flex;
+    flex-direction:column;
+
+    font-family:"Canela";
+    font-size:7rem;
+
+    line-height:.88;
+
+    letter-spacing:-3px;
+
+    color:#1E1A17;
+
+    margin:0;
+    margin-top: -350px;
+    margin-left: -80px;
+}
+
+.hero-title span{
+    display:block;
+    
+}
+.tag-line{
+    display:block;
+
+    width:70px;
+    height:2px;
+
+    background:#C8A77A;
+
+    transform:scaleX(1);
+}
+/* ================= FEATURES ================= */
+
+.features{
+
+    width:100%;
+
+    display:flex;
+
+    justify-content:center;
+
+    /* Viewport-relative so it adapts to Windows display scaling */
+    margin-top:max(-270px, -24vh);
+
+    margin-bottom:120px;
+
+    position:relative;
+    z-index:5;
+
+    contain:layout style paint;
+
+}
+
+.features-container{
+
+    width:80%;
+
+    max-width:1650px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:42px 50px;
+
+    border-radius:32px;
+
+    background:rgba(255,255,255,.18);
+
+    backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.25);
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.08);
+
+}
+
+.feature-item{
+
+    flex:1;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:22px;
+
+    padding:0 25px;
+
+}
+
+.feature-icon{
+
+    width:52px;
+
+    height:52px;
+
+    flex-shrink:0;
+
+}
+
+.feature-icon img{
+
+    width:100%;
+
+    height:100%;
+
+    object-fit:contain;
+
+}
+
+.feature-text h3{
+
+    margin:0 0 10px;
+
+    font-family:"Inter",sans-serif;
+
+    font-size:28px;
+
+    font-weight:500;
+
+    color:#2A211A;
+
+}
+
+.feature-text p{
+
+    margin:0;
+
+    font-family:"Inter",sans-serif;
+
+    font-size:18px;
+
+    line-height:1.6;
+
+    color:#6C6259;
+
+}
+
+.divider{
+
+    width:1px;
+
+    height:90px;
+
+    background:rgba(0,0,0,.08);
+
+    flex-shrink:0;
+
+}
+/* ================= HOVER ================= */
+
+.feature-item{
+
+    transition:
+        transform .35s ease,
+        opacity .35s ease;
+
+}
+
+.feature-item:hover{
+
+    transform:translateY(-6px);
+
+}
+
+.feature-item:hover .feature-icon{
+
+    transform:scale(1.08) rotate(-5deg);
+
+}
+
+.feature-item:hover .feature-icon img{
+
+    filter:drop-shadow(0 8px 18px rgba(210,170,90,.25));
+
+}
+
+.feature-item:hover h3{
+
+    color:#111;
+
+}
+
+.feature-item:hover p{
+
+    color:#4B4037;
+
+}
+
+.feature-icon{
+
+    transition:
+        transform .35s ease,
+        filter .35s ease;
+
+}
+
+.feature-icon img{
+
+    transition:
+        transform .35s ease,
+        filter .35s ease;
+
+}
+
+.feature-text h3{
+
+    transition:color .35s ease;
+
+}
+
+.feature-text p{
+
+    transition:color .35s ease;
+
+}
+.features-container:hover .feature-item{
+
+    opacity:.45;
+
+}
+
+.features-container:hover .feature-item:hover{
+
+    opacity:1;
+
+}
+.divider{
+
+    transition:opacity .35s ease;
+
+}
+
+.features-container:hover .divider{
+
+    opacity:.35;
+
+}
+.features-container{
+
+    transform-origin:center center;
+
+    will-change:transform;
+
+}
+
+.divider{
+
+    transform-origin:top center;
+
+}
+
+
+
+
+.sequence-section{
+
+    height:300vh;
+    position:relative;
+
+    contain:layout style paint;
+
+}
+
+#sequence-canvas{
+
+    position:sticky;
+    top:0;
+
+    width:100%;
+    height:100vh;
+
+    display:block;
+
+}
+
+
+/* ================= DEVICE-SPECIFIC OVERRIDES ================= */
+
+/* Applied via JS for standard 1366x768 / 1536x864 screens */
+body.layout-windows .hero {
+    position: relative;
+    /* Scale the entire hero layout proportionally from top-left */
+    transform: scale(0.7);
+    transform-origin: top left;
+    width: 142.8%; /* 100 / 0.7 to counteract scale width reduction */
+    margin-bottom: -20vh; /* Adjust space taken since scaling doesn't affect document flow */
+}
+
+body.layout-windows .features {
+    margin-top: max(-450px, -40vh); /* More aggressive pull up to meet the scaled hero */
+}
+
+body.layout-windows .sequence-section {
+    margin-top: -15vh; 
+}
+
+
+/* Applied via JS for very squat/old laptops (height <= 450px) */
+body.layout-small .hero {
+    position: relative;
+    transform: scale(0.45);
+    transform-origin: top left;
+    width: 222%; /* 100 / 0.45 */
+    margin-bottom: -50vh;
+}
+
+body.layout-small .features {
+    margin-top: max(-600px, -60vh);
+}
+
+body.layout-small .sequence-section {
+    margin-top: -30vh; 
+}
+
+/* Fix navbar/logo alignment for scaled layouts */
+body.layout-windows .navbar,
+body.layout-small .navbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-right: 0;
+    margin-top: 0;
+    box-sizing: border-box;
+}
+
+body.layout-windows .navbar {
+    padding: 15px 70px;
+}
+body.layout-small .navbar {
+    padding: 10px 100px;
+}
+
+body.layout-windows .nav-links,
+body.layout-small .nav-links {
+    margin-right: 0;
+}
+
+body.layout-windows .logo,
+body.layout-small .logo {
+    position: static;
+    margin-top: 0;
+    left: 0;
+    order: -1;
+}
+
+/* Counter-scale the navbar elements so they don't become tiny */
+
+/* Windows (0.7 inverse) */
+body.layout-windows .nav-links { gap: 60px; }
+body.layout-windows .nav-links a { font-size: 24px; }
+body.layout-windows .login-btn { 
+    font-size: 21px; 
+    padding: 20px 37px; 
+}
+body.layout-windows .logo img { width: 185px; }
+
+/* Small (0.45 inverse) */
+body.layout-small .nav-links { gap: 93px; }
+body.layout-small .nav-links a { font-size: 38px; }
+body.layout-small .login-btn { 
+    font-size: 33px; 
+    padding: 31px 58px; 
+}
+body.layout-small .logo img { width: 288px; }
