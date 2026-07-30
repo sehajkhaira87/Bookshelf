@@ -927,7 +927,7 @@ background:rgba(255,255,255,.18);
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 1;
+    z-index: 8;
 }
 
 .page2 #pencil {
@@ -937,7 +937,7 @@ background:rgba(255,255,255,.18);
     width: 46px;
     height: 46px;
     pointer-events: none;
-    z-index: 2;
+    z-index: 9;
     opacity: 0;
     transition: opacity .2s ease;
     filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
@@ -958,7 +958,7 @@ background:rgba(255,255,255,.18);
     z-index: 10; /* Forces Page 2 to slide OVER Page 1 */
     border-radius: 0; /* Keeps edges razor sharp and straight */
     box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.4);
-    background: #1B140F;
+   background: linear-gradient(180deg, #241B12 0%, #1B140F 45%, #14100B 100%);
     overflow: hidden;
     cursor: none; /* Hides default cursor so your custom pencil shows */
 }
@@ -1146,4 +1146,7 @@ background:rgba(255,255,255,.18);
 @media (max-width: 720px) {
     .p2nav-links { display: none; }
 }
+
+
+
 
