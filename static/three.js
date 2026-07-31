@@ -16,7 +16,7 @@ function initBook3D(canvas, container) {
  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
  renderer.outputColorSpace = THREE.SRGBColorSpace;
  renderer.toneMapping = THREE.ACESFilmicToneMapping;
- renderer.toneMappingExposure = 0.9; // Lowered exposure to remove the harsh edge glare
+ renderer.toneMappingExposure = 0.9;
 
  const scene = new THREE.Scene();
  scene.background = new THREE.Color(0x16100c);
@@ -34,11 +34,11 @@ function initBook3D(canvas, container) {
  resize();
  window.addEventListener('resize', resize, { passive: true });
 
- // ── LIGHTS & SHADOW SETUP (Softened to prevent bright streaks) ───────────
+ 
  const ambient = new THREE.AmbientLight(0xfff5e0, 0.4);
  scene.add(ambient);
 
- const key = new THREE.DirectionalLight(0xffd590, 2.5); // Softer intensity
+ const key = new THREE.DirectionalLight(0xffd590, 2.5); 
  key.position.set(3, 5, 4); 
  key.castShadow = true; 
  key.shadow.mapSize.width = 1024;
@@ -50,7 +50,7 @@ function initBook3D(canvas, container) {
  rim.position.set(-5, 2, 3); 
  scene.add(rim);
 
- // ── INVISIBLE SHADOW RECEIVER PLANE ─────────────────────────────────────
+ //  INVISIBLE SHADOW RECEIVER PLANE 
  const shadowPlaneGeo = new THREE.PlaneGeometry(10, 10);
  const shadowPlaneMat = new THREE.ShadowMaterial({ opacity: 0.35 });
  const shadowReceiver = new THREE.Mesh(shadowPlaneGeo, shadowPlaneMat);
@@ -59,7 +59,7 @@ function initBook3D(canvas, container) {
  shadowReceiver.receiveShadow = true;
  scene.add(shadowReceiver);
 
- // ── COMPACT SPOTLIGHT AURA ──────────────────────────────────────────────
+ //  COMPACT SPOTLIGHT AURA 
  const auraGeo = new THREE.PlaneGeometry(4.5, 4.5);
  const auraCanvas = document.createElement('canvas');
  auraCanvas.width = 256; auraCanvas.height = 256;
@@ -83,14 +83,14 @@ function initBook3D(canvas, container) {
  auraMesh.scale.set(0, 0, 0);
  scene.add(auraMesh);
 
- // ── SLOW MOTION FALLING LIGHT MOLECULE ───────────────────────────────────
+ //  SLOW MOTION FALLING LIGHT MOLECULE 
  const particleGeo = new THREE.SphereGeometry(0.06, 16, 16);
  const particleMat = new THREE.MeshBasicMaterial({ color: 0xffd590, transparent: true, opacity: 0.95 });
  const lightMolecule = new THREE.Mesh(particleGeo, particleMat);
  lightMolecule.position.set(0, 5.0, 0);
  scene.add(lightMolecule);
 
- // ── LOAD GLB ─────────────────────────────────────────────────────────────
+ //  LOAD GLB 
  let bookPivot = null;
  let introPlayed = false;
  let idleStartTime = 0;
@@ -115,7 +115,7 @@ function initBook3D(canvas, container) {
  if (child.isMesh) {
  child.castShadow = true;
  child.receiveShadow = true;
- // Tweak roughness/metalness slightly if materials exist to remove plastic/glossy glare
+ 
  if (child.material) {
  child.material.roughness = Math.max(child.material.roughness || 0, 0.5);
  child.material.metalness = Math.min(child.material.metalness || 0, 0.2);
@@ -134,7 +134,7 @@ function initBook3D(canvas, container) {
  bookPivot.position.set(0, 0, 0); 
  bookPivot.rotation.set(0.3, 0, 0.1); 
 
- // ── CINEMATIC SEQUENCE ────────────────────────────────────────
+ //  CINEMATIC SEQUENCE 
  if (typeof gsap !== 'undefined') {
  ScrollTrigger.create({
  trigger: container,
@@ -215,7 +215,7 @@ function initBook3D(canvas, container) {
  (err) => { console.error('[Book3D] ❌', err); }
  );
 
- // ── MOUSE HOVER ──────────────────────────────────────────────────────────
+ // MOUSE HOVER 
  let mx = 0, my = 0, hov = false;
  container.style.cursor = 'grab';
  container.addEventListener('mousemove', e => {
@@ -226,7 +226,7 @@ function initBook3D(canvas, container) {
  }, { passive: true });
  container.addEventListener('mouseleave', () => { hov = false; });
 
- // ── RENDER LOOP ──────────────────────────────────────────────────────────
+ // RENDER LOOP 
  let running = true;
  let baseX = 2.3;
 

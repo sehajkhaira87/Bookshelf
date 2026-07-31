@@ -450,8 +450,7 @@ body{
     width:25%;
     display:block;
     margin: 0 auto;
-    /* Hide the top 35% (the straight string) using a mask, so only the glass shows.
-       This preserves the layout size while hiding the stiff string. */
+    
     -webkit-mask-image: linear-gradient(to bottom, transparent 35%, black 35%);
     mask-image: linear-gradient(to bottom, transparent 35%, black 35%);
 }
@@ -485,7 +484,6 @@ body{
 
     filter:blur(90px);
 
-    /* animation and opacity controlled by .bulb.on::after below */
     opacity: 0;
     animation: none;
     transition: opacity 0.5s ease;
@@ -556,7 +554,7 @@ body{
 
     transform:scaleX(1);
 }
-/* ================= FEATURES ================= */
+/*  FEATURES  */
 
 .features{
 
@@ -566,7 +564,7 @@ body{
 
     justify-content:center;
 
-    /* Responsive to both width and height to prevent collision on short screens */
+   
 margin-top: clamp(-360px, max(-32vh, -23vw), -130px);
     margin-bottom:20px;
 
@@ -701,7 +699,7 @@ background:rgba(255,255,255,.18);
     flex-shrink:0;
 
 }
-/* ================= HOVER ================= */
+/*  HOVER  */
 
 .feature-item{
 
@@ -834,7 +832,7 @@ background:rgba(255,255,255,.18);
     contain: style;
 }
 
-/* Reduce motion for users who prefer it */
+
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -943,24 +941,24 @@ background:rgba(255,255,255,.18);
     filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
 }
 
-/* ================= PAGE 1 & PAGE 2 CURTAIN EFFECT ================= */
+/*  PAGE 1 & PAGE 2 CURTAIN EFFECT  */
 
 .page1 {
     position: relative;
     z-index: 1;
     background: #fff; 
-    padding-bottom: 120px; /* Bumper space so Page 2's shadow doesn't peek into Page 1 */
+    padding-bottom: 120px; 
 }
 
 .page2 {
     position: relative;
     min-height: 100vh;
-    z-index: 10; /* Forces Page 2 to slide OVER Page 1 */
-    border-radius: 0; /* Keeps edges razor sharp and straight */
+    z-index: 10; 
+    border-radius: 0; 
     box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.4);
    background: linear-gradient(180deg, #241B12 0%, #1B140F 45%, #14100B 100%);
     overflow: hidden;
-    cursor: none; /* Hides default cursor so your custom pencil shows */
+    cursor: none; 
 }
 
 /* ================= PAGE 2 THREE.JS CANVAS ================= */
@@ -973,12 +971,12 @@ background:rgba(255,255,255,.18);
     height: 100%;
     display: block;
     
-    /* CRITICAL: Lets mouse movements pass through to your custom pencil trail */
+   
     pointer-events: none; 
     z-index: 5;
 }
 
-/* ================= SCROLL CUE (jumping book) ================= */
+/*  SCROLL CUE (jumping book)  */
 
 .scroll-cue {
     position: absolute;
@@ -998,15 +996,14 @@ background:rgba(255,255,255,.18);
 
 .scroll-cue-book {
        width: 65px;
-       height: 68px;   /* matches the ~891:944 aspect ratio */
+       height: 68px;   
        object-fit: contain;
        filter: drop-shadow(0 8px 10px rgba(0,0,0,.28));
        animation: scrollCueBounce 1.7s ease-in-out infinite;
        transform-origin: center bottom;
    }
 
-/* Little shadow dot beneath it that squashes as the book lands —
-   sells the "jumping" weight much more than the book alone */
+
 .scroll-cue-dot {
     width: 18px;
     height: 4px;
@@ -1027,7 +1024,7 @@ background:rgba(255,255,255,.18);
     50%      { transform: scale(1.3); opacity: .65; }
 }
 
-/* Faster, more eager bounce on hover — reads as "wants to be clicked" */
+
 .scroll-cue:hover .scroll-cue-book,
 .scroll-cue:hover .scroll-cue-dot {
     animation-duration: 0.85s;
@@ -1040,7 +1037,7 @@ background:rgba(255,255,255,.18);
 }
 
 
-/* ================= PAGE 2 NAVBAR ================= */
+/*  PAGE 2 NAVBAR  */
 
 .page2-navbar-wrap {
     position: absolute;

@@ -29,7 +29,7 @@ gsap.ticker.add((time) => {
 
 gsap.ticker.lagSmoothing(0);
 
-// ================= LOADER & HERO INTRO =================
+//  LOADER & HERO INTRO 
 
 const loader = document.getElementById("loader");
 
@@ -55,7 +55,7 @@ setTimeout(() => {
  delay: 2.3
  });
 
- // Animate the "CURATED FOR STUDENTS" text
+ 
  gsap.from(".tag-text", {
  opacity: 0,
  x: 20,
@@ -64,12 +64,12 @@ setTimeout(() => {
  ease: "power3.out"
  });
 
- // Split the heading into characters (only once)
+ 
  const text = new SplitType(".hero-title", {
  types: "chars"
  });
 
- // Animate every character — no blur filter (very expensive on low-end)
+ 
  gsap.from(text.chars, {
  opacity: 0,
  y: 120,
@@ -90,7 +90,7 @@ const heroEl = document.querySelector(".hero");
 const ropeCanvas = document.getElementById("rope-canvas");
 const ropeCtx = ropeCanvas.getContext("2d");
 
-// Pendulum config
+
 const ROPE_LENGTH = 50; 
 const GRAVITY = 0.004; 
 const DAMPING = 0.992; 
@@ -109,10 +109,10 @@ let lastDragX = 0;
 let lastDragTime = 0;
 let dragAngleVel = 0;
 
-// Parallax tracking
+
 let bulbParallaxY = 0;
 
-// The fixed anchor point (in hero-relative coords)
+
 let anchorX = 0;
 let mouseX = 0;
 
@@ -290,16 +290,16 @@ function drawRope() {
  ropeCtx.stroke();
 }
 
-// ---- ANIMATION LOOP ----
+
 function animateBulb() {
  if (!bulbRunning) return;
 
  if (!isDragging) {
- // Gravity: restoring force toward angle=0 (hanging straight down)
+ 
  const gravityForce = -GRAVITY * Math.sin(angle);
  angleVel += gravityForce;
 
- // Gentle mouse follow
+ 
  const heroRect = heroEl.getBoundingClientRect();
  const relMouse = (mouseX - heroRect.left) / heroRect.width;
  const targetAngle = (relMouse - 0.6) * 0.06;
@@ -435,7 +435,7 @@ featuresTl.from(".features-container", {
 
 }, "-=0.3");
 
-// ================= FRAME SEQUENCE (OPTIMIZED) =================
+//  FRAME SEQUENCE (OPTIMIZED) 
 
 //const canvas = document.getElementById("sequence-canvas");
 //const context = canvas.getContext("2d", { alpha: false });//
@@ -537,8 +537,7 @@ gsap.to(frame, {
 
 });*/
 
-// ================= CLEANUP =================
-// Pause bulb animation when it's off-screen to save CPU
+
 
 ScrollTrigger.create({
  trigger: ".hero",
@@ -550,7 +549,7 @@ ScrollTrigger.create({
  onLeaveBack: () => { bulbRunning = false; }
 });
 
-// ================= PENCIL DRAW TRAIL (page2) =================
+//  PENCIL DRAW TRAIL (page2) //
 /*(function () {
  const page2 = document.querySelector(".page2");
  if (!page2) return;
@@ -612,21 +611,21 @@ ScrollTrigger.create({
  requestAnimationFrame(render);
 })();*/
 
-// ================= PAGE 2 LOADER/CURTAIN EFFECT =================
+//  PAGE 2 LOADER/CURTAIN EFFECT //
 
 ScrollTrigger.create({
  trigger: ".page1",
  start: "top top",
- // It stays pinned until the bottom of page1 is reached by the scrolling page2
+ 
  end: "bottom top", 
  pin: true,
- pinSpacing: false // This is the magic part! It lets page2 scroll OVER the pinned page1
+ pinSpacing: false // 
 });
 
-// Optional: Parallax fade out Page 1 as Page 2 slides over it
+
 gsap.to(".page1", {
  opacity: 0.3,
- filter: "blur(5px)", // Dims and blurs Page 1 as the loader slides up
+ filter: "blur(5px)", 
  ease: "none",
  scrollTrigger: {
  trigger: ".page2",
@@ -636,7 +635,7 @@ gsap.to(".page1", {
  }
 });
 
-// ================= SCROLL CUE (jumping book) =================
+// SCROLL CUE (jumping book) //
 
 const scrollCue = document.getElementById("scrollCue");
 
@@ -668,7 +667,7 @@ if (scrollCue) {
  });
 }
 
-// ================= PAGE 2 NAVBAR REVEAL =================
+//  PAGE 2 NAVBAR REVEAL //
 (function () {
   const navbarWrap = document.querySelector(".page2-navbar-wrap");
   if (!navbarWrap) return;
@@ -687,3 +686,6 @@ if (scrollCue) {
     }
   });
 })();
+
+
+

@@ -6,6 +6,7 @@
     <title>Login — Bookshelf</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+<base target="_blank">
 </head>
 <body>
 
@@ -28,15 +29,27 @@
                     <h1>Welcome back</h1>
                     <p class="login-subtext">Log in to pick up right where you left off.</p>
 
-                    <form class="login-form">
+                    <form class="login-form" id="loginForm">
                         <div class="login-field">
                             <label for="email">Email</label>
-                            <input type="email" id="email" placeholder="you@example.com">
+                            <input type="email" id="email" placeholder="you@example.com" required>
                         </div>
 
                         <div class="login-field">
                             <label for="password">Password</label>
-                            <input type="password" id="password" placeholder="••••••••">
+                            <div class="password-wrap">
+                                <input type="password" id="password" placeholder="••••••••" required>
+                                <button type="button" class="password-toggle" id="togglePassword" aria-label="Show password">
+                                    <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                    <svg id="eyeOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
 
                         <div class="login-row">
@@ -46,7 +59,10 @@
                             <a href="#" class="login-forgot">Forgot password?</a>
                         </div>
 
-                        <button type="submit" class="login-submit">Log In</button>
+                        <button type="submit" class="login-submit" id="loginSubmit">
+                            <span>Log In</span>
+                            <div class="btn-spinner"></div>
+                        </button>
 
                         <div class="login-divider"><span>or</span></div>
 
@@ -62,6 +78,36 @@
 
         </div>
     </div>
+
+    <script>
+        // Password visibility toggle
+        const toggleBtn = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+        const eyeOffIcon = document.getElementById('eyeOffIcon');
+
+        toggleBtn.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            eyeIcon.style.display = isPassword ? 'none' : 'block';
+            eyeOffIcon.style.display = isPassword ? 'block' : 'none';
+            toggleBtn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+        });
+
+        // Loading state on submit
+        const form = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('loginSubmit');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            submitBtn.classList.add('loading');
+
+            // Simulate login — remove this and replace with your actual auth
+            setTimeout(() => {
+                submitBtn.classList.remove('loading');
+            }, 2000);
+        });
+    </script>
 
 </body>
 </html>
