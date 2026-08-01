@@ -33,9 +33,11 @@ gsap.ticker.lagSmoothing(0);
 
 const loader = document.getElementById("loader");
 
+
 setTimeout(() => {
 
  loader.classList.add("hide-loader");
+ 
 
  // Remove loader from DOM after transition to free resources
  setTimeout(() => {
@@ -613,28 +615,29 @@ ScrollTrigger.create({
 
 //  PAGE 2 LOADER/CURTAIN EFFECT //
 
-ScrollTrigger.create({
- trigger: ".page1",
- start: "top top",
- 
- end: "bottom top", 
- pin: true,
- pinSpacing: false // 
-});
+if (window.innerWidth > 820) {
+    ScrollTrigger.create({
+        trigger: ".page1",
+        start: "top top",
+        end: "bottom top",
+        pin: true,
+        pinSpacing: false
+    });
+}
 
-
-gsap.to(".page1", {
- opacity: 0.3,
- filter: "blur(5px)", 
- ease: "none",
- scrollTrigger: {
- trigger: ".page2",
- start: "top bottom", 
- end: "top top",
- scrub: true
- }
-});
-
+if (window.innerWidth > 820) {
+    gsap.to(".page1", {
+        opacity: 0.3,
+        filter: "blur(5px)",
+        ease: "none",
+        scrollTrigger: {
+            trigger: ".page2",
+            start: "top bottom",
+            end: "top top",
+            scrub: true
+        }
+    });
+}
 // SCROLL CUE (jumping book) //
 
 const scrollCue = document.getElementById("scrollCue");

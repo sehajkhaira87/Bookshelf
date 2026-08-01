@@ -67,6 +67,7 @@ body{
     width:280px;
     height:auto;
     animation:fadeIn 1.5s ease;
+    
 }
 
 .hide-loader{
@@ -1147,3 +1148,100 @@ background:rgba(255,255,255,.18);
 
 
 
+body.mobile-exit .page1 {
+    display: none;
+}
+
+body.mobile-exit {
+    background: #000;
+}
+
+
+@media (max-width: 820px) {
+    #loader {
+        transition: transform 1.3s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+}
+@media (max-width: 820px) {
+    .page2 {
+        display: none;
+    }
+}
+@media (max-width: 820px) {
+
+    /* Navbar */
+    .navbar {
+        padding: 16px 0px;
+        flex-wrap: wrap;
+    }
+
+    .nav-links {
+        gap: 16px;
+    }
+
+    .nav-links a {
+        font-size: 14px;
+    }
+
+    .login-btn {
+        padding: 10px 16px;
+        font-size: 13px;
+        gap: 8px;
+    }
+
+    .logo img {
+        width: 90px;
+    }
+
+    /* Hero title — stop awkward word breaks */
+    .hero-title {
+    font-size: clamp(1.5rem, 7.5vw, 2.1rem) !important;
+    letter-spacing: -0.02em !important;
+}
+
+.hero-title span {
+    white-space: nowrap !important;
+    display: block !important;
+}
+
+.hero-title .hero-title-last {
+    white-space: normal !important;
+}
+
+    .hero-text {
+        top: 350px;
+        left: 20px;
+        width: 90%;
+    }
+
+    /* Push bookshelf image + cat down and shrink so they don't collide with nav/headline */
+     .hero-image {
+        top: 140px;
+        width: 60vw;
+        right: 1px;
+    }
+
+    .cat {
+        top: 148px;
+        right: 85px;
+        width: 60px;
+    }
+
+    .cat img {
+        width: 65px;
+    }
+
+    /* Bulb — reposition so it's not sitting on top of nav text */
+    .bulb-wrapper {
+        left: 80%;
+        top: 10px;
+        width: 70px;
+    }
+
+    .hero {
+        height: auto;
+        min-height: 100vh;
+        padding-bottom: 40px;
+    }
+
+}

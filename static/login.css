@@ -489,9 +489,52 @@ body {
 
 @media (max-width: 820px) {
     .login-visual { display: none; }
-    .login-container { max-width: 440px; }
-    .login-formside { padding: 48px 36px; }
-}
 
+    body {
+        padding: 0;
+        align-items: stretch;
+    }
+
+    .login-wrap {
+        perspective: none;
+    }
+
+    .login-container {
+        max-width: 100%;
+        min-height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .login-formside {
+        padding: 56px 28px 40px;
+        align-items: flex-start;
+    }
+
+    .login-form-inner {
+        max-width: 100%;
+    }
+
+    .login-logo {
+        height: 120px;
+        margin: 0 auto 32px;
+        display: block;
+    }
+
+    .login-formside h1 {
+        font-size: 30px;
+        text-align: center;
+    }
+
+    .login-subtext {
+        text-align: center;
+        margin-bottom: 36px;
+    }
+
+    .login-submit,
+    .login-google {
+        padding: 15px;
+    }
+}
 
 
