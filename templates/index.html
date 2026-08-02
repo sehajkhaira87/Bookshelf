@@ -45,6 +45,7 @@
  <img src="{{ url_for('static', filename='images/bulb.svg') }}" alt="Bulb">
  </div>
  </div>
+ 
 <div class="hero-text">
  <p class="hero-tag">
  <span class="tag-line"></span>
@@ -149,6 +150,7 @@
 </div>
 
 <section class="page2">
+    <canvas id="grid-bg-canvas" class="grid-bg-canvas"></canvas>
  
  <div class="p2nav-left">
  <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="p2nav-logo">
@@ -204,6 +206,7 @@
  
  <canvas id="book-canvas"></canvas>
  <svg id="trail-svg"></svg>
+ 
 
  <!--<svg id="pencil" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
  <g transform="rotate(-45 32 32)">
@@ -248,6 +251,6 @@
 
  
  
-
+<script src="{{ url_for('static', filename='grid-bg.js') }}"></script>
 </body>
 </html>

@@ -267,6 +267,7 @@ body{
     font-size: clamp(4rem, min(9vw, 18vh), 210px);
     line-height: .95;
     letter-spacing: -0.06em;
+    word-spacing: 0.15em;
     color:#1E1A17;
     margin:0;
 }
@@ -1244,4 +1245,19 @@ body.mobile-exit {
         padding-bottom: 40px;
     }
 
+}
+
+
+
+.grid-bg-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 6;    /* was 2 — now sits above #book-canvas (5) */
+    pointer-events: none;
+
+    -webkit-mask-image: linear-gradient(to right, black 0%, black 45%, transparent 78%);
+    mask-image: linear-gradient(to right, black 0%, black 45%, transparent 78%);
 }
