@@ -203,7 +203,7 @@
  <div class="transaction-step" id="step-3">Fetching requested bookshelf data...</div>
  <div class="transaction-step" id="step-4">Transaction Complete! Enjoy your books.</div>
  </div>
- 
+ <div class="page-wheel" id="pageWheel"></div>
  <canvas id="book-canvas"></canvas>
  <svg id="trail-svg"></svg>
  
@@ -249,8 +249,10 @@
 <script type="module" src="{{ url_for('static', filename='three.js') }}"></script>
  <script src="{{ url_for('static', filename='script.js') }}"></script>
 
- 
+
  
 <script src="{{ url_for('static', filename='grid-bg.js') }}"></script>
+
+ <script src="{{ url_for('static', filename='page-wheel.js') }}"></script>
 </body>
 </html>

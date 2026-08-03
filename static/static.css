@@ -1261,3 +1261,27 @@ body.mobile-exit {
     -webkit-mask-image: linear-gradient(to right, black 0%, black 45%, transparent 78%);
     mask-image: linear-gradient(to right, black 0%, black 45%, transparent 78%);
 }
+
+
+/* ================= PAGE WHEEL (left side, page2) ================= */
+
+.page-wheel {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 52%;
+    height: 100%;
+    z-index: 8;
+    perspective: 1500px;
+    pointer-events: auto;
+}
+
+.page-wheel-stage {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+}
+
+@media (max-width: 960px) {
+    .page-wheel { display: none; }
+}

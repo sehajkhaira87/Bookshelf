@@ -692,3 +692,35 @@ if (scrollCue) {
 
 
 
+ScrollTrigger.create({
+    trigger: ".page1",
+    start: "top top",
+    end: "bottom top",
+    pin: true,
+    pinSpacing: false
+});
+
+// ================= PAGE 2 LOCK — WHEEL SCROLL-DRIVEN =================
+if (window.innerWidth > 960) {
+    ScrollTrigger.create({
+        trigger: ".page2",
+        start: "top top",
+        end: "+=2200",
+        pin: true,
+        pinSpacing: true,
+        scrub: 0.4,
+        onUpdate: (self) => {
+            if (window.setPageWheelProgress) {
+                window.setPageWheelProgress(self.progress);
+            }
+        }
+    });
+}
+
+
+// ================= FORCE RECALCULATION AFTER FULL LOAD =================
+
+window.addEventListener('load', () => {
+    ScrollTrigger.refresh();
+    setTimeout(() => ScrollTrigger.refresh(), 300);
+});
