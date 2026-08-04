@@ -615,29 +615,51 @@ ScrollTrigger.create({
 
 //  PAGE 2 LOADER/CURTAIN EFFECT //
 
-if (window.innerWidth > 820) {
-    ScrollTrigger.create({
-        trigger: ".page1",
-        start: "top top",
-        end: "bottom top",
-        pin: true,
-        pinSpacing: false
-    });
-}
+window.addEventListener('load', () => {
 
-if (window.innerWidth > 820) {
-    gsap.to(".page1", {
-        opacity: 0.3,
-        filter: "blur(5px)",
-        ease: "none",
-        scrollTrigger: {
+    if (window.innerWidth > 820) {
+        ScrollTrigger.create({
+            trigger: ".page1",
+            start: "top top",
+            end: "bottom top",
+            pin: true,
+            pinSpacing: false
+        });
+    }
+
+    if (window.innerWidth > 820) {
+        gsap.to(".page1", {
+            opacity: 0.3,
+            filter: "blur(5px)",
+            ease: "none",
+            scrollTrigger: {
+                trigger: ".page2",
+                start: "top bottom",
+                end: "top top",
+                scrub: true
+            }
+        });
+    }
+     if (window.innerWidth > 960) {
+        ScrollTrigger.create({
             trigger: ".page2",
-            start: "top bottom",
-            end: "top top",
-            scrub: true
-        }
-    });
-}
+            start: "top top",
+            end: "+=2200",
+            pin: true,
+            pinSpacing: true,
+            scrub: 0.4,
+            onUpdate: (self) => {
+                if (window.setPageWheelProgress) {
+                    window.setPageWheelProgress(self.progress);
+                }
+            }
+        });
+    }
+
+
+    ScrollTrigger.refresh();
+
+});
 // SCROLL CUE (jumping book) //
 
 const scrollCue = document.getElementById("scrollCue");
@@ -692,33 +714,8 @@ if (scrollCue) {
 
 
 
-ScrollTrigger.create({
-    trigger: ".page1",
-    start: "top top",
-    end: "bottom top",
-    pin: true,
-    pinSpacing: false
-});
-
-// ================= PAGE 2 LOCK — WHEEL SCROLL-DRIVEN =================
-if (window.innerWidth > 960) {
-    ScrollTrigger.create({
-        trigger: ".page2",
-        start: "top top",
-        end: "+=2200",
-        pin: true,
-        pinSpacing: true,
-        scrub: 0.4,
-        onUpdate: (self) => {
-            if (window.setPageWheelProgress) {
-                window.setPageWheelProgress(self.progress);
-            }
-        }
-    });
-}
 
 
-// ================= FORCE RECALCULATION AFTER FULL LOAD =================
 
 window.addEventListener('load', () => {
     ScrollTrigger.refresh();
