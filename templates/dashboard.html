@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Bookshelf</title>
+    <link href="https://fonts.googleapis.com/css2?family=Canela:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+
+<body>
+    
+
+    <div id="loader">
+        <div class="book-loader">
+            <div class="book-page"></div>
+            <div class="book-page" style="animation-delay: 0.15s"></div>
+            <div class="book-page" style="animation-delay: 0.3s"></div>
+        </div>
+    </div>
+
+    <div class="dashboard-wrapper">
+        
+        
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                
+                <h2 class="brand-title">Bookshelf</h2>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active">Overview</a>
+                <a href="#" class="nav-item">My Books</a>
+                <a href="#" class="nav-item">Assignments</a>
+                <a href="#" class="nav-item">PYQs</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item">Settings</a>
+                <a href="/logout" class="nav-item text-danger">Log Out</a>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+            <header class="top-header">
+                <h1>Welcome back, Sehajpreet</h1>
+                <div class="user-profile">
+                    <div class="avatar">S</div>
+                </div>
+            </header>
+
+            <div class="content-grid">
+                
+                <div class="card">
+                    <h3>Recent Books</h3>
+                    <p>No recent activity.</p>
+                </div>
+                <div class="card">
+                    <h3>Pending Assignments</h3>
+                    <p>All caught up!</p>
+                </div>
+            </div>
+        </main>
+
+    </div>
+    
+    
+    <script>
+        window.addEventListener("load", () => {
+            const loader = document.getElementById("loader");
+            
+            setTimeout(() => {
+                loader.classList.add("hide-loader");
+                
+                
+                setTimeout(() => {
+                    loader.remove();
+                }, 1200);
+                
+            }, 1500); 
+        });
+    </script>
+</body>
+</html>
