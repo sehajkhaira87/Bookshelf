@@ -20,7 +20,9 @@ body {
     left: 0;
     width: 100%;
     height: 100vh;
-    background: #0F0B08;
+    
+    background: #F4F5F5; 
+    
     display: flex;
     justify-content: center;
     align-items: center;
@@ -32,6 +34,16 @@ body {
     transform: translateY(-100%);
 }
 
+.video-loader {
+    width: 320px; 
+    height: auto;
+    
+    animation: loaderFadeIn 0.8s ease forwards;
+}
+@keyframes loaderFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1; transform: scale(1); }
+}
 
 .book-loader {
     position: relative;

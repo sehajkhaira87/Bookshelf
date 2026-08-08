@@ -11,12 +11,11 @@
 <body>
     
 
+    <!-- VIDEO LOADER -->
     <div id="loader">
-        <div class="book-loader">
-            <div class="book-page"></div>
-            <div class="book-page" style="animation-delay: 0.15s"></div>
-            <div class="book-page" style="animation-delay: 0.3s"></div>
-        </div>
+        <video class="video-loader" autoplay muted playsinline>
+            <source src="{{ url_for('static', filename='videos/bookshelf-loader.mp4') }}" type="video/mp4">
+        </video>
     </div>
 
     <div class="dashboard-wrapper">
@@ -78,7 +77,7 @@
                     loader.remove();
                 }, 1200);
                 
-            }, 1500); 
+            }, 4000); 
         });
     </script>
 </body>
