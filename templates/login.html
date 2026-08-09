@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login — Bookshelf</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Link to your CSS file -->
     <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
 </head>
 <body>
@@ -12,56 +13,64 @@
     <div class="login-wrap">
         <div class="login-container">
 
-            <!-- LEFT: visual side -->
-            <div class="login-visual">
+            <!-- LEFT: Interactive corridor side -->
+            <div class="login-visual" id="loginVisual">
                 <div class="login-visual-glow"></div>
-                <img src="{{ url_for('static', filename='images/Bookshelf.svg') }}" alt="Bookshelf" class="login-visual-img">
+
+                <!-- Note: The book image was removed because the corridor is now the background in CSS -->
+
                 <p class="login-visual-quote">"Everything, exactly where it belongs."</p>
+
+                <canvas id="trail-canvas" class="login-trail"></canvas>
+
+                <svg id="loginPencil" class="login-pencil" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                  <g transform="rotate(-45 32 32)">
+                    <rect x="26" y="6" width="12" height="34" rx="2" fill="#F2C14E" stroke="#B4862A" stroke-width="1.5"/>
+                    <rect x="26" y="40" width="12" height="6" fill="#D8D8D8" stroke="#9A9A9A" stroke-width="1"/>
+                    <rect x="26" y="2" width="12" height="6" rx="2" fill="#E8879B" stroke="#B95C71" stroke-width="1.5"/>
+                    <polygon points="26,46 38,46 32,56" fill="#E8B978" stroke="#B4862A" stroke-width="1.5" stroke-linejoin="round"/>
+                    <polygon points="30,54 34,54 32,60" fill="#3A3A3A"/>
+                  </g>
+                </svg>
             </div>
 
-            <!-- RIGHT: form side -->
+            <!-- RIGHT: Google-only sign in -->
             <div class="login-formside">
-                <div class="login-form-inner">
+                <div class="login-form-inner login-form-inner--google">
 
-                    <img src="{{ url_for('static', filename='images/logoblack.png') }}" alt="Bookshelf Logo" class="login-logo">
+                    <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="login-logo">
 
                     <h1>Welcome back</h1>
-                    <p class="login-subtext">Log in to pick up right where you left off.</p>
+                    <p class="login-subtext">Sign in with Google to pick up right where you left off.</p>
 
-                    <form class="login-form">
-                        <div class="login-field">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" placeholder="you@example.com">
-                        </div>
+                    <button type="button" class="login-google-hero" id="googleSignIn">
+                        <span class="login-google-icon">
+                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="">
+                        </span>
+                        <span class="login-google-label">Continue with Google</span>
+                        <span class="login-google-arrow">→</span>
+                    </button>
 
-                        <div class="login-field">
-                            <label for="password">Password</label>
-                            <input type="password" id="password" placeholder="••••••••">
-                        </div>
+                    <p class="login-trust">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        One click, no new passwords to remember
+                    </p>
 
-                        <div class="login-row">
-                            <label class="login-remember">
-                                <input type="checkbox"> Remember me
-                            </label>
-                            <a href="#" class="login-forgot">Forgot password?</a>
-                        </div>
+                    <p class="login-terms">
+                        By continuing, you agree to Bookshelf's
+                        <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.
+                    </p>
 
-                        <button type="submit" class="login-submit">Log In</button>
-
-                        <div class="login-divider"><span>or</span></div>
-
-                        <button type="button" class="login-google">
-                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google">
-                            Continue with Google
-                        </button>
-                    </form>
-
-                    <p class="login-signup">Don't have an account? <a href="#">Sign up</a></p>
                 </div>
             </div>
 
         </div>
     </div>
+
+    <!-- Link to your new external JavaScript file -->
+    <script src="{{ url_for('static', filename='login.js') }}"></script>
 
 </body>
 </html>

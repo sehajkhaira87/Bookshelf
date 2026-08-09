@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Bookshelf</title>
+    <link href="https://fonts.googleapis.com/css2?family=Canela:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+
+<body>
+    
+    
+    <div id="loader">
+        <video class="video-loader" autoplay muted playsinline>
+            <source src="{{ url_for('static', filename='videos/bookshelf-loader.mp4') }}" type="video/mp4">
+        </video>
+    </div>
+
+    <div class="dashboard-wrapper">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar">
+           <div class="sidebar-header">
+                
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" class="brand-logo" alt="Bookshelf Logo">
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active">Overview</a>
+                <a href="#" class="nav-item">My Books</a>
+                <a href="#" class="nav-item">Assignments</a>
+                <a href="#" class="nav-item">PYQs</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item">Settings</a>
+                <a href="/logout" class="nav-item text-danger">Log Out</a>
+            </div>
+        </aside>
+
+        
+        <main class="main-content">
+            
+            <header class="top-header">
+                <div>
+                    <h1>Welcome back, Sehajpreet</h1>
+                    <p class="subtitle" id="instruction-text">Select your department to continue.</p>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar">S</div>
+                </div>
+            </header>
+
+            <div class="dashboard-flow">
+                
+                
+                <div class="selection-step" id="step-dept">
+                    <div class="dept-squares">
+                        
+                        <div class="dept-card" data-dept="cse">
+                            
+                            <img src="{{ url_for('static', filename='images/cse-icon.svg') }}" class="dept-icon" alt="CSE Icon">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">CSE</div>
+                                <h3>Computer Science</h3>
+                            </div>
+                        </div>
+                        
+                        <div class="dept-card" data-dept="it">
+                           
+                            <img src="{{ url_for('static', filename='images/it-icon.svg') }}" class="dept-icon" alt="IT Icon">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">IT</div>
+                                <h3>Information Tech</h3>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <div class="selection-step hidden" id="step-sem">
+                    <h4 class="step-label">Select Semester</h4>
+                    <div class="semester-grid">
+                        <button class="sem-card"><span class="sem-prefix">Sem</span> 1</button>
+                        <button class="sem-card"><span class="sem-prefix">Sem</span> 2</button>
+                        <button class="sem-card"><span class="sem-prefix">Sem</span> 3</button>
+                        <button class="sem-card"><span class="sem-prefix">Sem</span> 4</button>
+                        <button class="sem-card"><span class="sem-prefix">Sem</span> 5</button>
+                        <button class="sem-card"><span class="sem-prefix">Sem</span> 6</button>
+                        <button class="sem-card"><span class="sem-prefix">Sem</span> 7</button>
+                        <button class="sem-card"><span class="sem-prefix">Sem</span> 8</button>
+                    </div>
+                </div>
+
+                
+                <div class="selection-step hidden" id="step-category">
+                    <h4 class="step-label">What are you looking for?</h4>
+                    <div class="category-squares">
+                        
+                        <div class="category-card" data-category="pyqs">
+                            <div class="card-badge">01</div>
+                            <h3>PYQs</h3>
+                        </div>
+                        
+                        <div class="category-card" data-category="books">
+                            <div class="card-badge">02</div>
+                            <h3>Books</h3>
+                        </div>
+                        
+                        <div class="category-card" data-category="assignments">
+                            <div class="card-badge">03</div>
+                            <h3>Assignments</h3>
+                        </div>
+                        
+                        <div class="category-card" data-category="notes">
+                            <div class="card-badge">04</div>
+                            <h3>Notes</h3>
+                        </div>
+                        
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+    
+    
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+
+    
+    <script>
+        window.addEventListener("load", () => {
+            const loader = document.getElementById("loader");
+            
+            
+            setTimeout(() => {
+                loader.classList.add("hide-loader");
+                
+                setTimeout(() => {
+                    loader.remove();
+                }, 1200);
+                
+            }, 4000); 
+        });
+    </script>
+</body>
+</html>
