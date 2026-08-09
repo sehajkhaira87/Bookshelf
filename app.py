@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, render_template
 from database import check_connection, create_tables
 
@@ -20,4 +22,4 @@ def dashboard():
     return render_template('dashboard.html')
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8000)
+    app.run(debug=os.getenv("FLASK_DEBUG", "").lower() == "true", port=8000)
