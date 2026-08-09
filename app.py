@@ -1,10 +1,13 @@
+import os
+
 from flask import Flask, render_template
-from database import check_connection
+from database import check_connection, create_tables
 
 app = Flask(__name__)
 
-# Verify database connection on startup
+# Verify database connection and initialize tables on startup
 check_connection()
+create_tables()
 
 @app.route('/')
 def home():
@@ -14,11 +17,9 @@ def home():
 def login():
     return render_template('login.html')
 
-# --- ADD THIS NEW ROUTE ---
 @app.route('/dashboard')
 def dashboard():
     return render_template('dashboard.html')
-# --------------------------
 
-if __name__ == "__main__": 
-    app.run(debug=True, port=8000)
+if __name__ == "__main__":
+    app.run(debug=os.getenv("FLASK_DEBUG", "").lower() == "true", port=8000)
