@@ -10,8 +10,6 @@
 
 <body>
     
-
-    <!-- VIDEO LOADER -->
     <div id="loader">
         <video class="video-loader" autoplay muted playsinline>
             <source src="{{ url_for('static', filename='videos/bookshelf-loader.mp4') }}" type="video/mp4">
@@ -20,10 +18,8 @@
 
     <div class="dashboard-wrapper">
         
-        
         <aside class="sidebar">
             <div class="sidebar-header">
-                
                 <h2 class="brand-title">Bookshelf</h2>
             </div>
             
@@ -40,38 +36,89 @@
             </div>
         </aside>
 
-        <!-- MAIN CONTENT AREA -->
         <main class="main-content">
             <header class="top-header">
-                <h1>Welcome back, Sehajpreet</h1>
+                <div>
+                    <h1>Welcome back, Sehajpreet</h1>
+                    <p class="subtitle" id="instruction-text">Select your department to continue.</p>
+                </div>
                 <div class="user-profile">
                     <div class="avatar">S</div>
                 </div>
             </header>
 
-            <div class="content-grid">
+            <div class="dashboard-flow">
                 
-                <div class="card">
-                    <h3>Recent Books</h3>
-                    <p>No recent activity.</p>
+                <div class="selection-step" id="step-dept">
+                    <div class="dept-squares">
+                        <div class="dept-card" data-dept="cse">
+                            <div class="card-badge">CSE</div>
+                            <h3>Computer Science</h3>
+                        </div>
+                        
+                        <div class="dept-card" data-dept="it">
+                            <div class="card-badge">IT</div>
+                            <h3>Information Tech</h3>
+                        </div>
+                    </div>
                 </div>
-                <div class="card">
-                    <h3>Pending Assignments</h3>
-                    <p>All caught up!</p>
+
+                <div class="selection-step hidden" id="step-sem">
+                    <h4 class="step-label">Select Semester</h4>
+                    <div class="semester-grid">
+                        <button class="sem-card"><span class="sem-prefix">Sem</span> 1</button>
+                        <button class="sem-card"><span class="sem-prefix">Sem</span> 2</button>
+                        <button class="sem-card"><span class="sem-prefix">Sem</span> 3</button>
+                        <button class="sem-card"><span class="sem-prefix">Sem</span> 4</button>
+                        <button class="sem-card"><span class="sem-prefix">Sem</span> 5</button>
+                        <button class="sem-card"><span class="sem-prefix">Sem</span> 6</button>
+                        <button class="sem-card"><span class="sem-prefix">Sem</span> 7</button>
+                        <button class="sem-card"><span class="sem-prefix">Sem</span> 8</button>
+                    </div>
                 </div>
+
+                <div class="selection-step hidden" id="step-category">
+                    <h4 class="step-label">What are you looking for?</h4>
+                    <div class="category-squares">
+                        
+                        <div class="category-card" data-category="pyqs">
+                            <div class="card-badge">01</div>
+                            <h3>PYQs</h3>
+                        </div>
+                        
+                        <div class="category-card" data-category="books">
+                            <div class="card-badge">02</div>
+                            <h3>Books</h3>
+                        </div>
+                        
+                        <div class="category-card" data-category="assignments">
+                            <div class="card-badge">03</div>
+                            <h3>Assignments</h3>
+                        </div>
+                        
+                        <div class="category-card" data-category="notes">
+                            <div class="card-badge">04</div>
+                            <h3>Notes</h3>
+                        </div>
+                        
+                    </div>
+                </div>
+
             </div>
         </main>
 
     </div>
     
-    
+
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+
     <script>
         window.addEventListener("load", () => {
             const loader = document.getElementById("loader");
             
+            
             setTimeout(() => {
                 loader.classList.add("hide-loader");
-                
                 
                 setTimeout(() => {
                     loader.remove();
