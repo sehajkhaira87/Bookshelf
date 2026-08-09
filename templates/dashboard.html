@@ -10,6 +10,7 @@
 
 <body>
     
+    
     <div id="loader">
         <video class="video-loader" autoplay muted playsinline>
             <source src="{{ url_for('static', filename='videos/bookshelf-loader.mp4') }}" type="video/mp4">
@@ -18,9 +19,11 @@
 
     <div class="dashboard-wrapper">
         
+        <!-- SIDEBAR NAVIGATION -->
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2 class="brand-title">Bookshelf</h2>
+           <div class="sidebar-header">
+                
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" class="brand-logo" alt="Bookshelf Logo">
             </div>
             
             <nav class="sidebar-nav">
@@ -36,7 +39,9 @@
             </div>
         </aside>
 
+        
         <main class="main-content">
+            
             <header class="top-header">
                 <div>
                     <h1>Welcome back, Sehajpreet</h1>
@@ -49,20 +54,31 @@
 
             <div class="dashboard-flow">
                 
+                
                 <div class="selection-step" id="step-dept">
                     <div class="dept-squares">
+                        
                         <div class="dept-card" data-dept="cse">
-                            <div class="card-badge">CSE</div>
-                            <h3>Computer Science</h3>
+                            
+                            <img src="{{ url_for('static', filename='images/cse-icon.svg') }}" class="dept-icon" alt="CSE Icon">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">CSE</div>
+                                <h3>Computer Science</h3>
+                            </div>
                         </div>
                         
                         <div class="dept-card" data-dept="it">
-                            <div class="card-badge">IT</div>
-                            <h3>Information Tech</h3>
+                           
+                            <img src="{{ url_for('static', filename='images/it-icon.svg') }}" class="dept-icon" alt="IT Icon">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">IT</div>
+                                <h3>Information Tech</h3>
+                            </div>
                         </div>
+
                     </div>
                 </div>
-
+                
                 <div class="selection-step hidden" id="step-sem">
                     <h4 class="step-label">Select Semester</h4>
                     <div class="semester-grid">
@@ -77,6 +93,7 @@
                     </div>
                 </div>
 
+                
                 <div class="selection-step hidden" id="step-category">
                     <h4 class="step-label">What are you looking for?</h4>
                     <div class="category-squares">
@@ -109,9 +126,10 @@
 
     </div>
     
-
+    
     <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
 
+    
     <script>
         window.addEventListener("load", () => {
             const loader = document.getElementById("loader");

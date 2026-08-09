@@ -7,7 +7,7 @@
 
 body {
     font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #0F0B08; 
+    background: #1A130D;
     color: #1A130D;
     min-height: 100vh;
     overflow: hidden; 
@@ -117,12 +117,12 @@ body {
 
 .sidebar {
     width: 260px;
-    background: #1A130D; 
+    background: #241B13;
     color: #F4EFE3;
     display: flex;
     flex-direction: column;
     padding: 32px 24px;
-    border-right: 1px solid rgba(242, 193, 78, 0.1);
+    border-right: 1px solid rgba(242, 193, 78, 0.05);
     
     
     opacity: 0;
@@ -136,6 +136,7 @@ body {
     color: #F2C14E; 
     margin-bottom: 48px;
 }
+
 
 .sidebar-nav {
     display: flex;
@@ -171,13 +172,13 @@ body {
 
 .main-content {
     flex: 1;
-    background: #FCFAF8; 
+    background: #F7F3EA; 
     border-top-left-radius: 24px;
     border-bottom-left-radius: 24px;
     padding: 48px 64px;
     overflow-y: auto;
     margin: 12px 12px 12px 0;
-    box-shadow: inset 1px 0 0 rgba(255,255,255,0.5);
+    box-shadow: inset 1px 0 0 rgba(255,255,255,0.8), -4px 0 24px rgba(0,0,0,0.2);
     
     
     opacity: 0;
@@ -463,4 +464,17 @@ body {
     opacity: 0.4;
     filter: grayscale(100%);
     transform: scale(0.98);
+}
+
+.brand-logo {
+    width: 75px; 
+    height: auto;
+    margin-bottom: 40px;
+    display: block;
+    
+    
+    filter: invert(76%) sepia(36%) saturate(1185%) hue-rotate(345deg) brightness(100%) contrast(92%);
+    
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
 }
