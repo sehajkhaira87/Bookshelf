@@ -10,7 +10,6 @@
 
 <body>
     
-    
     <div id="loader">
         <video class="video-loader" autoplay muted playsinline>
             <source src="{{ url_for('static', filename='videos/bookshelf-loader.mp4') }}" type="video/mp4">
@@ -22,7 +21,6 @@
         <!-- SIDEBAR NAVIGATION -->
         <aside class="sidebar">
            <div class="sidebar-header">
-                
                 <img src="{{ url_for('static', filename='images/logo.svg') }}" class="brand-logo" alt="Bookshelf Logo">
             </div>
             
@@ -39,7 +37,6 @@
             </div>
         </aside>
 
-        
         <main class="main-content">
             
             <header class="top-header">
@@ -54,12 +51,10 @@
 
             <div class="dashboard-flow">
                 
-                
                 <div class="selection-step" id="step-dept">
                     <div class="dept-squares">
                         
                         <div class="dept-card" data-dept="cse">
-                            
                             <img src="{{ url_for('static', filename='images/cse-icon.svg') }}" class="dept-icon" alt="CSE Icon">
                             <div>
                                 <div class="card-badge" style="margin-bottom: 8px;">CSE</div>
@@ -68,7 +63,6 @@
                         </div>
                         
                         <div class="dept-card" data-dept="it">
-                           
                             <img src="{{ url_for('static', filename='images/it-icon.svg') }}" class="dept-icon" alt="IT Icon">
                             <div>
                                 <div class="card-badge" style="margin-bottom: 8px;">IT</div>
@@ -99,23 +93,35 @@
                     <div class="category-squares">
                         
                         <div class="category-card" data-category="pyqs">
-                            <div class="card-badge">01</div>
-                            <h3>PYQs</h3>
+                            <img src="{{ url_for('static', filename='images/pyq-icon.svg') }}" class="category-icon" alt="PYQ">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">01</div>
+                                <h3>PYQs</h3>
+                            </div>
                         </div>
                         
                         <div class="category-card" data-category="books">
-                            <div class="card-badge">02</div>
-                            <h3>Books</h3>
+                            <img src="{{ url_for('static', filename='images/books-icon.svg') }}" class="category-icon" alt="Books">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">02</div>
+                                <h3>Books</h3>
+                            </div>
                         </div>
                         
                         <div class="category-card" data-category="assignments">
-                            <div class="card-badge">03</div>
-                            <h3>Assignments</h3>
+                            <img src="{{ url_for('static', filename='images/assignment-icon.svg') }}" class="category-icon" alt="Assignments">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">03</div>
+                                <h3>Assignments</h3>
+                            </div>
                         </div>
                         
                         <div class="category-card" data-category="notes">
-                            <div class="card-badge">04</div>
-                            <h3>Notes</h3>
+                            <img src="{{ url_for('static', filename='images/notes-icon.svg') }}" class="category-icon" alt="Notes">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">04</div>
+                                <h3>Notes</h3>
+                            </div>
                         </div>
                         
                     </div>
@@ -126,14 +132,11 @@
 
     </div>
     
-    
     <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
 
-    
     <script>
         window.addEventListener("load", () => {
             const loader = document.getElementById("loader");
-            
             
             setTimeout(() => {
                 loader.classList.add("hide-loader");
