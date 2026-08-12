@@ -440,3 +440,33 @@ body {
 .login-visual:hover::after {
     opacity: 1; 
 }
+
+.login-google-hero.is-authenticating {
+    animation: authPulse 1.2s ease-in-out infinite alternate;
+    border-color: rgba(242, 193, 78, 0.6);
+}
+
+@keyframes authPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(242, 193, 78, 0.2);
+        transform: scale(1);
+    }
+    100% {
+        box-shadow: 0 0 20px 4px rgba(242, 193, 78, 0.35);
+        transform: scale(1.01);
+    }
+}
+
+.login-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(36, 27, 18, 0.15);
+    border-top-color: #241B12;
+    border-radius: 50%;
+    display: inline-block;
+    animation: loginSpin 0.6s linear infinite;
+}
+
+@keyframes loginSpin {
+    to { transform: rotate(360deg); }
+}

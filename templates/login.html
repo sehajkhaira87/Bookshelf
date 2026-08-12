@@ -70,6 +70,16 @@
     </div>
 
     <script src="{{ url_for('static', filename='login.js') }}"></script>
+    <script>
+    // Push a dummy state so the browser recognizes a history entry
+    history.pushState(null, null, location.href);
+    
+    // Listen for the back button event
+    window.addEventListener('popstate', function () {
+        // Immediately redirect back to the login route
+        window.location.href = '/login';
+    });
+</script>
 
 </body>
 </html>

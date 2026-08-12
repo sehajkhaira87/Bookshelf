@@ -1,23 +1,24 @@
 document.getElementById('googleSignIn').addEventListener('click', (e) => {
     const btn = e.currentTarget;
     const label = btn.querySelector('.login-google-label');
-    const overlay = document.getElementById('login-transition-overlay');
-
-    label.innerText = "Authenticating...";
-    btn.style.pointerEvents = "none"; 
-    btn.style.opacity = "0.7";
-
-    if (overlay) {
-        overlay.style.opacity = "1";
-        overlay.style.pointerEvents = "auto";
-    }
+    const icon = btn.querySelector('.login-google-icon');
 
     
-    setTimeout(() => {
-        window.location.href = '/dashboard';
-    }, 2000); 
-});
+    label.innerText = "Authenticating...";
+    btn.style.pointerEvents = "none";
+    btn.style.opacity = "0.8";
 
+    setTimeout(() => {
+        label.innerText = "Loading dashboard...";
+        if (icon) {
+            icon.innerHTML = `<span class="login-spinner"></span>`;
+        }
+
+        setTimeout(() => {
+            window.location.href = '/dashboard';
+        }, 700);
+    }, 1000);
+});
 (function() {
     const visual = document.getElementById('loginVisual');
     if (!visual) return;
