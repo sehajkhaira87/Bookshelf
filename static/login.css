@@ -45,7 +45,6 @@ body {
     100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ============ LEFT SIDE — BOOK + PENCIL TRAIL ============ */
 
 .login-visual {
     flex: 1;
@@ -94,8 +93,7 @@ body {
     z-index: 2;
     opacity: 0;
     filter: drop-shadow(0 20px 40px rgba(0,0,0,0.45));
-    animation: bookFadeIn 1.2s ease 0.6s forwards,
-               bookFloat 7s ease-in-out 1.8s infinite;
+    
     pointer-events: none;
 }
 
@@ -148,7 +146,6 @@ body {
     will-change: transform;
 }
 
-/* ============ RIGHT SIDE — GOOGLE SIGN IN ============ */
 
 .login-formside {
     flex: 1;
@@ -410,26 +407,23 @@ body {
 
 
 
-
 .login-visual::before {
     content: "";
     position: absolute;
     inset: 0;
     
-    background: rgba(15, 11, 8, 0.85); 
+    background: rgba(15, 11, 8, 0.70); 
     z-index: 2;
     pointer-events: none;
     transition: opacity 0.6s ease;
 }
 
-
 .login-visual::after {
     content: "";
     position: absolute;
     inset: 0;
-   
     background: radial-gradient(
-        circle 150px at var(--x, 50%) var(--y, 50%), 
+        circle 200px at var(--x, 50%) var(--y, 50%), 
         transparent 0%, 
         rgba(24, 18, 12, 0.3) 40%, 
         rgba(15, 11, 8, 0.85) 85% 
@@ -439,8 +433,6 @@ body {
     opacity: 0; 
     transition: opacity 0.8s ease;
 }
-
-
 .login-visual:hover::before {
     opacity: 0; 
 }

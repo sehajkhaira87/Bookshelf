@@ -5,19 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login — Bookshelf</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Link to your CSS file -->
     <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
 </head>
 <body>
 
+    <!-- Transition overlay for your JavaScript fade effect -->
+    <div id="login-transition-overlay" style="position: fixed; inset: 0; background: #0F0B08; opacity: 0; pointer-events: none; z-index: 9999; transition: opacity 0.8s ease;"></div>
+
     <div class="login-wrap">
         <div class="login-container">
 
-            <!-- LEFT: Interactive corridor side -->
+            <!-- LEFT: Interactive corridor side (Book Removed) -->
             <div class="login-visual" id="loginVisual">
                 <div class="login-visual-glow"></div>
-
-                <!-- Note: The book image was removed because the corridor is now the background in CSS -->
 
                 <p class="login-visual-quote">"Everything, exactly where it belongs."</p>
 
@@ -69,7 +69,6 @@
         </div>
     </div>
 
-    <!-- Link to your new external JavaScript file -->
     <script src="{{ url_for('static', filename='login.js') }}"></script>
 
 </body>

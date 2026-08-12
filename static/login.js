@@ -3,24 +3,21 @@ document.getElementById('googleSignIn').addEventListener('click', (e) => {
     const label = btn.querySelector('.login-google-label');
     const overlay = document.getElementById('login-transition-overlay');
 
-    // 1. Give the user instant visual feedback
     label.innerText = "Authenticating...";
-    btn.style.pointerEvents = "none"; // Prevents double-clicking
+    btn.style.pointerEvents = "none"; 
     btn.style.opacity = "0.7";
 
-    // 2. Trigger the black fade out
     if (overlay) {
         overlay.style.opacity = "1";
         overlay.style.pointerEvents = "auto";
     }
 
-    // 3. Wait for the screen to go black, then instantly load the dashboard
+    
     setTimeout(() => {
         window.location.href = '/dashboard';
-    }, 850); // This waits exactly as long as the CSS fade transition
+    }, 2000); 
 });
 
-//LEFT SIDE,PENCIL TRAIL & SPOTLIGHT 
 (function() {
     const visual = document.getElementById('loginVisual');
     if (!visual) return;
@@ -53,8 +50,8 @@ document.getElementById('googleSignIn').addEventListener('click', (e) => {
         mx = e.clientX - r.left;
         my = e.clientY - r.top;
         pencil.style.opacity = '1';
-        
-        
+
+
         visual.style.setProperty('--x', `${mx}px`);
         visual.style.setProperty('--y', `${my}px`);
     });
