@@ -1,25 +1,38 @@
-document.getElementById('googleSignIn').addEventListener('click', (e) => {
-    const btn = e.currentTarget;
-    const label = btn.querySelector('.login-google-label');
-    const icon = btn.querySelector('.login-google-icon');
-    const arrow = btn.querySelector('.login-google-arrow');
+document.addEventListener('DOMContentLoaded', () => {
+    const googleBtn = document.getElementById('googleSignIn');
+    
+    if (googleBtn) {
+        googleBtn.addEventListener('click', (e) => {
+            e.preventDefault(); // 
+            
+            const btn = e.currentTarget;
+            const label = btn.querySelector('.login-google-label');
+            const icon = btn.querySelector('.login-google-icon');
+            const arrow = btn.querySelector('.login-google-arrow');
 
-    label.innerText = "Authenticating...";
-    btn.style.pointerEvents = "none";
-    btn.classList.add('is-authenticating');
-    if (arrow) arrow.style.opacity = "0";
+            
+            btn.style.display = "flex";
+            btn.style.pointerEvents = "none";
+            
+            btn.classList.add('bookshelf-loading-pulse');
+            
+            if (arrow) arrow.style.display = "none";
+            if (label) label.innerText = "Authenticating...";
 
-    setTimeout(() => {
-        label.innerText = "Preparing your bookshelf...";
-        if (icon) {
-            icon.innerHTML = `<span class="login-spinner"></span>`;
-        }
+            setTimeout(() => {
+                if (label) label.innerText = "Preparing your bookshelf...";
+                if (icon) {
+                    icon.innerHTML = `<span class="login-spinner"></span>`;
+                }
 
-        setTimeout(() => {
-            window.location.href = '/dashboard';
-        }, 800);
-    }, 1200);
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 800);
+            }, 1200);
+        });
+    }
 });
+
 
 (function() {
     const visual = document.getElementById('loginVisual');
@@ -29,7 +42,6 @@ document.getElementById('googleSignIn').addEventListener('click', (e) => {
         const r = visual.getBoundingClientRect();
         const mx = e.clientX - r.left;
         const my = e.clientY - r.top;
-        
         
         visual.style.setProperty('--x', `${mx}px`);
         visual.style.setProperty('--y', `${my}px`);
