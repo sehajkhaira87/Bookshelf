@@ -43,13 +43,13 @@
                     <h1>Welcome back</h1>
                     <p class="login-subtext">Sign in with Google to pick up right where you left off.</p>
 
-                    <button type="button" class="login-google-hero" id="googleSignIn">
+                    <a href="{{ url_for('login_google') }}" class="login-google-hero" id="googleSignIn">
                         <span class="login-google-icon">
                             <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="">
                         </span>
                         <span class="login-google-label">Continue with Google</span>
                         <span class="login-google-arrow">→</span>
-                    </button>
+                    </a>
 
                     <p class="login-trust">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

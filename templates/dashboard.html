@@ -40,11 +40,11 @@
             
             <header class="top-header">
                 <div>
-                    <h1>Welcome back, Sehajpreet</h1>
+                    <h1>Welcome back, {{ user.name.split(' ')[0] }}</h1>
                     <p class="subtitle" id="instruction-text">Select your department to continue.</p>
                 </div>
                 <div class="user-profile">
-                    <div class="avatar">S</div>
+                    <div class="avatar">{{ user.name[0] }}</div>
                 </div>
             </header>
 

@@ -4,11 +4,11 @@ import os
 
 load_dotenv()
 
-hostname = os.getenv("host")
-port = os.getenv("port")
-username = os.getenv("username")
-password = os.getenv("password")
-database = os.getenv("database")
+hostname = os.getenv("DB_HOST")
+port = os.getenv("DB_PORT")
+username = os.getenv("DB_USER")
+password = os.getenv("DB_PASSWORD")
+database = os.getenv("DB_NAME")
 
 def get_connection():
     """Returns a new connection to the database."""
