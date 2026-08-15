@@ -1,6 +1,5 @@
 import os
-
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 from database import check_connection, create_tables
 
 app = Flask(__name__)
@@ -21,5 +20,25 @@ def login():
 def dashboard():
     return render_template('dashboard.html')
 
-if __name__ == "__main__":
-    app.run(debug=os.getenv("FLASK_DEBUG", "").lower() == "true", port=8000)
+@app.route('/admin') 
+def admin_panel():
+    return render_template('admin.html')
+
+@app.route('/admin-verify', methods=['POST'])
+def admin_verify():
+    entered_password = request.form.get('master_key')
+    
+    # our highly secure password
+    secret_password = "bookshelf" 
+    
+    if entered_password == secret_password:
+        return redirect(url_for('admin_dashboard'))
+    else:
+        return redirect(url_for('admin_panel'))
+
+@app.route('/admin-dashboard')
+def admin_dashboard():
+    return "<h1 style='color: green;'>Access Granted m4 uncle and sehaj sir </h1>"
+
+if __name__ == '__main__':
+    app.run(debug=True, port=8000)
