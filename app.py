@@ -38,7 +38,8 @@ def admin_verify():
 
 @app.route('/admin-dashboard')
 def admin_dashboard():
-    return "<h1 style='color: green;'>Access Granted m4 uncle and sehaj sir </h1>"
+    # This tells Python to load your new front-end file!
+    return render_template('admin-dashboard.html')
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000)
