@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Control Center</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin-dashboard.css') }}">
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>Admin Vault</h2>
+        <button class="nav-btn active"> Upload Resources</button>
+        <button class="nav-btn"> User Database</button>
+        <button class="nav-btn"> Contributions <span class="badge">Later</span></button>
+    </div>
+
+    <div class="content">
+        <h1 class="header-title">Resource Manager</h1>
+        
+        <div class="card">
+            <h3>Upload New File</h3>
+            <p>Add a new PYQ, Assignment, or Book directly to the database.</p>
+            
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                
+                <label>Category</label>
+                <select name="category" required>
+                    <option value="pyq">Past Year Question (PYQ)</option>
+                    <option value="assignment">Assignment / Lab File</option>
+                    <option value="book">Digital Book</option>
+                </select>
+
+                <label>Branch</label>
+                <select name="branch" required>
+                    <option value="" disabled selected>Select a Branch...</option>
+                    <option value="cse">Computer Science (CSE)</option>
+                    <option value="ece">Information and Technology (IT)</option>
+                    <option value="ee">Electrical (EE)</option>
+                    <option value="me">Mechanical (ME)</option>
+                    <option value="ce">Civil (CE)</option>
+                </select>
+   
+                <label>Semester</label>
+                <select name="semester" required>
+                    <option value="" disabled selected>Select a Semester...</option>
+                    <option value="1">1st Semester</option>
+                    <option value="2">2nd Semester</option>
+                    <option value="3">3rd Semester</option>
+                    <option value="4">4th Semester</option>
+                    <option value="5">5th Semester</option>
+                    <option value="6">6th Semester</option>
+                    <option value="7">7th Semester</option>
+                    <option value="8">8th Semester</option>
+                </select>
+
+                <label>Resource Title</label>
+                <input type="text" name="title" placeholder="e.g., Artificial Intelligence PYQ 2025" required>
+
+                <label>Attach File</label>
+                <input type="file" name="file_upload" required>
+
+                <button type="submit" class="btn-submit">Upload to Database</button>
+            </form>
+        </div>
+
+    </div>
+
+</body>
+</html>

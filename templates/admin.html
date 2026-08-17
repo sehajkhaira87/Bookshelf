@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Master Access</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+</head>
+<body>
+
+    <div class="secret-container">
+        
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="admin-logo">
+
+        <h1>"Welcome back, Mr. Khaira and Mr. Mangat."</h1>
+        <p>The bookshelf awaits your command. Please verify your identity.</p>
+        
+        <!-- The form -->
+        <form action="/admin-verify" method="POST">
+            <input type="password" name="master_key" autofocus required>
+            <button type="submit"></button> 
+        </form>
+    </div>
+    <div class="guardian-combo">
+        <img src="{{ url_for('static', filename='images/stool.svg') }}" alt="Library Stool" class="admin-stool">
+        <img src="{{ url_for('static', filename='images/cat.svg') }}" alt="Our Cat" class="cat-guardian">
+    </div>
+
+</body>
+</html>
+
+</body>
+</html>

@@ -1,0 +1,118 @@
+body { 
+    margin: 0; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+    background: #f4f7f6; 
+    display: flex; 
+    height: 100vh; 
+    overflow: hidden;
+}
+
+.sidebar { 
+    width: 260px; 
+    background: #1e2b3c; 
+    color: white; 
+    display: flex; 
+    flex-direction: column; 
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+.sidebar h2 { 
+    padding: 25px 20px; 
+    margin: 0; 
+    font-size: 22px; 
+    border-bottom: 1px solid #2a3f54; 
+    letter-spacing: 1px;
+}
+.nav-btn { 
+    padding: 18px 20px; 
+    color: #aebfd4; 
+    text-decoration: none; 
+    border: none; 
+    background: none; 
+    text-align: left; 
+    font-size: 16px; 
+    cursor: pointer; 
+    transition: all 0.3s ease; 
+}
+.nav-btn:hover, .nav-btn.active { 
+    background: #2a3f54; 
+    color: white; 
+    border-left: 5px solid #4cd137; 
+}
+.badge { 
+    font-size: 11px; 
+    background: #e1b12c; 
+    color: #000; 
+    padding: 3px 8px; 
+    border-radius: 12px; 
+    margin-left: 10px; 
+    font-weight: bold;
+}
+
+.content { 
+    flex-grow: 1; 
+    padding: 40px; 
+    overflow-y: auto; 
+}
+.header-title {
+    margin-top: 0;
+    color: #2f3640;
+    font-size: 28px;
+    margin-bottom: 30px;
+}
+
+.card { 
+    background: white; 
+    padding: 35px; 
+    border-radius: 10px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+    max-width: 600px; 
+}
+.card h3 { 
+    margin-top: 0; 
+    color: #2f3640; 
+    font-size: 22px;
+    margin-bottom: 5px;
+}
+.card p {
+    color: #718093;
+    font-size: 14px;
+    margin-bottom: 25px;
+}
+
+label { 
+    display: block; 
+    margin-top: 20px; 
+    color: #2f3640; 
+    font-weight: 600;
+    font-size: 14px; 
+}
+select, input[type="text"], input[type="file"] { 
+    width: 100%; 
+    padding: 12px; 
+    margin-top: 8px; 
+    border: 2px solid #dcdde1; 
+    border-radius: 6px; 
+    box-sizing: border-box; 
+    font-size: 15px;
+    background: #f5f6fa;
+    transition: border 0.3s;
+}
+select:focus, input[type="text"]:focus {
+    border-color: #0097e6;
+    outline: none;
+}
+
+.btn-submit { 
+    margin-top: 30px; 
+    background: #4cd137; 
+    color: white; 
+    border: none; 
+    padding: 15px 20px; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    font-size: 16px; 
+    font-weight: bold;
+    width: 100%; 
+    transition: background 0.3s; 
+}
+.btn-submit:hover { background: #44bd32; }
