@@ -18,7 +18,7 @@ def login():
 
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', user={'name': 'Sehajpreet'})
 
 @app.route('/admin') 
 def admin_panel():
