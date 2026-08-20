@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard — Bookshelf</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Canela:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
 </head>
@@ -95,7 +96,17 @@
             </nav>
 
             <div class="sidebar-footer">
-                <a href="#" class="nav-item">Settings</a>
+                <div style="position: relative;">
+                    <a href="#" class="nav-item" id="settingsBtn">Settings</a>
+                    
+                    <div id="settingsPopup" class="settings-popup hidden">
+                        <label class="theme-switch-wrapper">
+                            <span style="font-size: 14px;">Dark Mode</span>
+                            <input type="checkbox" id="darkModeToggle">
+                        </label>
+                    </div>
+                </div>
+                
                 <a href="/logout" class="nav-item text-danger">Log Out</a>
             </div>
         </aside>
@@ -216,7 +227,5 @@
             }, 4000); 
         });
     </script>
-</body>
-</html>
 </body>
 </html>
