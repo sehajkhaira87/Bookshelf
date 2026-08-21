@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, redirect, url_for, session
+from flask import Flask, render_template, redirect, url_for, session, request
 from authlib.integrations.flask_client import OAuth
 from database import check_connection, create_tables, add_or_update_user
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -32,9 +32,33 @@ def home():
 def login():
     return render_template('login.html')
 
+@app.route('/auth/google')
+def auth_google():
+    redirect_uri = url_for('callback', _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+@app.route('/callback')
+def callback():
+    token = google.authorize_access_token()
+    user_info = token.get('userinfo')
+    if user_info:
+        email = user_info.get('email')
+        name = user_info.get('name')
+        session['user'] = {'email': email, 'name': name}
+        add_or_update_user(email, name)
+    return redirect(url_for('dashboard'))
+
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html', user={'name': 'Sehajpreet'})
+    user = session.get('user')
+    if not user:
+        return redirect(url_for('login'))
+    return render_template('dashboard.html', user=user)
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('home'))
 
 @app.route('/admin') 
 def admin_panel():
