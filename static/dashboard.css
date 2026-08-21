@@ -697,3 +697,19 @@ body.dark-mode .category-card.selected {
     background: #2A2118;
     border-color: #F2C14E;
 }
+
+.sidebar-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.sidebar-footer > div {
+    flex: 1;
+}
+
+.sidebar-footer .nav-item {
+    display: block;
+    text-align: center;
+}
