@@ -3,12 +3,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (googleBtn) {
         googleBtn.addEventListener('click', (e) => {
-            e.preventDefault(); // 
+            e.preventDefault();
             
             const btn = e.currentTarget;
             const label = btn.querySelector('.login-google-label');
             const icon = btn.querySelector('.login-google-icon');
             const arrow = btn.querySelector('.login-google-arrow');
+            const targetUrl = btn.getAttribute('href');
 
             
             btn.style.display = "flex";
@@ -20,13 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (label) label.innerText = "Authenticating...";
 
             setTimeout(() => {
-                if (label) label.innerText = "Preparing your bookshelf...";
+                if (label) label.innerText = "Redirecting to Google...";
                 if (icon) {
                     icon.innerHTML = `<span class="login-spinner"></span>`;
                 }
 
                 setTimeout(() => {
-                    window.location.href = '/dashboard';
+                    window.location.href = targetUrl;
                 }, 800);
             }, 1200);
         });
