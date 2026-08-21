@@ -1263,7 +1263,7 @@ body.mobile-exit {
 }
 
 
-/* ================= PAGE WHEEL (left side, page2) ================= */
+
 
 .page-wheel {
     position: absolute;
@@ -1285,3 +1285,5 @@ body.mobile-exit {
 @media (max-width: 960px) {
     .page-wheel { display: none; }
 }
+
+

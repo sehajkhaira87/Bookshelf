@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard — Bookshelf</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Canela:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
 </head>
 
 <body>
+    
     
     <div id="loader">
         <video class="video-loader" autoplay muted playsinline>
@@ -16,6 +18,69 @@
         </video>
     </div>
 
+    
+    <div class="onboarding-overlay" id="onboardingOverlay">
+        <div class="onboarding-modal">
+            <h2>Set Up Your Bookshelf</h2>
+            <p>Just a few details so we can organize your resources.</p>
+            
+            <form id="onboardingForm" class="onboarding-form">
+                
+                
+                <div class="input-group">
+                    <label for="studentName">Full Name</label>
+                    <input type="text" id="studentName" required placeholder="e.g. Sehajpreet Singh">
+                    <span class="warning-text">⚠️ Please use your real registered name. Fake names will lead to immediate account restriction or a ban.</span>
+                </div>
+                
+                
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="urn">URN</label>
+                        <input type="text" id="urn" required placeholder="e.g. 2435163">
+                    </div>
+                    <div class="input-group">
+                        <label for="crn">CRN</label>
+                        <input type="text" id="crn" required placeholder="e.g. 2415262">
+                    </div>
+                </div>
+
+                
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="branch">Branch</label>
+                        <select id="branch" required>
+                            <option value="" disabled selected>Select Branch</option>
+                            <option value="CSE">Computer Science (CSE)</option>
+                            <option value="IT">Information Technology (IT)</option>
+                            <option value="ECE">Electronics (ECE)</option>
+                            <option value="ME">Mechanical (ME)</option>
+                            <option value="CE">Civil (CE)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="semester">Semester</label>
+                        <select id="semester" required>
+                            <option value="" disabled selected>Select Sem</option>
+                            <option value="1">1st</option>
+                            <option value="2">2nd</option>
+                            <option value="3">3rd</option>
+                            <option value="4">4th</option>
+                            <option value="5">5th</option>
+                            <option value="6">6th</option>
+                            <option value="7">7th</option>
+                            <option value="8">8th</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="onboarding-submit">Access Dashboard</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD CONTENT -->
     <div class="dashboard-wrapper">
         
         <!-- SIDEBAR NAVIGATION -->
@@ -25,13 +90,23 @@
             </div>
             
             <nav class="sidebar-nav">
-    <a href="#" class="nav-item active">Overview</a>
-    <a href="#" class="nav-item">Shared Files</a>
-    <a href="#" class="nav-item" style="opacity: 0.5; cursor: not-allowed;">Contribution <br><small>(coming soon)</small></a>
-</nav>
+                <a href="#" class="nav-item active">Overview</a>
+                
+                <a href="#" class="nav-item" style="opacity: 0.5; cursor: not-allowed;">Contribution <br><small>(coming soon)</small></a>
+            </nav>
 
             <div class="sidebar-footer">
-                <a href="#" class="nav-item">Settings</a>
+                <div style="position: relative;">
+                    <a href="#" class="nav-item" id="settingsBtn">Settings</a>
+                    
+                    <div id="settingsPopup" class="settings-popup hidden">
+                        <label class="theme-switch-wrapper">
+                            <span style="font-size: 14px;">Dark Mode</span>
+                            <input type="checkbox" id="darkModeToggle">
+                        </label>
+                    </div>
+                </div>
+                
                 <a href="/logout" class="nav-item text-danger">Log Out</a>
             </div>
         </aside>
@@ -86,7 +161,6 @@
                     </div>
                 </div>
 
-                
                 <div class="selection-step hidden" id="step-category">
                     <h4 class="step-label">What are you looking for?</h4>
                     <div class="category-squares">
@@ -134,11 +208,17 @@
     <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
 
     <script>
+        console.log("1. Script section reached!");
+
         window.addEventListener("load", () => {
+            console.log("2. Page fully loaded! Starting the 4-second timer...");
             const loader = document.getElementById("loader");
+            const overlay = document.getElementById("onboardingOverlay");
             
             setTimeout(() => {
+                console.log("3. 4 seconds passed! Sliding loader up and showing panel...");
                 loader.classList.add("hide-loader");
+                overlay.classList.add("show-overlay");
                 
                 setTimeout(() => {
                     loader.remove();

@@ -66,3 +66,49 @@ categoryCards.forEach(card => {
         }, 300);
     });
 });
+document.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.getElementById('onboardingOverlay');
+    const form = document.getElementById('onboardingForm');
+
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault(); 
+            
+            localStorage.setItem('bookshelf_profile_complete', 'true');
+            
+            overlay.classList.add('hidden');
+        });
+    }
+});
+
+
+
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsPopup = document.getElementById('settingsPopup');
+const darkModeToggle = document.getElementById('darkModeToggle');
+
+settingsBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    settingsPopup.classList.toggle('hidden');
+});
+
+document.addEventListener('click', (e) => {
+    if (!settingsBtn.contains(e.target) && !settingsPopup.contains(e.target)) {
+        settingsPopup.classList.add('hidden');
+    }
+});
+
+if (localStorage.getItem('bookshelf_dark_mode') === 'true') {
+    document.body.classList.add('dark-mode');
+    darkModeToggle.checked = true;
+}
+
+darkModeToggle.addEventListener('change', (e) => {
+    if (e.target.checked) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('bookshelf_dark_mode', 'true');
+    } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('bookshelf_dark_mode', 'false');
+    }
+});

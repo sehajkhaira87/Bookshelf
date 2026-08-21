@@ -9,41 +9,26 @@
 </head>
 <body>
 
-    <!-- Transition overlay for your JavaScript fade effect -->
-    <div id="login-transition-overlay" style="position: fixed; inset: 0; background: #0F0B08; opacity: 0; pointer-events: none; z-index: 9999; transition: opacity 0.8s ease;"></div>
-
     <div class="login-wrap">
         <div class="login-container">
 
-            <!-- LEFT: Interactive corridor side (Book Removed) -->
             <div class="login-visual" id="loginVisual">
                 <div class="login-visual-glow"></div>
 
                 <p class="login-visual-quote">"Everything, exactly where it belongs."</p>
 
                 <canvas id="trail-canvas" class="login-trail"></canvas>
-
-                <svg id="loginPencil" class="login-pencil" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-                  <g transform="rotate(-45 32 32)">
-                    <rect x="26" y="6" width="12" height="34" rx="2" fill="#F2C14E" stroke="#B4862A" stroke-width="1.5"/>
-                    <rect x="26" y="40" width="12" height="6" fill="#D8D8D8" stroke="#9A9A9A" stroke-width="1"/>
-                    <rect x="26" y="2" width="12" height="6" rx="2" fill="#E8879B" stroke="#B95C71" stroke-width="1.5"/>
-                    <polygon points="26,46 38,46 32,56" fill="#E8B978" stroke="#B4862A" stroke-width="1.5" stroke-linejoin="round"/>
-                    <polygon points="30,54 34,54 32,60" fill="#3A3A3A"/>
-                  </g>
-                </svg>
             </div>
 
-            <!-- RIGHT: Google-only sign in -->
             <div class="login-formside">
                 <div class="login-form-inner login-form-inner--google">
 
-                    <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="login-logo">
+                    <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="login-logo" style="width: 110px; height: auto;">
 
                     <h1>Welcome back</h1>
                     <p class="login-subtext">Sign in with Google to pick up right where you left off.</p>
 
-                    <a href="{{ url_for('login_google') }}" class="login-google-hero" id="googleSignIn">
+                    <a href="#" class="login-google-hero" id="googleSignIn">
                         <span class="login-google-icon">
                             <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="">
                         </span>
@@ -70,16 +55,7 @@
     </div>
 
     <script src="{{ url_for('static', filename='login.js') }}"></script>
-    <script>
-    // Push a dummy state so the browser recognizes a history entry
-    history.pushState(null, null, location.href);
     
-    // Listen for the back button event
-    window.addEventListener('popstate', function () {
-        // Immediately redirect back to the login route
-        window.location.href = '/login';
-    });
-</script>
 
 </body>
 </html>

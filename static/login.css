@@ -170,7 +170,7 @@ body {
 }
 
 .login-logo {
-    height: 90px;
+    height: 60px;
     margin-bottom: 28px;
     display: block;
     opacity: 0;
@@ -470,3 +470,15 @@ body {
 @keyframes loginSpin {
     to { transform: rotate(360deg); }
 }
+
+
+#googleSignIn, 
+#googleSignIn:focus, 
+#googleSignIn:active {
+    outline: none !important;
+    text-decoration: none !important;
+    -webkit-tap-highlight-color: transparent; 
+}
+
+
+

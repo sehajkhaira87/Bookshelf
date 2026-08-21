@@ -32,44 +32,30 @@ def home():
 def login():
     return render_template('login.html')
 
-@app.route('/login/google')
-def login_google():
-    """Redirects user to Google's consent screen."""
-    redirect_uri = url_for('authorize', _external=True)
-    return google.authorize_redirect(redirect_uri)
-
-@app.route('/authorize')
-def authorize():
-    """Callback from Google — fetches profile, saves to DB, sets session."""
-    token = google.authorize_access_token()
-    user_info = token.get('userinfo')
-
-    email = user_info.get('email')
-    name = user_info.get('name')
-
-    # Save user to database
-    add_or_update_user(email=email, name=name)
-
-    # Store in session
-    session['user'] = {
-        'email': email,
-        'name': name,
-        'picture': user_info.get('picture'),
-    }
-
-    return redirect(url_for('dashboard'))
-
 @app.route('/dashboard')
 def dashboard():
-    user = session.get('user')
-    if not user:
-        return redirect(url_for('login'))
-    return render_template('dashboard.html', user=user)
+    return render_template('dashboard.html', user={'name': 'Sehajpreet'})
 
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('home'))
+@app.route('/admin') 
+def admin_panel():
+    return render_template('admin.html')
 
-if __name__ == "__main__":
+@app.route('/admin-verify', methods=['POST'])
+def admin_verify():
+    entered_password = request.form.get('master_key')
+
+    # our highly secure password
+    secret_password = "bookshelf" 
+
+    if entered_password == secret_password:
+        return redirect(url_for('admin_dashboard'))
+    else:
+        return redirect(url_for('admin_panel'))
+
+@app.route('/admin-dashboard')
+def admin_dashboard():
+    # This tells Python to load your new front-end file!
+    return render_template('admin-dashboard.html')
+
+if __name__ == '__main__':
     app.run(debug=True, port=8000)
