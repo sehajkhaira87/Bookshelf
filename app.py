@@ -2,11 +2,12 @@ import os
 from flask import Flask, render_template, redirect, url_for, session
 from authlib.integrations.flask_client import OAuth
 from database import check_connection, create_tables, add_or_update_user
+from werkzeug.middleware.proxy_fix import ProxyFix
 from dotenv import load_dotenv
-
 load_dotenv()
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 app.secret_key = os.getenv("flash_secret")
 
 # Google OAuth setup
