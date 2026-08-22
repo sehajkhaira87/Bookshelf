@@ -869,7 +869,6 @@ background:rgba(255,255,255,.18);
     animation: flicker 0.7s ease-in-out forwards;
 }
 
-/* Lights-off: hero dims when bulb is clicked off */
 .hero {
     transition: filter 0.7s ease;
 }
@@ -963,7 +962,7 @@ background:rgba(255,255,255,.18);
     cursor: none; 
 }
 
-/* ================= PAGE 2 THREE.JS CANVAS ================= */
+
 
 #book-canvas {
     position: absolute;
@@ -1194,7 +1193,6 @@ body.mobile-exit {
         width: 90px;
     }
 
-    /* Hero title — stop awkward word breaks */
     .hero-title {
     font-size: clamp(1.5rem, 7.5vw, 2.1rem) !important;
     letter-spacing: -0.02em !important;
@@ -1215,7 +1213,6 @@ body.mobile-exit {
         width: 90%;
     }
 
-    /* Push bookshelf image + cat down and shrink so they don't collide with nav/headline */
      .hero-image {
         top: 140px;
         width: 60vw;
@@ -1232,7 +1229,6 @@ body.mobile-exit {
         width: 65px;
     }
 
-    /* Bulb — reposition so it's not sitting on top of nav text */
     .bulb-wrapper {
         left: 80%;
         top: 10px;
@@ -1255,7 +1251,7 @@ body.mobile-exit {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 6;    /* was 2 — now sits above #book-canvas (5) */
+    z-index: 6;    
     pointer-events: none;
 
     -webkit-mask-image: linear-gradient(to right, black 0%, black 45%, transparent 78%);
@@ -1287,3 +1283,284 @@ body.mobile-exit {
 }
 
 
+
+.p2-layer{
+    position:absolute;
+    inset:0;
+    z-index:12;
+    pointer-events:none; 
+}
+
+.p2-layer::before{
+    content:"";
+    position:absolute;
+    left:26%;
+    top:50%;
+    width:44vw;
+    height:44vw;
+    max-height:760px;
+    transform:translateY(-50%);
+    background:radial-gradient(closest-side,
+        rgba(180,134,42,.085) 0%,
+        rgba(180,134,42,.03) 45%,
+        rgba(180,134,42,0) 78%);
+    opacity:0;
+    transition:opacity 1.2s ease 0.1s;
+}
+.p2-layer.is-lit::before{ opacity:1; }
+
+.p2-head{
+    position:absolute;
+    top:clamp(80px,10.5vh,128px);
+    left:clamp(24px,4vw,64px);
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.p2-rule{
+    width:clamp(28px,3.4vw,52px);
+    height:1px;
+    background:linear-gradient(90deg,#B4862A,rgba(180,134,42,0));
+    transform:scaleX(0);
+    transform-origin:left center;
+    transition:transform .95s cubic-bezier(.16,1,.3,1) .06s;
+}
+.p2-layer.is-lit .p2-rule{ transform:scaleX(1); }
+
+.p2-eyebrow{
+    margin:0;
+    font:500 11.5px/1 "Inter",sans-serif;
+    letter-spacing:.34em;
+    text-transform:uppercase;
+    color:#B4862A;
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity .9s ease .2s,
+               transform .9s cubic-bezier(.16,1,.3,1) .2s;
+}
+.p2-layer.is-lit .p2-eyebrow{ opacity:1; transform:none; }
+
+.p2-narrative{
+    position:absolute;
+    left:37%;
+    top:50%;
+    width:min(28vw,306px);
+    max-width:29%;
+    transform:translateY(-50%);
+}
+
+.p2-stem{
+    position:absolute;
+    left:-22px;
+    top:2px;
+    bottom:2px;
+    width:1px;
+    background:linear-gradient(180deg,
+        rgba(242,193,78,0) 0%,
+        rgba(242,193,78,.55) 22%,
+        rgba(180,134,42,.25) 70%,
+        rgba(242,193,78,0) 100%);
+    transform:scaleY(0);
+    transform-origin:top center;
+    transition:transform 1.05s cubic-bezier(.16,1,.3,1) .2s;
+}
+.p2-layer.is-lit .p2-stem{ transform:scaleY(1); }
+
+.p2-quote{
+    position:relative;
+    margin:0 0 13px;
+    font-family:"Canela",serif;
+    font-weight:400;
+    font-size:clamp(20px,2vw,28px);
+    line-height:1.2;
+    letter-spacing:-.015em;
+    color:#F4EFE3;
+}
+
+.p2-w{
+    display:inline-block;
+    overflow:hidden;
+    vertical-align:bottom;
+    padding-bottom:.16em; 
+    margin-bottom:-.16em;
+}
+.p2-wi{
+    display:inline-block;
+    transform:translateY(115%);
+    opacity:0;
+    transition:transform .8s cubic-bezier(.16,1,.3,1),
+               opacity .8s ease;
+}
+.p2-w.is-in .p2-wi{ transform:none; opacity:1; }
+
+.p2-w.is-out .p2-wi{
+    transform:translateY(-115%);
+    opacity:0;
+    transition:transform .3s cubic-bezier(.5,0,.75,0),
+               opacity .26s ease;
+}
+
+.p2-body{
+    position:relative;
+    margin:0;
+    font:400 13.5px/1.62 "Inter",sans-serif;
+    color:rgba(244,239,227,.42);
+    opacity:0;
+    transform:translateY(9px);
+    transition:opacity .8s ease,
+               transform .8s cubic-bezier(.16,1,.3,1);
+}
+.p2-body.is-in{ opacity:1; transform:none; }
+
+.p2-rail{
+    position:absolute;
+    right:clamp(16px,2vw,30px);
+    top:50%;
+    transform:translateY(-50%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:9px;
+}
+
+.p2-tick{
+    width:2px;
+    height:22px;
+    border-radius:2px;
+    background:rgba(244,239,227,.13);
+    opacity:0;
+    transform:scaleY(.3);
+    transition:opacity .55s ease,
+               transform .55s cubic-bezier(.16,1,.3,1),
+               background .45s ease,
+               height .5s cubic-bezier(.16,1,.3,1),
+               box-shadow .45s ease;
+}
+.p2-layer.is-lit .p2-tick{ opacity:1; transform:none; }
+
+.p2-layer.is-lit .p2-tick.is-active{
+    height:42px;
+    background:linear-gradient(180deg,#F2C14E,rgba(242,193,78,.3));
+    box-shadow:0 0 14px rgba(242,193,78,.4);
+}
+
+.p2-stats{
+    position:absolute;
+    left:clamp(24px,4vw,64px);
+    right:clamp(24px,4vw,64px);
+    bottom:clamp(24px,4vh,48px);
+    padding-top:22px;
+}
+
+.p2-stats::before{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    top:0;
+    height:1px;
+    background:linear-gradient(90deg,
+        rgba(242,193,78,.34) 0%,
+        rgba(244,239,227,.09) 38%,
+        rgba(244,239,227,.06) 100%);
+    transform:scaleX(0);
+    transform-origin:left center;
+    transition:transform 1s cubic-bezier(.16,1,.3,1) 0.4s;
+}
+.p2-layer.is-lit .p2-stats::before{ transform:scaleX(1); }
+
+.p2-statgrid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:clamp(16px,3vw,48px);
+}
+
+.p2-stat{
+    opacity:0;
+    transform:translateY(15px);
+    transition:opacity .85s ease,
+               transform .85s cubic-bezier(.16,1,.3,1);
+}
+.p2-layer.is-lit .p2-stat{ opacity:1; transform:none; }
+
+.p2-stat-value{
+    font-family:"Canela",serif;
+    font-weight:400;
+    font-size:clamp(23px,2.25vw,34px);
+    line-height:1;
+    letter-spacing:-.01em;
+    color:#F2C14E;
+    font-variant-numeric:tabular-nums;
+}
+.p2-stat-label{
+    margin-top:8px;
+    font:500 11px/1.4 "Inter",sans-serif;
+    letter-spacing:.13em;
+    text-transform:uppercase;
+    color:rgba(244,239,227,.33);
+}
+
+.p2-cue{
+    position:absolute;
+    left:clamp(24px,4vw,64px);
+    bottom:calc(clamp(24px,4vh,48px) + 96px);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font:500 10px/1 "Inter",sans-serif;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:rgba(244,239,227,.28);
+    opacity:0;
+    transition:opacity .9s ease 1s;
+}
+.p2-layer.is-lit .p2-cue{ opacity:1; }
+.p2-layer.is-lit .p2-cue.is-hidden{ opacity:0; transition:opacity .5s ease; }
+
+.p2-cue-line{
+    width:34px;
+    height:1px;
+    background:linear-gradient(90deg,rgba(244,239,227,.32),rgba(244,239,227,0));
+    animation:p2CueSlide 2.6s ease-in-out infinite;
+}
+@keyframes p2CueSlide{
+    0%,100%{ transform:translateX(0);   opacity:.5; }
+    50%    { transform:translateX(9px); opacity:1;   }
+}
+
+@media (max-width:1400px){
+    .p2-narrative{ left:36%; width:min(26vw,276px); }
+}
+
+@media (max-width:1100px){
+    .p2-narrative,
+    .p2-rail,
+    .p2-cue{ display:none; }
+    .p2-layer::before{ opacity:0 !important; }
+}
+
+@media (max-width:960px){
+    .p2-statgrid{ grid-template-columns:repeat(2,1fr); row-gap:24px; }
+}
+
+@media (prefers-reduced-motion:reduce){
+    .p2-cue-line{ animation:none; }
+    .p2-rule,
+    .p2-stem,
+    .p2-stats::before{ transform:none !important; transition:none; }
+    .p2-eyebrow,
+    .p2-body,
+    .p2-tick,
+    .p2-stat{ transform:none !important; transition:opacity .3s linear; }
+    .p2-wi{ transform:none !important; transition:opacity .3s linear; }
+}
+
+
+
+
+.p2-head, 
+.p2-rule, 
+.p2-eyebrow {
+    display: none !important;
+}
