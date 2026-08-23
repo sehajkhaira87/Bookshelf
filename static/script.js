@@ -660,7 +660,7 @@ window.addEventListener('load', () => {
     ScrollTrigger.refresh();
 
 });
-// SCROLL CUE (jumping book) //
+// SCROLL CUE (jumping book) 
 
 const scrollCue = document.getElementById("scrollCue");
 
@@ -678,8 +678,7 @@ if (scrollCue) {
  }
  });
 
- // Fade the cue out once the user actually starts scrolling past the
- // hero, so it doesn't linger awkwardly once they're already past it
+ 
  ScrollTrigger.create({
  trigger: ".hero",
  start: "top top",
@@ -692,7 +691,7 @@ if (scrollCue) {
  });
 }
 
-//  PAGE 2 NAVBAR REVEAL //
+//  PAGE 2 NAVBAR REVEAL
 (function () {
   const navbarWrap = document.querySelector(".page2-navbar-wrap");
   if (!navbarWrap) return;
@@ -721,3 +720,6 @@ window.addEventListener('load', () => {
     ScrollTrigger.refresh();
     setTimeout(() => ScrollTrigger.refresh(), 300);
 });
+
+
+

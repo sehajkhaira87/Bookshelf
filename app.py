@@ -68,17 +68,19 @@ def admin_panel():
 def admin_verify():
     entered_password = request.form.get('master_key')
 
-    # our highly secure password
     secret_password = "bookshelf" 
 
     if entered_password == secret_password:
+        session['is_admin'] = True 
         return redirect(url_for('admin_dashboard'))
     else:
         return redirect(url_for('admin_panel'))
 
 @app.route('/admin-dashboard')
 def admin_dashboard():
-    # This tells Python to load your new front-end file!
+    if not session.get('is_admin'):
+        return redirect(url_for('admin_panel'))
+        
     return render_template('admin-dashboard.html')
 
 if __name__ == '__main__':
