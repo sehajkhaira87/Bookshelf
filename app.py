@@ -83,5 +83,10 @@ def admin_dashboard():
         
     return render_template('admin-dashboard.html')
 
+@app.route('/pyqs')
+def pyqs():
+    # Later, we will fetch the database records here
+    return render_template('pyqs.html')
+
 if __name__ == '__main__':
     app.run(debug=True, port=8000)

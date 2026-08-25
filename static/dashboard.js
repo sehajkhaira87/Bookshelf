@@ -112,3 +112,14 @@ darkModeToggle.addEventListener('change', (e) => {
         localStorage.setItem('bookshelf_dark_mode', 'false');
     }
 });
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const pyqCard = document.querySelector('.category-card[data-category="pyqs"]');
+    
+    if (pyqCard) {
+        pyqCard.addEventListener('click', () => {
+            window.location.href = '/pyqs';
+        });
+    }
+});
