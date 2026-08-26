@@ -88,5 +88,10 @@ def pyqs():
     # Later, we will fetch the database records here
     return render_template('pyqs.html')
 
+
+@app.route('/contribute')
+def contribute():
+    return render_template('contribute.html')
+
 if __name__ == '__main__':
     app.run(debug=True, port=8000)

@@ -13,18 +13,18 @@ database = os.getenv("DB_NAME")
 
 def get_connection():
     """Returns a new connection to the AWS Postgres database."""
-    try:
-        conn = psycopg2.connect(
-            host=hostname,
-            port=port,
-            user=username,
-            password=password,
-            dbname=database
-        )
-        return conn
-    except Exception as e:
-        print("Error while connecting to database:", e)
-        return None
+    #try:
+        #conn = psycopg2.connect(
+            #host=hostname,
+           # port=port,
+            #user=username,
+            #password=password,
+            #dbname=database
+       # )
+        #return conn
+    #except Exception as e:
+        #print("Error while connecting to database:", e)
+    return None
 
 def check_connection():
     """Verifies the database connection."""
