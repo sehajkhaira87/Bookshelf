@@ -1,6 +1,7 @@
 import psycopg2 as p
 from dotenv import load_dotenv
 import os
+from db_agent import create_resources_table
 
 load_dotenv()
 
@@ -59,6 +60,9 @@ def create_tables():
         cur.execute(create_user_table_query)
         conn.commit()
         print("Tables created successfully (or already exist).")
+
+        # Also create the resources table via db_agent
+        create_resources_table()
         
     except Exception as e:
         print("Error creating tables:", e)

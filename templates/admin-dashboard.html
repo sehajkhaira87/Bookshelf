@@ -4,68 +4,336 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin | Control Center</title>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='admin-dashboard.css') }}">
 </head>
 <body>
 
     <div class="sidebar">
         <h2>Admin Vault</h2>
-        <button class="nav-btn active"> Upload Resources</button>
-        <button class="nav-btn"> User Database</button>
+        <button class="nav-btn active" onclick="switchPanel('upload')"> Upload Resources</button>
+        <button class="nav-btn" onclick="switchPanel('library')"> Resource Library</button>
+        <button class="nav-btn" onclick="switchPanel('users')"> User Database</button>
         <button class="nav-btn"> Contributions <span class="badge">Later</span></button>
+        <div class="sidebar-footer">
+            <a href="/logout" class="nav-btn logout-btn">← Log Out</a>
+        </div>
     </div>
 
     <div class="content">
-        <h1 class="header-title">Resource Manager</h1>
-        
-        <div class="card">
-            <h3>Upload New File</h3>
-            <p>Add a new PYQ, Assignment, or Book directly to the database.</p>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="flash-msg flash-{{ category }}">
+                <span>{{ message }}</span>
+                <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <span class="stat-number">{{ stats.total or 0 }}</span>
+                <span class="stat-label">Total Resources</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ stats.by_category.get('pyq', 0) }}</span>
+                <span class="stat-label">PYQs</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ stats.by_category.get('assignment', 0) }}</span>
+                <span class="stat-label">Assignments</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">{{ stats.by_category.get('notes', 0) + stats.by_category.get('book', 0) }}</span>
+                <span class="stat-label">Notes / Books</span>
+            </div>
+            <div class="stat-card stat-verified">
+                <span class="stat-number">{{ stats.by_status.get('verified', 0) }}</span>
+                <span class="stat-label">Verified</span>
+            </div>
+        </div>
+
+        <!-- ═══ PANEL 1: Upload Resources ═══ -->
+        <div class="panel active" id="panel-upload">
+            <h1 class="header-title">Upload Resource</h1>
             
-            <form action="/upload" method="POST" enctype="multipart/form-data">
+            <div class="card">
+                <h3>Upload New File</h3>
+                <p>Add a new PYQ, Assignment, Notes or Book directly to the cloud & database.</p>
                 
-                <label>Category</label>
-                <select name="category" required>
-                    <option value="pyq">Past Year Question (PYQ)</option>
-                    <option value="assignment">Assignment / Lab File</option>
-                    <option value="book">Digital Book</option>
+                <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select name="category" required>
+                                <option value="" disabled selected>Select Type...</option>
+                                <option value="pyq">Past Year Question (PYQ)</option>
+                                <option value="assignment">Assignment / Lab File</option>
+                                <option value="book">Digital Book</option>
+                                <option value="notes">Notes</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Branch</label>
+                            <select name="branch" required>
+                                <option value="" disabled selected>Select Branch...</option>
+                                <option value="cse">Computer Science (CSE)</option>
+                                <option value="it">Information Technology (IT)</option>
+                                <option value="ece">Electronics (ECE)</option>
+                                <option value="ee">Electrical (EE)</option>
+                                <option value="me">Mechanical (ME)</option>
+                                <option value="ce">Civil (CE)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Semester</label>
+                            <select name="semester" required>
+                                <option value="" disabled selected>Select Semester...</option>
+                                <option value="1">1st Semester</option>
+                                <option value="2">2nd Semester</option>
+                                <option value="3">3rd Semester</option>
+                                <option value="4">4th Semester</option>
+                                <option value="5">5th Semester</option>
+                                <option value="6">6th Semester</option>
+                                <option value="7">7th Semester</option>
+                                <option value="8">8th Semester</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Subject Name <span class="optional-tag">optional</span></label>
+                            <input type="text" name="subject_name" placeholder="e.g., Data Structures, Operating Systems">
+                        </div>
+                    </div>
+
+                    <label>Resource Title</label>
+                    <input type="text" name="title" placeholder="e.g., Artificial Intelligence PYQ 2025" required>
+
+                    <label>Attach File</label>
+                    <div class="file-drop-zone" id="dropZone">
+                        <input type="file" name="file_upload" id="fileInput" required>
+                        <div class="drop-text">
+                            <span class="drop-icon">📄</span>
+                            <p>Drop file here or <strong>click to browse</strong></p>
+                            <span class="drop-hint">PDF, DOCX, PPT, Images — Max 50MB</span>
+                        </div>
+                        <div class="file-preview hidden" id="filePreview">
+                            <span class="file-icon">📎</span>
+                            <span class="file-name" id="fileName"></span>
+                            <span class="file-size" id="fileSize"></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        <span class="btn-text">Upload to Cloud ↗</span>
+                        <span class="btn-loading hidden">Uploading...</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ═══ PANEL 2: Resource Library ═══ -->
+        <div class="panel" id="panel-library">
+            <h1 class="header-title">Resource Library</h1>
+
+            <!-- Filters -->
+            <div class="filter-bar">
+                <select id="filterCategory" onchange="filterTable()">
+                    <option value="">All Categories</option>
+                    <option value="pyq">PYQ</option>
+                    <option value="assignment">Assignment</option>
+                    <option value="book">Book</option>
+                    <option value="notes">Notes</option>
                 </select>
-
-                <label>Branch</label>
-                <select name="branch" required>
-                    <option value="" disabled selected>Select a Branch...</option>
-                    <option value="cse">Computer Science (CSE)</option>
-                    <option value="ece">Information and Technology (IT)</option>
-                    <option value="ee">Electrical (EE)</option>
-                    <option value="me">Mechanical (ME)</option>
-                    <option value="ce">Civil (CE)</option>
+                <select id="filterBranch" onchange="filterTable()">
+                    <option value="">All Branches</option>
+                    <option value="cse">CSE</option>
+                    <option value="it">IT</option>
+                    <option value="ece">ECE</option>
+                    <option value="ee">EE</option>
+                    <option value="me">ME</option>
+                    <option value="ce">CE</option>
                 </select>
-   
-                <label>Semester</label>
-                <select name="semester" required>
-                    <option value="" disabled selected>Select a Semester...</option>
-                    <option value="1">1st Semester</option>
-                    <option value="2">2nd Semester</option>
-                    <option value="3">3rd Semester</option>
-                    <option value="4">4th Semester</option>
-                    <option value="5">5th Semester</option>
-                    <option value="6">6th Semester</option>
-                    <option value="7">7th Semester</option>
-                    <option value="8">8th Semester</option>
+                <select id="filterStatus" onchange="filterTable()">
+                    <option value="">All Status</option>
+                    <option value="verified">Verified</option>
+                    <option value="unverified">Unverified</option>
                 </select>
+                <span class="resource-count" id="resourceCount">{{ resources|length }} resources</span>
+            </div>
+            
+            {% if resources %}
+            <div class="table-wrapper">
+                <table class="resource-table" id="resourceTable">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Branch</th>
+                            <th>Sem</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Uploaded</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in resources %}
+                        <tr data-category="{{ r.category }}" data-branch="{{ r.branch }}" data-status="{{ r.status }}">
+                            <td class="td-title">
+                                <a href="{{ r.blob_url }}" target="_blank" class="resource-link">{{ r.title }}</a>
+                                {% if r.file_name %}
+                                <span class="td-filename">{{ r.file_name }}</span>
+                                {% endif %}
+                            </td>
+                            <td><span class="cat-badge cat-{{ r.category }}">{{ r.category|upper }}</span></td>
+                            <td><span class="branch-tag">{{ r.branch|upper }}</span></td>
+                            <td>{{ r.semester }}</td>
+                            <td>{{ r.subject_name or '—' }}</td>
+                            <td>
+                                <span class="status-badge status-{{ r.status }}">{{ r.status }}</span>
+                            </td>
+                            <td class="td-date">{{ r.created_at[:10] if r.created_at else '—' }}</td>
+                            <td class="td-actions">
+                                <a href="{{ r.blob_url }}" target="_blank" class="action-btn action-view" title="Open file">↗</a>
+                                <form action="/admin/toggle-status/{{ r.id }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="action-btn action-toggle" title="Toggle status">⟳</button>
+                                </form>
+                                <form action="/admin/delete/{{ r.id }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this resource permanently?');">
+                                    <button type="submit" class="action-btn action-delete" title="Delete">✕</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <span class="empty-icon">📚</span>
+                <h3>No resources yet</h3>
+                <p>Upload your first resource using the Upload panel.</p>
+            </div>
+            {% endif %}
+        </div>
 
-                <label>Resource Title</label>
-                <input type="text" name="title" placeholder="e.g., Artificial Intelligence PYQ 2025" required>
-
-                <label>Attach File</label>
-                <input type="file" name="file_upload" required>
-
-                <button type="submit" class="btn-submit">Upload to Database</button>
-            </form>
+        <!-- ═══ PANEL 3: Users (placeholder) ═══ -->
+        <div class="panel" id="panel-users">
+            <h1 class="header-title">User Database</h1>
+            <div class="empty-state">
+                <span class="empty-icon">👥</span>
+                <h3>User management coming soon</h3>
+                <p>View and manage registered users here.</p>
+            </div>
         </div>
 
     </div>
+
+    <script>
+        // ── Panel Switching ──
+        function switchPanel(panelName) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            const panel = document.getElementById('panel-' + panelName);
+            if (panel) panel.classList.add('active');
+
+            // Highlight the correct nav button
+            const buttons = document.querySelectorAll('.sidebar .nav-btn:not(.logout-btn)');
+            const panelMap = { 'upload': 0, 'library': 1, 'users': 2 };
+            if (panelMap[panelName] !== undefined && buttons[panelMap[panelName]]) {
+                buttons[panelMap[panelName]].classList.add('active');
+            }
+        }
+
+        // ── File Input Preview ──
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const filePreview = document.getElementById('filePreview');
+        const dropText = dropZone.querySelector('.drop-text');
+
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('fileSize').textContent = formatFileSize(file.size);
+                filePreview.classList.remove('hidden');
+                dropText.classList.add('hidden');
+            }
+        });
+
+        // Drag & drop visual feedback
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+
+        // ── Upload Form Loading State ──
+        document.getElementById('uploadForm').addEventListener('submit', function() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.querySelector('.btn-text').classList.add('hidden');
+            btn.querySelector('.btn-loading').classList.remove('hidden');
+        });
+
+        // ── Table Filtering ──
+        function filterTable() {
+            const category = document.getElementById('filterCategory').value;
+            const branch = document.getElementById('filterBranch').value;
+            const status = document.getElementById('filterStatus').value;
+            
+            const rows = document.querySelectorAll('#resourceTable tbody tr');
+            let visible = 0;
+
+            rows.forEach(row => {
+                const matchCat = !category || row.dataset.category === category;
+                const matchBranch = !branch || row.dataset.branch === branch;
+                const matchStatus = !status || row.dataset.status === status;
+                
+                if (matchCat && matchBranch && matchStatus) {
+                    row.style.display = '';
+                    visible++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            document.getElementById('resourceCount').textContent = visible + ' resources';
+        }
+
+        // ── Auto-dismiss flash messages ──
+        setTimeout(() => {
+            document.querySelectorAll('.flash-msg').forEach(msg => {
+                msg.style.opacity = '0';
+                msg.style.transform = 'translateY(-10px)';
+                setTimeout(() => msg.remove(), 400);
+            });
+        }, 5000);
+    </script>
 
 </body>
 </html>
