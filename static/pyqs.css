@@ -13,8 +13,26 @@ body {
     padding: 40px 50px;
 }
 
-.top-nav {
-    margin-bottom: 50px;
+.top-nav { 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 50px; 
+}
+
+.nav-logo {
+    height: 45px; 
+    width: auto;
+    filter: invert(100%);
+    opacity: 0.75; 
+    transition: opacity 0.3s ease;
+    transform: scale(2.2); 
+    transform-origin: left center; 
+    margin-left: -15px; 
+}
+
+.nav-logo:hover {
+    opacity: 1;
 }
 
 .back-btn {
@@ -24,14 +42,12 @@ body {
     letter-spacing: 1px;
     text-transform: uppercase;
     transition: color 0.3s ease;
-    display: inline-flex;
+    display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.back-btn:hover {
-    color: #F2C14E;
-}
+.back-btn:hover { color: #F2C14E; }
 
 .header-section {
     display: flex;

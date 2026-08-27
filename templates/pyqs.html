@@ -10,11 +10,14 @@
 
     <div class="page-wrapper">
         <nav class="top-nav">
+            <div class="brand">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="nav-logo">
+            </div>
+            
             <a href="{{ url_for('dashboard') }}" class="back-btn">
                 <span>←</span> Return to Dashboard
             </a>
         </nav>
-
         <header class="header-section">
             <div class="page-title">
                 <h1>Previous Papers</h1>
