@@ -1,4 +1,33 @@
 
+document.addEventListener("DOMContentLoaded", () => {
+    const loader = document.getElementById("loader");
+    const overlay = document.getElementById("onboardingOverlay");
+    const sidebar = document.querySelector(".sidebar");
+    const mainContent = document.querySelector(".main-content");
+
+    if (document.referrer.includes("login") || document.referrer.includes("auth")) {
+        sessionStorage.removeItem("dashboard_visited");
+    }
+
+    if (sessionStorage.getItem("dashboard_visited") === "true") {
+        if (loader) loader.style.display = "none";
+        if (overlay) overlay.style.display = "none";
+        
+        if (sidebar) { sidebar.style.animation = "none"; sidebar.style.opacity = "1"; }
+        if (mainContent) { mainContent.style.animation = "none"; mainContent.style.opacity = "1"; }
+    } else {
+        
+        sessionStorage.setItem("dashboard_visited", "true");
+        
+        
+        setTimeout(() => {
+            if (loader) loader.classList.add("hide-loader");
+        }, 3900); 
+    }
+});
+
+
+
 const deptCards = document.querySelectorAll('.dept-card');
 const semCards = document.querySelectorAll('.sem-card');
 const categoryCards = document.querySelectorAll('.category-card'); 
@@ -66,6 +95,7 @@ categoryCards.forEach(card => {
         }, 300);
     });
 });
+
 document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.getElementById('onboardingOverlay');
     const form = document.getElementById('onboardingForm');
@@ -80,8 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
-
 
 const settingsBtn = document.getElementById('settingsBtn');
 const settingsPopup = document.getElementById('settingsPopup');
@@ -112,7 +140,6 @@ darkModeToggle.addEventListener('change', (e) => {
         localStorage.setItem('bookshelf_dark_mode', 'false');
     }
 });
-
 
 document.addEventListener('DOMContentLoaded', () => {
     const pyqCard = document.querySelector('.category-card[data-category="pyqs"]');

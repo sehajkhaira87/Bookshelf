@@ -1,24 +1,12 @@
 import os
 from flask import Flask, render_template, redirect, url_for, session, request
-from authlib.integrations.flask_client import OAuth
 from database import check_connection, create_tables, add_or_update_user
-from werkzeug.middleware.proxy_fix import ProxyFix
 from dotenv import load_dotenv
+
 load_dotenv()
 
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
-app.secret_key = os.getenv("flash_secret")
-
-# Google OAuth setup
-oauth = OAuth(app)
-google = oauth.register(
-    name='google',
-    client_id=os.getenv("google_Client_ID"),
-    client_secret=os.getenv("google_Client_Secret"),
-    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={'scope': 'openid email profile'},
-)
+app.secret_key = "super_secret_bookshelf_dev_key"
 
 # Verify database connection and initialize tables on startup
 check_connection()
@@ -32,20 +20,15 @@ def home():
 def login():
     return render_template('login.html')
 
+# ==========================================
+# DUMMY LOGIN FOR FRONTEND TESTING
+# Your backend friend can add the real OAuth back here later!
+# ==========================================
 @app.route('/auth/google')
 def auth_google():
-    redirect_uri = url_for('callback', _external=True)
-    return google.authorize_redirect(redirect_uri)
-
-@app.route('/callback')
-def callback():
-    token = google.authorize_access_token()
-    user_info = token.get('userinfo')
-    if user_info:
-        email = user_info.get('email')
-        name = user_info.get('name')
-        session['user'] = {'email': email, 'name': name}
-        add_or_update_user(email, name)
+    # Instantly log in as a test user to bypass the wall
+    session['user'] = {'email': 'test@developer.com', 'name': 'Frontend Tester'}
+    add_or_update_user('test@developer.com', 'Frontend Tester')
     return redirect(url_for('dashboard'))
 
 @app.route('/dashboard')
@@ -67,7 +50,6 @@ def admin_panel():
 @app.route('/admin-verify', methods=['POST'])
 def admin_verify():
     entered_password = request.form.get('master_key')
-
     secret_password = "bookshelf" 
 
     if entered_password == secret_password:
@@ -80,14 +62,11 @@ def admin_verify():
 def admin_dashboard():
     if not session.get('is_admin'):
         return redirect(url_for('admin_panel'))
-        
     return render_template('admin-dashboard.html')
 
 @app.route('/pyqs')
 def pyqs():
-    # Later, we will fetch the database records here
     return render_template('pyqs.html')
-
 
 @app.route('/contribute')
 def contribute():
