@@ -471,15 +471,13 @@ body {
     margin-bottom: 40px;
     display: block;
     
+    filter: brightness(0) invert(1);
     
-    filter: invert(76%) sepia(36%) saturate(1185%) hue-rotate(345deg) brightness(100%) contrast(92%);
-    
-    opacity: 0.9;
+    opacity: 0.85;
     transition: opacity 0.3s ease;
 }
 
 
-/* panel di frames */
 .onboarding-overlay {
     position: fixed;
     top: 0;
@@ -509,11 +507,9 @@ body {
     box-shadow: 0 24px 48px rgba(0,0,0,0.1), 0 0 0 1px rgba(36, 27, 18, 0.05);
     text-align: center;
     
-    /* Start hidden and 60px higher up */
     opacity: 0;
     transform: translateY(-60px);
     
-    /* Smooth glide down transition */
     transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -697,3 +693,22 @@ body.dark-mode .category-card.selected {
     background: #2A2118;
     border-color: #F2C14E;
 }
+
+.sidebar-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.sidebar-footer > div {
+    flex: 1;
+}
+
+.sidebar-footer .nav-item {
+    display: block;
+    text-align: center;
+}
+
+
+

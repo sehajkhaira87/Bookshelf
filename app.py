@@ -82,7 +82,6 @@ def admin_panel():
 def admin_verify():
     entered_password = request.form.get('master_key')
 
-    # our highly secure password
     secret_password = "bookshelf" 
 
     if entered_password == secret_password:
@@ -240,6 +239,16 @@ def api_resources():
 
     return jsonify(resources)
 
+
+@app.route('/pyqs')
+def pyqs():
+    # Later, we will fetch the database records here
+    return render_template('pyqs.html')
+
+
+@app.route('/contribute')
+def contribute():
+    return render_template('contribute.html')
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000)

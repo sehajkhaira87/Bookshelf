@@ -1,10 +1,12 @@
-import psycopg2 as p
+import os
+import psycopg2
 from dotenv import load_dotenv
 import os
 from db_agent import create_resources_table
 
 load_dotenv()
 
+# Fetch AWS RDS credentials
 hostname = os.getenv("DB_HOST")
 port = os.getenv("DB_PORT")
 username = os.getenv("DB_USER")
@@ -12,25 +14,25 @@ password = os.getenv("DB_PASSWORD")
 database = os.getenv("DB_NAME")
 
 def get_connection():
-    """Returns a new connection to the database."""
-    try:
-        conn = p.connect(
-            host=hostname,
-            port=port,
-            user=username,
-            password=password,
-            dbname=database
-        )
-        return conn
-    except Exception as e:
-        print("Error while connecting to database", e)
-        return None
+    """Returns a new connection to the AWS Postgres database."""
+    #try:
+        #conn = psycopg2.connect(
+            #host=hostname,
+           # port=port,
+            #user=username,
+            #password=password,
+            #dbname=database
+       # )
+        #return conn
+    #except Exception as e:
+        #print("Error while connecting to database:", e)
+    return None
 
 def check_connection():
     """Verifies the database connection."""
     conn = get_connection()
     if conn:
-        print("Successfully connected to the database.")
+        print("Successfully connected to the AWS RDS database!")
         conn.close()
     else:
         print("Failed to connect to the database.")
@@ -44,7 +46,6 @@ def create_tables():
     try:
         cur = conn.cursor()
         
-        # SQL query to create the users table
         create_user_table_query = """
         CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
@@ -83,7 +84,6 @@ def add_or_update_user(email, name, department=None, urn=None, semester_no=None)
     try:
         cur = conn.cursor()
         
-        # Using UPSERT (ON CONFLICT) to insert or update the user details
         insert_query = """
         INSERT INTO users (email, name, department, urn, semester_no) 
         VALUES (%s, %s, %s, %s, %s)

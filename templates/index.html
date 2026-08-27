@@ -177,7 +177,7 @@
  <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
  </svg>
  </button>
- <a href="#" class="p2nav-login">Login</a>
+ <a href="{{ url_for('login') }}" class="p2nav-login">Login</a>
  </div>
  </nav>
 </div>
@@ -254,5 +254,6 @@
 <script src="{{ url_for('static', filename='grid-bg.js') }}"></script>
 
  <script src="{{ url_for('static', filename='page-wheel.js') }}"></script>
+ <script src="{{ url_for('static', filename='page2-narrative.js') }}"></script>
 </body>
 </html>
