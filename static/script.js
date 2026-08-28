@@ -39,12 +39,10 @@ setTimeout(() => {
  loader.classList.add("hide-loader");
  
 
- // Remove loader from DOM after transition to free resources
  setTimeout(() => {
  loader.remove();
  }, 1200);
 
- // Animate the line
  gsap.set(".tag-line", {
  scaleX: 0,
  transformOrigin: "left center"
@@ -54,7 +52,7 @@ setTimeout(() => {
  scaleX: 1,
  duration: 1.8,
  ease: "power3.out",
- delay: 2.3
+ delay: 2.0
  });
 
  
@@ -62,7 +60,7 @@ setTimeout(() => {
  opacity: 0,
  x: 20,
  duration: 1.7,
- delay: 2.5,
+ delay: 2.0,
  ease: "power3.out"
  });
 
@@ -723,3 +721,62 @@ window.addEventListener('load', () => {
 
 
 
+// ==========================================
+// MOBILE LOGIC SANDBOX
+// ==========================================
+const isMobileDevice = window.matchMedia("(max-width: 820px)").matches;
+
+if (isMobileDevice) {
+    console.log("Mobile layout initialized");
+
+    // 1. Text Delay for CSS Animation
+    let charIndex = 0;
+    const BASE_DELAY = 1.5; // Syncs with loader timing
+    document.querySelectorAll('.hero-title span').forEach(lineEl => {
+        const text = lineEl.textContent;
+        lineEl.innerHTML = '';
+        [...text].forEach(ch => {
+            const s = document.createElement('span');
+            s.className = 'char';
+            s.style.animationDelay = (BASE_DELAY + charIndex * 0.025) + 's';
+            s.textContent = ch === ' ' ? '\u00A0' : ch;
+            lineEl.appendChild(s);
+            charIndex++;
+        });
+    });
+
+    // 2. Feature Card Swiping Logic
+    const fcTrack = document.getElementById('featuresTrack');
+    const fcItems = fcTrack ? Array.from(fcTrack.querySelectorAll('.feature-item')) : [];
+    const fcDots  = document.querySelectorAll('.f-dot');
+    let fcIndex = 0;
+
+    function fcRender() {
+        fcItems.forEach((item, i) => {
+            item.classList.remove('card-active', 'card-next', 'card-hidden');
+            if (i === fcIndex) item.classList.add('card-active');
+            else if (i === (fcIndex + 1) % fcItems.length) item.classList.add('card-next');
+            else item.classList.add('card-hidden');
+        });
+        fcDots.forEach((d, i) => d.classList.toggle('is-active', i === fcIndex));
+    }
+
+    if (fcTrack && fcItems.length) {
+        fcRender();
+        fcDots.forEach((d, i) => d.addEventListener('click', () => { fcIndex = i; fcRender(); }));
+
+        let touchStartX = 0, touchStartY = 0;
+        fcTrack.addEventListener('touchstart', e => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        fcTrack.addEventListener('touchend', e => {
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            const dy = e.changedTouches[0].clientY - touchStartY;
+            if (Math.abs(dx) < 30 || Math.abs(dx) < Math.abs(dy)) return;
+            fcIndex = dx < 0 ? (fcIndex + 1) % fcItems.length : (fcIndex - 1 + fcItems.length) % fcItems.length;
+            fcRender();
+        }, { passive: true });
+    }
+}
