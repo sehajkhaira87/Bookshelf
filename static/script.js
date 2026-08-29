@@ -731,7 +731,7 @@ if (isMobileDevice) {
 
     // 1. Text Delay for CSS Animation
     let charIndex = 0;
-    const BASE_DELAY = 1.5; // Syncs with loader timing
+    const BASE_DELAY = 2; // Syncs with loader timing
     document.querySelectorAll('.hero-title span').forEach(lineEl => {
         const text = lineEl.textContent;
         lineEl.innerHTML = '';

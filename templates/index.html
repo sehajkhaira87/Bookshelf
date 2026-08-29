@@ -69,7 +69,9 @@
 
         <!-- FEATURES SECTION -->
         <section class="features">
+            
             <div class="features-container">
+                
                 <!-- MOBILE CAROUSEL TRACK -->
                 <div class="features-track" id="featuresTrack">
                     <!-- Feature 1 -->
@@ -122,9 +124,16 @@
                         </div>
                     </div>
                 </div> <!-- End Features Track -->
+
+                <!-- JUMPING BOOK (SCROLL CUE) - Safely back inside the container -->
+                <div class="scroll-cue" id="scrollCue" role="button" tabindex="0" aria-label="Scroll to explore">
+                    <canvas id="scrollCueCanvas" class="scroll-cue-book" width="34" height="36"></canvas>
+                    <span class="scroll-cue-dot"></span>
+                </div>
+                
             </div> <!-- End Features Container -->
 
-            <!-- MOBILE CAROUSEL DOTS -->
+            <!-- MOBILE CAROUSEL DOTS - Placed outside the glass container -->
             <div class="feature-dots" id="featureDots">
                 <span class="f-dot is-active"></span>
                 <span class="f-dot"></span>
@@ -132,11 +141,6 @@
                 <span class="f-dot"></span>
             </div>
 
-            <!-- JUMPING BOOK (SCROLL CUE) -->
-            <div class="scroll-cue" id="scrollCue" role="button" tabindex="0" aria-label="Scroll to explore">
-                <canvas id="scrollCueCanvas" class="scroll-cue-book" width="34" height="36"></canvas>
-                <span class="scroll-cue-dot"></span>
-            </div>
         </section>
         
     </div> <!-- END PAGE 1 -->
