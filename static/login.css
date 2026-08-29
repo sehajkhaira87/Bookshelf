@@ -482,3 +482,128 @@ body {
 
 
 
+/*  MOBILE EXCLUSIVE STYLING                  */
+@media (max-width: 820px) {
+    body {
+        padding: 0 !important;
+        background: #15110E !important; 
+        height: 100dvh !important;
+        align-items: flex-start !important;
+    }
+
+    .login-wrap {
+        perspective: none !important;
+        height: 100% !important;
+        align-items: flex-start !important;
+    }
+
+    .login-container {
+        max-width: 100% !important;
+        min-height: 100dvh !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        flex-direction: column !important; 
+        background: #15110E !important;
+        transform: none !important;
+        animation: fadeIn 0.8s ease forwards !important;
+    }
+
+    .login-visual { 
+        display: flex !important; 
+        width: 100% !important;
+        height: 42vh !important; 
+        flex: none !important;
+        padding: 20px !important;
+        position: relative !important;
+    }
+
+    .login-visual::before { 
+        opacity: 0.2 !important; 
+    } 
+    
+    .login-visual::after { 
+        display: block !important; 
+        opacity: 1 !important;
+        background: linear-gradient(to bottom, transparent 50%, #15110E 100%) !important;
+    } 
+    
+    .login-visual-quote {
+        bottom: 75px !important; 
+        font-size: 14.5px !important;
+        opacity: 0.8 !important; 
+        animation: none !important;
+        z-index: 5 !important;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.8) !important; 
+    }
+
+    /* 2. THE BOTTOM SHEET FORM */
+    .login-formside {
+        padding: 48px 28px 30px !important;
+        flex: 1 !important; 
+        width: 100% !important;
+        
+        background-color: #FBF6EC !important; 
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E") !important;
+        
+        border-radius: 32px 32px 0 0 !important; 
+        margin-top: -40px !important; 
+        z-index: 10 !important;
+        position: relative !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.4) !important;
+        box-shadow: 0 -20px 40px rgba(21, 17, 14, 0.7) !important;
+
+        will-change: transform !important;
+        
+        animation: absolutePremiumSlide 1.5s cubic-bezier(0.05, 0.9, 0.1, 1) 0.05s both !important;
+    }
+
+    /* THE HARDWARE-ACCELERATED DRIFT */
+    @keyframes absolutePremiumSlide {
+        0% {
+            transform: translate3d(0, 100vh, 0); 
+        }
+        100% {
+            transform: translate3d(0, 0, 0); 
+        }
+    }
+
+    .login-form-inner {
+        max-width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        height: 100% !important;
+    }
+
+    .login-logo {
+        height: 78px !important; 
+        width: auto !important;
+        margin: 0 auto 28px !important;
+        display: block !important;
+    }
+
+    .login-formside h1 {
+        font-size: 32px !important;
+        text-align: center !important;
+        color: #1E1A17 !important;
+        letter-spacing: -0.5px !important; 
+    }
+
+    .login-subtext {
+        text-align: center !important;
+        margin-bottom: 36px !important;
+        font-size: 15px !important;
+        line-height: 1.6 !important;
+    }
+
+    .login-google-hero {
+        padding: 17px 20px !important;
+        width: 100% !important;
+        background: #1E1A17 !important; 
+    }
+    
+    .login-terms {
+        margin-top: auto !important; 
+        margin-bottom: 20px !important;
+    }
+}
