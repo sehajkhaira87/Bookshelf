@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard — Bookshelf</title>
@@ -27,23 +28,22 @@
             <form id="onboardingForm" class="onboarding-form">
                 
                 
-                <div class="input-group">
-                    <label for="studentName">Full Name</label>
-                    <input type="text" id="studentName" required placeholder="e.g. Sehajpreet Singh">
-                    <span class="warning-text">⚠️ Please use your real registered name. Fake names will lead to immediate account restriction or a ban.</span>
-                </div>
-                
-                
-                <div class="input-row">
-                    <div class="input-group">
-                        <label for="urn">URN</label>
-                        <input type="text" id="urn" required placeholder="e.g. 2435163">
-                    </div>
-                    <div class="input-group">
-                        <label for="crn">CRN</label>
-                        <input type="text" id="crn" required placeholder="e.g. 2415262">
-                    </div>
-                </div>
+<div class="input-group">
+    <label for="studentName">Full Name</label>
+    <input type="text" id="studentName" required placeholder="e.g. Just Your Name">
+    <span class="warning-text">⚠️ Please use your real registered name. Fake names will lead to immediate account restriction or a ban.</span>
+</div>
+
+<div class="input-row">
+    <div class="input-group">
+        <label for="urn">URN</label>
+        <input type="text" id="urn" required placeholder="e.g. 2435163" pattern="[0-9]+" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+    </div>
+    <div class="input-group">
+        <label for="crn">CRN</label>
+        <input type="text" id="crn" required placeholder="e.g. 2415259" pattern="[0-9]+" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+    </div>
+</div>
 
                 
                 <div class="input-row">
