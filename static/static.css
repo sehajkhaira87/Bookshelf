@@ -1,3 +1,7 @@
+* {
+    -webkit-tap-highlight-color: transparent !important;
+}
+
 /*  1. FONTS & RESETS */
 
 @font-face {
