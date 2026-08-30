@@ -38,7 +38,6 @@
                 <ul class="leaderboard-list">
                     <!-- LATER: We will wrap a Jinja for-loop here to pull real database stats -->
                     
-                    
                     <div style="text-align: center; padding: 40px 20px; color: rgba(244, 239, 227, 0.4); font-size: 14px; line-height: 1.6;">
                         The archive is currently empty.<br>
                         <span style="color: #F2C14E; font-family: 'Canela', serif; font-size: 16px;">Be the first to leave your mark.</span>
@@ -48,7 +47,6 @@
 
             <section class="upload-panel">
                 
-                
                 <div class="upload-state" id="state-start">
                     <button class="big-contribute-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -56,12 +54,10 @@
                     </button>
                 </div>
 
-                
                 <div class="upload-state hidden" id="state-options">
                     <h3 class="step-title">How would you like to add it?</h3>
                     
                     <div class="choice-cards">
-                        <!-- Camera Option -->
                         <button class="choice-card" id="btn-camera">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
                             <span>Scan with Camera</span>
@@ -75,8 +71,6 @@
 
                     <button class="cancel-btn" id="btn-cancel-options">Cancel</button>
                 </div>
-                <input type="file" id="native-upload" accept=".pdf, .jpg, .jpeg, .png" class="hidden">
-                <input type="file" id="native-camera" accept="image/*" capture="environment" class="hidden">
 
                 <div class="upload-state hidden" id="state-form">
                     <h3 class="step-title">Catalog this Document</h3>
@@ -87,9 +81,11 @@
                         <button id="btn-cancel-file" class="remove-btn">✕</button>
                     </div>
 
-                   
                     <form id="metadata-form" action="{{ url_for('contribute') }}" method="POST" enctype="multipart/form-data">
                         
+                        <input type="file" id="native-upload" name="file" accept=".pdf, .jpg, .jpeg, .png" class="hidden">
+                        <input type="file" id="native-camera" name="file" accept="image/*" capture="environment" class="hidden">
+
                         <div class="form-row">
                             <select name="branch" required class="book-input">
                                 <option value="" disabled selected>Select Branch...</option>
