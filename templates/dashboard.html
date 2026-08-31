@@ -226,6 +226,16 @@
                 
             }, 4000); 
         });
+        document.querySelectorAll('.category-card').forEach(card => {
+    card.addEventListener('click', () => {
+        const category = card.getAttribute('data-category');
+        if (category === 'books') {
+            window.location.href = '/books';
+        }
+    });
+});
     </script>
+
+    
 </body>
 </html>

@@ -68,11 +68,14 @@ def admin_dashboard():
 def pyqs():
     return render_template('pyqs.html')
 
+
 @app.route('/contribute')
 def contribute():
     return render_template('contribute.html')
 
-
+@app.route('/books')
+def books():
+    return render_template('books.html')
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000)
