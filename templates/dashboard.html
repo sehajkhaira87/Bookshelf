@@ -9,7 +9,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
 </head>
 
-<body>
+    {% set dashboard_user = profile if profile is defined and profile else user %}
+    {% set display_name = dashboard_user.preferred_name or dashboard_user.display_name or dashboard_user.google_name or dashboard_user.name or 'Student' %}
+    {% set profile_is_complete = dashboard_user.profile_completed|default(false) %}
+<body data-profile-complete="{{ 'true' if profile_is_complete else 'false' }}">
     
     
     <div id="loader">
@@ -19,17 +22,28 @@
     </div>
 
     
-    <div class="onboarding-overlay" id="onboardingOverlay">
-        <div class="onboarding-modal">
-            <h2>Set Up Your Bookshelf</h2>
+    <div class="onboarding-overlay{% if profile_is_complete %} hidden{% endif %}" id="onboardingOverlay" aria-hidden="{{ 'true' if profile_is_complete else 'false' }}">
+        <div class="onboarding-modal" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
+            <h2 id="onboardingTitle">Set Up Your Bookshelf</h2>
             <p>Just a few details so we can organize your resources.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="onboarding-messages" role="alert">
+                        {% for category, message in messages %}
+                            <p class="onboarding-message {{ category }}">{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
             
-            <form id="onboardingForm" class="onboarding-form">
+            <form id="onboardingForm" class="onboarding-form" method="post" action="{{ url_for('complete_profile') }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                 
                 
                 <div class="input-group">
                     <label for="studentName">Full Name</label>
-                    <input type="text" id="studentName" required placeholder="e.g. Sehajpreet Singh">
+                    <input type="text" id="studentName" name="preferred_name" value="{{ dashboard_user.preferred_name or '' }}" required minlength="2" maxlength="255" autocomplete="name" placeholder="e.g. Sehajpreet Singh">
                     <span class="warning-text">⚠️ Please use your real registered name. Fake names will lead to immediate account restriction or a ban.</span>
                 </div>
                 
@@ -37,11 +51,11 @@
                 <div class="input-row">
                     <div class="input-group">
                         <label for="urn">URN</label>
-                        <input type="text" id="urn" required placeholder="e.g. 2435163">
+                        <input type="text" id="urn" name="urn" value="{{ dashboard_user.urn or '' }}" required minlength="3" maxlength="50" pattern="[A-Za-z0-9][A-Za-z0-9/\-]{2,49}" autocomplete="off" placeholder="e.g. 2435163">
                     </div>
                     <div class="input-group">
                         <label for="crn">CRN</label>
-                        <input type="text" id="crn" required placeholder="e.g. 2415262">
+                        <input type="text" id="crn" name="crn" value="{{ dashboard_user.crn or '' }}" required minlength="3" maxlength="50" pattern="[A-Za-z0-9][A-Za-z0-9/\-]{2,49}" autocomplete="off" placeholder="e.g. 2415262">
                     </div>
                 </div>
 
@@ -49,28 +63,29 @@
                 <div class="input-row">
                     <div class="input-group">
                         <label for="branch">Branch</label>
-                        <select id="branch" required>
-                            <option value="" disabled selected>Select Branch</option>
-                            <option value="CSE">Computer Science (CSE)</option>
-                            <option value="IT">Information Technology (IT)</option>
-                            <option value="ECE">Electronics (ECE)</option>
-                            <option value="ME">Mechanical (ME)</option>
-                            <option value="CE">Civil (CE)</option>
+                        <select id="branch" name="department" required>
+                            <option value="" disabled{% if not dashboard_user.department %} selected{% endif %}>Select Branch</option>
+                            <option value="CSE"{% if dashboard_user.department == 'CSE' %} selected{% endif %}>Computer Science (CSE)</option>
+                            <option value="IT"{% if dashboard_user.department == 'IT' %} selected{% endif %}>Information Technology (IT)</option>
+                            <option value="ECE"{% if dashboard_user.department == 'ECE' %} selected{% endif %}>Electronics (ECE)</option>
+                            <option value="EE"{% if dashboard_user.department == 'EE' %} selected{% endif %}>Electrical (EE)</option>
+                            <option value="ME"{% if dashboard_user.department == 'ME' %} selected{% endif %}>Mechanical (ME)</option>
+                            <option value="CE"{% if dashboard_user.department == 'CE' %} selected{% endif %}>Civil (CE)</option>
                         </select>
                     </div>
                     
                     <div class="input-group">
                         <label for="semester">Semester</label>
-                        <select id="semester" required>
-                            <option value="" disabled selected>Select Sem</option>
-                            <option value="1">1st</option>
-                            <option value="2">2nd</option>
-                            <option value="3">3rd</option>
-                            <option value="4">4th</option>
-                            <option value="5">5th</option>
-                            <option value="6">6th</option>
-                            <option value="7">7th</option>
-                            <option value="8">8th</option>
+                        <select id="semester" name="semester_no" required>
+                            <option value="" disabled{% if not dashboard_user.semester_no %} selected{% endif %}>Select Sem</option>
+                            <option value="1"{% if dashboard_user.semester_no == 1 %} selected{% endif %}>1st</option>
+                            <option value="2"{% if dashboard_user.semester_no == 2 %} selected{% endif %}>2nd</option>
+                            <option value="3"{% if dashboard_user.semester_no == 3 %} selected{% endif %}>3rd</option>
+                            <option value="4"{% if dashboard_user.semester_no == 4 %} selected{% endif %}>4th</option>
+                            <option value="5"{% if dashboard_user.semester_no == 5 %} selected{% endif %}>5th</option>
+                            <option value="6"{% if dashboard_user.semester_no == 6 %} selected{% endif %}>6th</option>
+                            <option value="7"{% if dashboard_user.semester_no == 7 %} selected{% endif %}>7th</option>
+                            <option value="8"{% if dashboard_user.semester_no == 8 %} selected{% endif %}>8th</option>
                         </select>
                     </div>
                 </div>
@@ -114,13 +129,35 @@
             
             <header class="top-header">
                 <div>
-                    <h1>Welcome back, {{ user.name.split(' ')[0] }}</h1>
+                    <h1>Welcome back, {{ display_name.split(' ')[0] }}</h1>
                     <p class="subtitle" id="instruction-text">Select your department to continue.</p>
                 </div>
                 <div class="user-profile">
-                    <div class="avatar">{{ user.name[0] }}</div>
+                    <div class="avatar" aria-label="{{ display_name }}">{{ display_name[0]|upper }}</div>
                 </div>
             </header>
+
+            {% if user_warnings|default([], true) %}
+            <section class="account-warnings" aria-labelledby="accountWarningsTitle">
+                <div class="account-warnings-heading">
+                    <span class="account-warnings-icon" aria-hidden="true">!</span>
+                    <div>
+                        <h2 id="accountWarningsTitle">Account warning{% if user_warnings|length != 1 %}s{% endif %}</h2>
+                        <p>Please review the messages sent by the Bookshelf administrators.</p>
+                    </div>
+                </div>
+                <div class="account-warning-list">
+                    {% for warning in user_warnings %}
+                    <article class="account-warning-item">
+                        <p>{{ warning.message }}</p>
+                        <span>
+                            Sent {{ warning.created_at.strftime('%d %b %Y at %I:%M %p') if warning.created_at else 'by an administrator' }}
+                        </span>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
 
             <div class="dashboard-flow">
                 
@@ -214,11 +251,16 @@
             console.log("2. Page fully loaded! Starting the 4-second timer...");
             const loader = document.getElementById("loader");
             const overlay = document.getElementById("onboardingOverlay");
+            const needsOnboarding = document.body.dataset.profileComplete !== "true";
             
             setTimeout(() => {
-                console.log("3. 4 seconds passed! Sliding loader up and showing panel...");
+                console.log("3. 4 seconds passed! Sliding loader up...");
                 loader.classList.add("hide-loader");
-                overlay.classList.add("show-overlay");
+                if (needsOnboarding) {
+                    overlay.classList.remove("hidden");
+                    overlay.classList.add("show-overlay");
+                    overlay.setAttribute("aria-hidden", "false");
+                }
                 
                 setTimeout(() => {
                     loader.remove();

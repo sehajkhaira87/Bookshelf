@@ -31,7 +31,13 @@
                     <h1>Welcome back</h1>
                     <p class="login-subtext">Sign in with Google to pick up right where you left off.</p>
 
-                    <a href="{{ url_for('auth_google') }}" class="login-google-hero" id="googleSignIn">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% for category, message in messages %}
+                            <div class="login-alert login-alert--{{ category }}" role="alert">{{ message }}</div>
+                        {% endfor %}
+                    {% endwith %}
+
+                    <a href="{{ url_for('auth_google', role='student') }}" class="login-google-hero" id="googleSignIn">
                         <span class="login-google-icon">
                             <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="">
                         </span>

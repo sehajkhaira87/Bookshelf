@@ -3,24 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin | Control Center</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Bookshelf Admin — Control Room</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet">
+    <script>
+        (() => {
+            try {
+                const savedTheme = localStorage.getItem('bookshelf_admin_theme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                    document.documentElement.dataset.theme = 'dark';
+                }
+            } catch (_error) {
+                // The dashboard still works when browser storage is unavailable.
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='admin-dashboard.css') }}">
 </head>
 <body>
+    <button class="mobile-nav-toggle" id="mobileNavToggle" type="button" aria-label="Open navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+    </button>
+    <div class="mobile-scrim" id="mobileScrim" aria-hidden="true"></div>
 
-    <div class="sidebar">
-        <h2>Admin Vault</h2>
-        <button class="nav-btn active" onclick="switchPanel('upload')"> Upload Resources</button>
-        <button class="nav-btn" onclick="switchPanel('library')"> Resource Library</button>
-        <button class="nav-btn" onclick="switchPanel('users')"> User Database</button>
-        <button class="nav-btn"> Contributions <span class="badge">Later</span></button>
-        <div class="sidebar-footer">
-            <a href="/logout" class="nav-btn logout-btn">← Log Out</a>
+    <div class="app-shell">
+    <aside class="sidebar" id="adminSidebar">
+        <div class="brand-lockup">
+            <div class="brand-mark" aria-hidden="true">B</div>
+            <div>
+                <span class="brand-name">Bookshelf</span>
+                <span class="brand-subtitle">Administration</span>
+            </div>
         </div>
-    </div>
 
-    <div class="content">
+        <div class="nav-label">Workspace</div>
+        <nav class="sidebar-nav" aria-label="Admin workspace">
+            <button class="nav-btn active" type="button" data-panel="upload" aria-current="page" onclick="switchPanel('upload')">
+                <span class="nav-icon" aria-hidden="true">＋</span><span>Upload resource</span>
+            </button>
+            <button class="nav-btn" type="button" data-panel="library" onclick="switchPanel('library')">
+                <span class="nav-icon" aria-hidden="true">▤</span><span>Resource library</span>
+            </button>
+            <button class="nav-btn" type="button" data-panel="users" onclick="switchPanel('users')">
+                <span class="nav-icon" aria-hidden="true">◎</span><span>User database</span>
+            </button>
+            <button class="nav-btn nav-btn-disabled" type="button" disabled>
+                <span class="nav-icon" aria-hidden="true">↗</span><span>Contributions</span><span class="badge">Soon</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="theme-toggle" id="adminThemeToggle" type="button" aria-pressed="false">
+                <span class="theme-toggle-icon" aria-hidden="true">☾</span>
+                <span class="theme-toggle-label">Dark mode</span>
+                <span class="theme-toggle-track" aria-hidden="true"><span></span></span>
+            </button>
+            <div class="admin-profile">
+                <span class="admin-avatar">{{ session.get('admin_user', {}).get('name', 'A')[:1]|upper }}</span>
+                <span class="admin-profile-copy">
+                    <strong>{{ session.get('admin_user', {}).get('name', 'Administrator') }}</strong>
+                    <small>{{ session.get('admin_user', {}).get('email', 'Secure session') }}</small>
+                </span>
+            </div>
+            <a href="/logout" class="logout-btn"><span aria-hidden="true">↙</span> Sign out</a>
+        </div>
+    </aside>
+
+    <main class="content">
+        <header class="workspace-header">
+            <div>
+                <span class="eyebrow">Bookshelf administration</span>
+                <h1>Control room</h1>
+                <p>Keep the library useful, trusted, and ready for every student.</p>
+            </div>
+            <div class="workspace-status" title="Administrative services are available">
+                <span class="status-dot"></span>
+                <span>Systems ready</span>
+            </div>
+        </header>
 
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -37,38 +99,56 @@
         {% endwith %}
 
         <!-- Stats Bar -->
-        <div class="stats-bar">
-            <div class="stat-card">
-                <span class="stat-number">{{ stats.total or 0 }}</span>
-                <span class="stat-label">Total Resources</span>
+        <section class="stats-bar" aria-label="Library overview">
+            <div class="stat-card stat-card-primary">
+                <span class="stat-label">Total resources</span>
+                <span class="stat-number">{{ stats.get('total', 0) }}</span>
+                <span class="stat-note">Across the full library</span>
             </div>
             <div class="stat-card">
-                <span class="stat-number">{{ stats.by_category.get('pyq', 0) }}</span>
                 <span class="stat-label">PYQs</span>
+                <span class="stat-number">{{ stats.get('by_category', {}).get('pyq', 0) }}</span>
+                <span class="stat-note">Exam archive</span>
             </div>
             <div class="stat-card">
-                <span class="stat-number">{{ stats.by_category.get('assignment', 0) }}</span>
                 <span class="stat-label">Assignments</span>
+                <span class="stat-number">{{ stats.get('by_category', {}).get('assignment', 0) }}</span>
+                <span class="stat-note">Course work</span>
             </div>
             <div class="stat-card">
-                <span class="stat-number">{{ stats.by_category.get('notes', 0) + stats.by_category.get('book', 0) }}</span>
                 <span class="stat-label">Notes / Books</span>
+                <span class="stat-number">{{ stats.get('by_category', {}).get('notes', 0) + stats.get('by_category', {}).get('book', 0) }}</span>
+                <span class="stat-note">Study material</span>
             </div>
             <div class="stat-card stat-verified">
-                <span class="stat-number">{{ stats.by_status.get('verified', 0) }}</span>
                 <span class="stat-label">Verified</span>
+                <span class="stat-number">{{ stats.get('by_status', {}).get('verified', 0) }}</span>
+                <span class="stat-note">Ready for students</span>
             </div>
-        </div>
+        </section>
 
         <!-- ═══ PANEL 1: Upload Resources ═══ -->
         <div class="panel active" id="panel-upload">
-            <h1 class="header-title">Upload Resource</h1>
-            
+            <div class="panel-heading">
+                <div>
+                    <span class="section-kicker">Library intake</span>
+                    <h2 class="header-title">Upload a resource</h2>
+                    <p>Publish trusted study material to the right course collection.</p>
+                </div>
+                <span class="panel-step">01</span>
+            </div>
+
             <div class="card">
-                <h3>Upload New File</h3>
-                <p>Add a new PYQ, Assignment, Notes or Book directly to the cloud & database.</p>
+                <div class="card-intro">
+                    <span class="card-icon" aria-hidden="true">↑</span>
+                    <div>
+                        <h3>Resource details</h3>
+                        <p>Add a PYQ, assignment, note, or book directly to the library.</p>
+                    </div>
+                </div>
                 
                 <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                     
                     <div class="form-row">
                         <div class="form-group">
@@ -125,7 +205,7 @@
                     <div class="file-drop-zone" id="dropZone">
                         <input type="file" name="file_upload" id="fileInput" required>
                         <div class="drop-text">
-                            <span class="drop-icon">📄</span>
+                            <span class="drop-icon">↑</span>
                             <p>Drop file here or <strong>click to browse</strong></p>
                             <span class="drop-hint">PDF, DOCX, PPT, Images — Max 50MB</span>
                         </div>
@@ -137,7 +217,7 @@
                     </div>
 
                     <button type="submit" class="btn-submit" id="submitBtn">
-                        <span class="btn-text">Upload to Cloud ↗</span>
+                        <span class="btn-text">Publish resource <span aria-hidden="true">→</span></span>
                         <span class="btn-loading hidden">Uploading...</span>
                     </button>
                 </form>
@@ -146,7 +226,14 @@
 
         <!-- ═══ PANEL 2: Resource Library ═══ -->
         <div class="panel" id="panel-library">
-            <h1 class="header-title">Resource Library</h1>
+            <div class="panel-heading">
+                <div>
+                    <span class="section-kicker">Content operations</span>
+                    <h2 class="header-title">Resource library</h2>
+                    <p>Review availability, verification status, and course placement.</p>
+                </div>
+                <span class="panel-step">02</span>
+            </div>
 
             <!-- Filters -->
             <div class="filter-bar">
@@ -209,9 +296,11 @@
                             <td class="td-actions">
                                 <a href="{{ r.blob_url }}" target="_blank" class="action-btn action-view" title="Open file">↗</a>
                                 <form action="/admin/toggle-status/{{ r.id }}" method="POST" style="display:inline;">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="action-btn action-toggle" title="Toggle status">⟳</button>
                                 </form>
                                 <form action="/admin/delete/{{ r.id }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this resource permanently?');">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="action-btn action-delete" title="Delete">✕</button>
                                 </form>
                             </td>
@@ -229,23 +318,178 @@
             {% endif %}
         </div>
 
-        <!-- ═══ PANEL 3: Users (placeholder) ═══ -->
+        <!-- ═══ PANEL 3: User Database ═══ -->
         <div class="panel" id="panel-users">
-            <h1 class="header-title">User Database</h1>
+            <div class="panel-heading">
+                <div>
+                    <span class="section-kicker">Community oversight</span>
+                    <h2 class="header-title">User database</h2>
+                    <p>Find student accounts, review details, and manage access.</p>
+                </div>
+                <span class="panel-step">03</span>
+            </div>
+
+            <div class="user-toolbar">
+                <form action="/admin-dashboard" method="GET" class="user-search-form" role="search">
+                    <label for="userSearch" class="sr-only">Search registered users</label>
+                    <input
+                        type="search"
+                        id="userSearch"
+                        name="q"
+                        value="{{ request.args.get('q', '') }}"
+                        maxlength="200"
+                        placeholder="Search name, email, URN or CRN"
+                        autocomplete="off"
+                    >
+                    <button type="submit" class="user-search-btn">Search</button>
+                    {% if request.args.get('q') %}
+                    <a href="/admin-dashboard?panel=users" class="user-clear-btn">Clear</a>
+                    {% endif %}
+                </form>
+                <span class="user-result-count">
+                    {{ users|default([], true)|length }} user{% if users|default([], true)|length != 1 %}s{% endif %}
+                </span>
+            </div>
+
+            {% if users|default([], true) %}
+            <div class="table-wrapper user-table-wrapper">
+                <table class="resource-table user-table">
+                    <thead>
+                        <tr>
+                            <th>Names</th>
+                            <th>Account</th>
+                            <th>Academic details</th>
+                            <th>Warnings</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for managed_user in users %}
+                        <tr>
+                            <td class="user-name-cell">
+                                <span class="preferred-name">{{ managed_user.preferred_name or 'Not provided' }}</span>
+                                <span class="name-caption">Entered name</span>
+                                <span class="google-name">{{ managed_user.google_name or 'Not provided' }}</span>
+                                <span class="name-caption">Google name</span>
+                            </td>
+                            <td>
+                                <span class="user-email">{{ managed_user.email }}</span>
+                                <span class="user-meta">Joined {{ managed_user.created_at.strftime('%d %b %Y') if managed_user.created_at else '—' }}</span>
+                            </td>
+                            <td>
+                                <span class="academic-primary">
+                                    {{ managed_user.department|upper if managed_user.department else 'Department —' }}
+                                    {% if managed_user.semester_no %} · Sem {{ managed_user.semester_no }}{% endif %}
+                                </span>
+                                <span class="user-meta">URN {{ managed_user.urn or '—' }}</span>
+                                <span class="user-meta">CRN {{ managed_user.crn or '—' }}</span>
+                            </td>
+                            <td>
+                                <span class="warning-count{% if managed_user.warning_count %} has-warnings{% endif %}">
+                                    {{ managed_user.warning_count or 0 }} warning{% if managed_user.warning_count != 1 %}s{% endif %}
+                                </span>
+                                {% if managed_user.latest_warning_at %}
+                                <span class="user-meta">Latest {{ managed_user.latest_warning_at.strftime('%d %b %Y') }}</span>
+                                {% endif %}
+                                {% set warning_history = warnings_by_user|default({}) %}
+                                {% set managed_warnings = warning_history.get(managed_user.id, []) %}
+                                {% if managed_warnings %}
+                                <details class="warning-history">
+                                    <summary>View / remove</summary>
+                                    <div class="warning-history-list">
+                                        {% for warning in managed_warnings %}
+                                        <div class="warning-history-item">
+                                            <p>{{ warning.message }}</p>
+                                            <div class="warning-history-meta">
+                                                <span>{{ warning.created_at.strftime('%d %b %Y') if warning.created_at else 'Date unavailable' }}</span>
+                                                <form
+                                                    action="/admin/users/{{ managed_user.id }}/warnings/{{ warning.id }}/delete"
+                                                    method="POST"
+                                                    onsubmit="return confirm('Remove this warning from the user?');"
+                                                >
+                                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                                    <button type="submit" class="warning-remove-btn">Remove</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </details>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if managed_user.is_banned %}
+                                <span class="user-status user-status-banned">Banned</span>
+                                {% if managed_user.banned_at %}
+                                <span class="user-meta">{{ managed_user.banned_at.strftime('%d %b %Y') }}</span>
+                                {% endif %}
+                                {% else %}
+                                <span class="user-status user-status-active">Active</span>
+                                {% endif %}
+                            </td>
+                            <td class="user-actions">
+                                <div class="user-action-row">
+                                    {% if managed_user.is_banned %}
+                                    <form action="/admin/users/{{ managed_user.id }}/unban" method="POST" onsubmit="return confirm('Restore access for this user?');">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="moderation-btn moderation-unban">Unban</button>
+                                    </form>
+                                    {% else %}
+                                    <form action="/admin/users/{{ managed_user.id }}/ban" method="POST" onsubmit="return confirm('Ban this user from Bookshelf?');">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="moderation-btn moderation-ban">Ban</button>
+                                    </form>
+                                    {% endif %}
+
+                                    <details class="warning-composer">
+                                        <summary class="moderation-btn moderation-warn">Warn</summary>
+                                        <form action="/admin/users/{{ managed_user.id }}/warn" method="POST" class="warning-form">
+                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                            <label for="warning-{{ managed_user.id }}">Warning for {{ managed_user.preferred_name or managed_user.google_name or managed_user.email }}</label>
+                                            <textarea
+                                                id="warning-{{ managed_user.id }}"
+                                                name="message"
+                                                maxlength="2000"
+                                                rows="4"
+                                                placeholder="Explain what the user needs to correct…"
+                                                required
+                                            ></textarea>
+                                            <button type="submit" class="warning-send-btn">Send warning</button>
+                                        </form>
+                                    </details>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
             <div class="empty-state">
                 <span class="empty-icon">👥</span>
-                <h3>User management coming soon</h3>
-                <p>View and manage registered users here.</p>
+                {% if request.args.get('q') %}
+                <h3>No users found</h3>
+                <p>Try a different name, email, URN or CRN.</p>
+                {% else %}
+                <h3>No registered users</h3>
+                <p>Users will appear here after signing in.</p>
+                {% endif %}
             </div>
+            {% endif %}
         </div>
 
+    </main>
     </div>
 
     <script>
         // ── Panel Switching ──
         function switchPanel(panelName) {
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.sidebar .nav-btn').forEach(button => {
+                button.classList.remove('active');
+                button.removeAttribute('aria-current');
+            });
             
             const panel = document.getElementById('panel-' + panelName);
             if (panel) panel.classList.add('active');
@@ -255,8 +499,53 @@
             const panelMap = { 'upload': 0, 'library': 1, 'users': 2 };
             if (panelMap[panelName] !== undefined && buttons[panelMap[panelName]]) {
                 buttons[panelMap[panelName]].classList.add('active');
+                buttons[panelMap[panelName]].setAttribute('aria-current', 'page');
             }
+
+            document.body.classList.remove('sidebar-open');
+            document.getElementById('mobileNavToggle').setAttribute('aria-expanded', 'false');
         }
+
+        const mobileNavToggle = document.getElementById('mobileNavToggle');
+        const mobileScrim = document.getElementById('mobileScrim');
+        mobileNavToggle.addEventListener('click', () => {
+            const isOpen = document.body.classList.toggle('sidebar-open');
+            mobileNavToggle.setAttribute('aria-expanded', String(isOpen));
+        });
+        mobileScrim.addEventListener('click', () => {
+            document.body.classList.remove('sidebar-open');
+            mobileNavToggle.setAttribute('aria-expanded', 'false');
+        });
+
+        // ── Persistent Admin Theme ──
+        const adminThemeToggle = document.getElementById('adminThemeToggle');
+        const themeToggleIcon = adminThemeToggle.querySelector('.theme-toggle-icon');
+        const themeToggleLabel = adminThemeToggle.querySelector('.theme-toggle-label');
+
+        function syncAdminThemeToggle() {
+            const isDark = document.documentElement.dataset.theme === 'dark';
+            adminThemeToggle.setAttribute('aria-pressed', String(isDark));
+            adminThemeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+            themeToggleIcon.textContent = isDark ? '☀' : '☾';
+            themeToggleLabel.textContent = isDark ? 'Light mode' : 'Dark mode';
+        }
+
+        adminThemeToggle.addEventListener('click', () => {
+            const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            if (nextTheme === 'dark') {
+                document.documentElement.dataset.theme = 'dark';
+            } else {
+                delete document.documentElement.dataset.theme;
+            }
+            try {
+                localStorage.setItem('bookshelf_admin_theme', nextTheme);
+            } catch (_error) {
+                // Keep the active theme even if persistence is unavailable.
+            }
+            syncAdminThemeToggle();
+        });
+
+        syncAdminThemeToggle();
 
         // ── File Input Preview ──
         const fileInput = document.getElementById('fileInput');
@@ -333,6 +622,15 @@
                 setTimeout(() => msg.remove(), 400);
             });
         }, 5000);
+
+        // Keep user management visible after a search or moderation redirect.
+        const dashboardParams = new URLSearchParams(window.location.search);
+        const requestedPanel = dashboardParams.get('panel');
+        if (requestedPanel && ['upload', 'library', 'users'].includes(requestedPanel)) {
+            switchPanel(requestedPanel);
+        } else if (dashboardParams.has('q')) {
+            switchPanel('users');
+        }
     </script>
 
 </body>

@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 static.zip
 .env
+.venv-test/

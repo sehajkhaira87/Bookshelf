@@ -67,16 +67,15 @@ categoryCards.forEach(card => {
     });
 });
 document.addEventListener('DOMContentLoaded', () => {
-    const overlay = document.getElementById('onboardingOverlay');
     const form = document.getElementById('onboardingForm');
 
     if (form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault(); 
-            
-            localStorage.setItem('bookshelf_profile_complete', 'true');
-            
-            overlay.classList.add('hidden');
+        form.addEventListener('submit', () => {
+            const submitButton = form.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = 'Saving your details…';
+            }
         });
     }
 });
