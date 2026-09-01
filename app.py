@@ -39,6 +39,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 
@@ -147,6 +148,10 @@ def home():
 def login():
     return render_template('login.html')
 
+# ==========================================
+# DUMMY LOGIN FOR FRONTEND TESTING
+# Your backend friend can add the real OAuth back here later!
+# ==========================================
 @app.route('/auth/google')
 def auth_google():
     intent = request.args.get('role', 'student').strip().lower()
@@ -624,13 +629,21 @@ def api_resources():
 
 @app.route('/pyqs')
 def pyqs():
-    # Later, we will fetch the database records here
     return render_template('pyqs.html')
 
 
 @app.route('/contribute')
 def contribute():
     return render_template('contribute.html')
+
+@app.route('/books')
+def books():
+    return render_template('books.html')
+
+@app.route('/notes')
+def notes():
+    return render_template('notes.html')
+
 
 if __name__ == '__main__':
     app.run(debug=os.getenv('FLASK_DEBUG') == '1', port=8000)
