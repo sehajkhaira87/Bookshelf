@@ -234,6 +234,16 @@
         }
     });
 });
+
+
+        document.querySelectorAll('.category-card').forEach(card => {
+    card.addEventListener('click', () => {
+        const category = card.getAttribute('data-category');
+        if (category === 'notes') {
+            window.location.href = '/notes';
+        }
+    });
+});
     </script>
 
     

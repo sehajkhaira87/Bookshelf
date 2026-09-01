@@ -77,5 +77,10 @@ def contribute():
 def books():
     return render_template('books.html')
 
+@app.route('/notes')
+def notes():
+    return render_template('notes.html')
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=8000)

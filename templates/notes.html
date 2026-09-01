@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes - BOOKSHELF</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='books.css') }}">
+</head>
+<body>
+    <div class="page-wrapper">
+        <nav class="top-nav">
+            <div class="brand">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="nav-logo">
+            </div>
+            
+            <a href="{{ url_for('dashboard') }}" class="back-btn">
+                <span>←</span> Return to Dashboard
+            </a>
+        </nav>
+        <header class="header-section">
+            <div class="page-title">
+                <h1>Your Notes</h1>
+                <p>Search and download recommended notes and reference materials.</p>
+            </div>
+
+            <div class="minimal-search-box">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" class="minimal-search-input" placeholder="Search titles, authors..." autocomplete="off">
+            </div>
+        </header>
+
+        <main class="content-grid">
+            <div class="placeholder-card">
+                 Notes will appear on this shelf.
+            </div>
+        </main>
+    </div>
+</body>
+</html>
