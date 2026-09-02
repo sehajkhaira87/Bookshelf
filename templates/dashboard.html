@@ -227,23 +227,20 @@
             }, 4000); 
         });
         document.querySelectorAll('.category-card').forEach(card => {
-    card.addEventListener('click', () => {
-        const category = card.getAttribute('data-category');
-        if (category === 'books') {
-            window.location.href = '/books';
-        }
-    });
-});
-
-
-        document.querySelectorAll('.category-card').forEach(card => {
-    card.addEventListener('click', () => {
-        const category = card.getAttribute('data-category');
-        if (category === 'notes') {
-            window.location.href = '/notes';
-        }
-    });
-});
+            card.addEventListener('click', () => {
+                const category = card.getAttribute('data-category');
+                
+                if (category === 'books') {
+                    window.location.href = '/books';
+                } else if (category === 'notes') {
+                    window.location.href = '/notes';
+                } else if (category === 'assignments') { 
+                    window.location.href = '/assignments'; 
+                } else if (category === 'pyqs') {
+                    window.location.href = '/pyqs';
+                }
+            });
+        });
     </script>
 
     

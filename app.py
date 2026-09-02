@@ -81,6 +81,10 @@ def books():
 def notes():
     return render_template('notes.html')
 
+@app.route('/assignments')
+def assignments():
+    return render_template('assignments.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=8000)
