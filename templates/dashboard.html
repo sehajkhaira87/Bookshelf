@@ -53,8 +53,8 @@
                             <option value="" disabled selected>Select Branch</option>
                             <option value="CSE">Computer Science (CSE)</option>
                             <option value="IT">Information Technology (IT)</option>
+                            <option value="EE">Electrical (EE)</option>
                             <option value="ECE">Electronics (ECE)</option>
-                            <option value="ME">Mechanical (ME)</option>
                             <option value="CE">Civil (CE)</option>
                         </select>
                     </div>
@@ -152,10 +152,33 @@
                             <img src="{{ url_for('static', filename='images/it-icon.svg') }}" class="dept-icon" alt="IT Icon">
                             <div>
                                 <div class="card-badge" style="margin-bottom: 8px;">IT</div>
-                                <h3>Information Tech</h3>
+                                <h3>Information Technology</h3>
                             </div>
                         </div>
 
+                    <div class="dept-card" data-dept="ece">
+                   <img src="{{ url_for('static', filename='images/electronics.svg') }}" class="dept-icon" alt="ECE Icon">
+                   <div>
+                <div class="card-badge" style="margin-bottom: 8px;">ECE</div>
+                                <h3>Electronics</h3>
+                            </div>
+                        </div>
+
+                        <div class="dept-card" data-dept="ee">
+                            <img src="{{ url_for('static', filename='images/electrical.svg') }}" class="dept-icon" alt="EE Icon">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">EE</div>
+                                <h3>Electrical Engg</h3>
+                            </div>
+                        </div>
+
+                        <div class="dept-card" data-dept="ce">
+                            <img src="{{ url_for('static', filename='images/civil.svg') }}" class="dept-icon" alt="CE Icon">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">CE</div>
+                                <h3>Civil</h3>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
