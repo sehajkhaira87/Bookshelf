@@ -188,3 +188,31 @@ body {
         gap: 16px !important;
     }
 }
+
+.paper-form { display: flex; flex-wrap: wrap; gap: 16px; margin: 24px 0 40px; }
+.paper-form label { display: flex; flex-direction: column; gap: 8px; }
+.paper-form input, .paper-form button, .minimal-search-box input, .minimal-search-box button {
+    box-sizing: border-box; padding: 12px; border: 1px solid #876b3f;
+    border-radius: 8px; background: #251c13; color: #f4efe3; max-width: 100%;
+}
+.paper-card { padding: 24px; border: 1px solid #876b3f; border-radius: 12px; overflow-wrap: anywhere; }
+.paper-card h2 { font-size: 1.2rem; margin: 0 0 12px; }
+.paper-card a, .pagination a { color: #f2c14e; }
+.paper-card p { margin: 12px 0; }
+.pagination { display: flex; gap: 24px; margin: 24px 0; }
+.minimal-search-box select {
+    padding: 12px;
+    border: 1px solid #876b3f;
+    border-radius: 8px;
+    background: #251c13;
+    color: #f4efe3;
+}
+.clear-search { align-self: center; color: #f2c14e; padding: 8px; }
+.minimal-search-box { display: flex; flex-wrap: wrap; gap: 8px; }
+.minimal-search-box svg { display: none; }
+.minimal-search-box input[name="year"] { width: 110px; }
+.paper-card button, .paper-form button, .minimal-search-box button { cursor: pointer; }
+@media (max-width: 400px) {
+    .content-grid { grid-template-columns: minmax(0, 1fr); }
+    .paper-form label { width: 100%; }
+}

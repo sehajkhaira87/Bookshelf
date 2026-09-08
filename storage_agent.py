@@ -5,6 +5,7 @@ Handles all Azure Blob Storage operations: upload, delete, list.
 
 import os
 import uuid
+from werkzeug.utils import secure_filename
 from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
 
@@ -54,8 +55,8 @@ def upload_file(file_stream, original_filename, category):
 
     try:
         # Generate a unique blob name to prevent collisions
-        unique_prefix = uuid.uuid4().hex[:8]
-        safe_filename = original_filename.replace(" ", "_")
+        unique_prefix = uuid.uuid4().hex
+        safe_filename = secure_filename(original_filename) or 'document.pdf'
         blob_name = f"{unique_prefix}_{safe_filename}"
 
         # Get the container client and upload

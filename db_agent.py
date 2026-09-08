@@ -7,6 +7,7 @@ create table, add/get/update/delete resources.
 import psycopg2 as p
 from dotenv import load_dotenv
 import os
+from psycopg2.extras import RealDictCursor
 
 load_dotenv()
 
@@ -31,6 +32,50 @@ def get_connection():
     except Exception as e:
         print(f"[DBAgent] Error connecting to database: {e}")
         return None
+
+
+def get_resource_catalogue(category, branch=None, semester=None, search='', page=1):
+    """Read a fresh, paginated student catalogue from verified uploads."""
+    if category not in {'notes', 'assignment', 'book'}:
+        raise ValueError('Invalid resource category.')
+    where = ['category = %s', 'status = %s']
+    params = [category, 'verified']
+    if branch:
+        where.append('branch = %s')
+        params.append(branch)
+    if semester:
+        where.append('semester = %s')
+        params.append(int(semester))
+    if search:
+        term = '%' + search.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_') + '%'
+        where.append('(title ILIKE %s OR subject_name ILIKE %s)')
+        params.extend([term, term])
+    clause = ' WHERE ' + ' AND '.join(where)
+    conn = get_connection()
+    if conn is None:
+        raise RuntimeError('The resource library is unavailable.')
+    try:
+        with conn, conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute('SELECT COUNT(*) AS total FROM resources' + clause, params)
+            total = cur.fetchone()['total']
+            cur.execute('''SELECT id, title, category, branch, semester, subject_name,
+                blob_url, file_name, file_size, created_at, uploaded_by,
+                (SELECT COALESCE(NULLIF(BTRIM(u.preferred_name), ''),
+                                 NULLIF(BTRIM(u.google_name), ''),
+                                 NULLIF(BTRIM(u.name), ''))
+                 FROM users u
+                 WHERE LOWER(BTRIM(u.email)) = LOWER(BTRIM(resources.uploaded_by))
+                 ORDER BY u.id LIMIT 1) AS contributor_name,
+                (SELECT u.contributor_badge FROM users u
+                 WHERE LOWER(BTRIM(u.email)) = LOWER(BTRIM(resources.uploaded_by))
+                   AND u.is_banned=FALSE
+                 ORDER BY u.id LIMIT 1) AS contributor_badge
+                FROM resources''' + clause +
+                ' ORDER BY created_at DESC, id DESC LIMIT 50 OFFSET %s',
+                [*params, (page - 1) * 50])
+            return [dict(row) for row in cur.fetchall()], total
+    finally:
+        conn.close()
 
 
 def create_resources_table():

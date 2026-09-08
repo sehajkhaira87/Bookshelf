@@ -1,6 +1,8 @@
 import os
 import secrets
 import zipfile
+import communications_service
+from communications_routes import register_routes as register_communications_routes
 from collections.abc import Mapping
 from functools import wraps
 from pathlib import Path
@@ -27,12 +29,14 @@ from admin_user_service import (
     list_warnings,
     list_warnings_for_users,
     search_users,
+    set_contributor_badge,
     unban_user,
 )
 from storage_agent import upload_file, delete_file
+from pyq_service import create_pyq_schema, import_pdf, list_pyqs, get_pyq_summary, rename_pyq, query as pyq_query
 from db_agent import (
     add_resource, get_resources, get_resource_by_id,
-    update_resource_status, delete_resource, get_resource_stats
+    update_resource_status, delete_resource, get_resource_stats, get_resource_catalogue
 )
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -62,7 +66,7 @@ ALLOWED_EXTENSIONS = {
     ".pdf", ".doc", ".docx", ".ppt", ".pptx",
     ".png", ".jpg", ".jpeg", ".webp",
 }
-ALLOWED_CATEGORIES = {"pyq", "assignment", "book", "notes"}
+ALLOWED_CATEGORIES = {"assignment", "book", "notes"}
 ALLOWED_BRANCHES = {"cse", "it", "ece", "ee", "me", "ce"}
 ALLOWED_SEMESTERS = {str(value) for value in range(1, 9)}
 
@@ -131,6 +135,11 @@ google = oauth.register(
 # Verify database connection and initialize tables on startup
 check_connection()
 if create_tables():
+    create_pyq_schema()
+    try:
+        communications_service.create_schema()
+    except Exception:
+        app.logger.exception('Could not initialize announcements and notifications')
     try:
         create_admin_user_schema()
     except AdminUserServiceError:
@@ -225,7 +234,9 @@ def callback():
         flash("This account has been banned. Contact an administrator for help.", "error")
         return redirect(url_for('login'))
 
-    session['user'] = {'email': email, 'name': name}
+    picture = str(user_info.get('picture') or '')
+    session['user'] = {'email': email, 'name': name,
+                       'picture': picture if picture.startswith('https://') and len(picture) <= 2000 else ''}
     return redirect(url_for('dashboard'))
 
 @app.route('/dashboard')
@@ -250,8 +261,14 @@ def dashboard():
     except (AdminUserServiceError, AdminUserValidationError):
         app.logger.exception("Could not load warnings for user %s", profile['id'])
 
+    announcement = None
+    try:
+        announcement = communications_service.announcement()
+    except Exception:
+        app.logger.exception('Could not load official announcement')
     return render_template(
-        'dashboard.html', user=user, profile=profile, user_warnings=warnings
+        'dashboard.html', user=user, profile=profile, user_warnings=warnings,
+        announcement=announcement,
     )
 
 @app.route('/logout')
@@ -353,6 +370,18 @@ def admin_dashboard():
     # Fetch all resources and stats for the dashboard
     resources = get_resources()
     stats = get_resource_stats()
+    pyq_summary = None
+    try:
+        pyq_summary = get_pyq_summary()
+        pyq_count = pyq_summary['total']
+        stats['total'] = stats.get('total', 0) + pyq_count
+        counts = stats.setdefault('by_category', {})
+        counts['pyq'] = counts.get('pyq', 0) + pyq_count
+        statuses = stats.setdefault('by_status', {})
+        statuses['verified'] = statuses.get('verified', 0) + pyq_count
+    except Exception:
+        app.logger.exception('Could not load PYQ statistics')
+        flash('PYQ statistics are temporarily unavailable.', 'error')
     try:
         users = search_users(request.args.get('q', ''))
     except AdminUserValidationError as error:
@@ -372,7 +401,7 @@ def admin_dashboard():
         flash("Warning histories could not be loaded.", "error")
     return render_template(
         'admin-dashboard.html', resources=resources, stats=stats, users=users,
-        warnings_by_user=warnings_by_user,
+        warnings_by_user=warnings_by_user, pyq_summary=pyq_summary,
     )
 
 
@@ -394,6 +423,22 @@ def admin_ban_user(user_id):
     flash("User banned successfully." if updated else "User not found.",
           "success" if updated else "error")
     return _moderation_redirect()
+
+
+@app.route('/admin/users/<int:user_id>/badge', methods=['POST'])
+@admin_required
+@csrf_protected
+def admin_contributor_badge(user_id):
+    destination = url_for('admin_dashboard', panel='users', q=request.form.get('q', '')[:200])
+    try:
+        updated = set_contributor_badge(user_id, request.form.get('badge'))
+    except (AdminUserValidationError, AdminUserServiceError) as error:
+        if isinstance(error, AdminUserServiceError):
+            app.logger.exception('Could not set contributor badge for user %s', user_id)
+        flash(str(error), 'error')
+        return redirect(destination)
+    flash('Contributor badge saved.' if updated else 'User not found.', 'success' if updated else 'error')
+    return redirect(destination)
 
 
 @app.route('/admin/users/<int:user_id>/unban', methods=['POST'])
@@ -613,6 +658,8 @@ def api_resources():
     Only returns verified resources to students.
     """
     category = request.args.get('category')
+    if category == 'pyq':
+        return api_pyqs()
     branch = request.args.get('branch')
     semester = request.args.get('semester')
 
@@ -629,7 +676,120 @@ def api_resources():
 
 @app.route('/pyqs')
 def pyqs():
-    return render_template('pyqs.html')
+    return _pyq_catalogue(False)
+
+
+@app.route('/api/pyqs')
+def api_pyqs():
+    try:
+        page = int(request.args.get('page', '1'))
+        year = int(request.args['year']) if request.args.get('year') else None
+        if not 1 <= page <= 1000000 or (year is not None and not 1900 <= year <= 9999):
+            raise ValueError()
+    except ValueError:
+        return jsonify(error='Invalid page or year.'), 400
+    try:
+        papers, total = list_pyqs(request.args.get('q', '').strip()[:200], year, page)
+        # Public results omit internal uploader and file hash fields.
+        items = [{key: paper[key] for key in
+                  ('id', 'title', 'subject_code', 'subject_name', 'year', 'blob_url')}
+                 for paper in papers]
+        for item in items:
+            item['category'] = 'pyq'
+        return jsonify(items=items, total=total, page=page, page_size=50)
+    except Exception:
+        app.logger.exception('Could not load PYQ API')
+        return jsonify(error='The PYQ catalogue is temporarily unavailable.'), 503
+
+
+def _pyq_catalogue(admin):
+    search = request.args.get('q', '').strip()[:200]
+    try:
+        page = max(1, int(request.args.get('page', '1')))
+        year = int(request.args['year']) if request.args.get('year') else None
+        if page > 1000000 or (year is not None and not 1900 <= year <= 9999):
+            raise ValueError()
+    except ValueError:
+        abort(400, 'Invalid page or year.')
+    try:
+        papers, total = list_pyqs(search, year, page)
+        archive = get_pyq_summary()
+    except Exception:
+        app.logger.exception('Could not load PYQs')
+        return 'The PYQ catalogue is temporarily unavailable.', 503
+    return render_template('admin-pyqs.html' if admin else 'pyqs.html', papers=papers, total=total, page=page,
+                           search=search, year=year, admin=admin, archive=archive)
+
+
+@app.route('/admin/pyqs')
+@admin_required
+def admin_pyqs():
+    return _pyq_catalogue(True)
+
+
+@app.route('/admin/pyqs/<int:paper_id>/rename', methods=['POST'])
+@admin_required
+@csrf_protected
+def admin_rename_pyq(paper_id):
+    try:
+        saved = rename_pyq(paper_id, request.form.get('subject_name'), request.form.get('expected_name'))
+        flash('Subject name updated.' if saved else 'This paper was removed or changed since you opened it. Refresh and try again.',
+              'success' if saved else 'error')
+    except ValueError as error:
+        flash(str(error), 'error')
+    except Exception:
+        app.logger.exception('Could not rename PYQ %s', paper_id)
+        flash('The name could not be saved. Please try again.', 'error')
+    try:
+        page = max(1, min(1000000, int(request.form.get('page', '1'))))
+        year = int(request.form['filter_year']) if request.form.get('filter_year') else ''
+        if year and not 1900 <= year <= 9999:
+            year = ''
+    except ValueError:
+        page, year = 1, ''
+    return redirect(url_for('admin_pyqs', q=request.form.get('q', '')[:200], year=year, page=page))
+
+
+@app.route('/admin/pyqs/upload', methods=['POST'])
+@admin_required
+@csrf_protected
+def admin_upload_pyq():
+    file = request.files.get('file_upload')
+    try:
+        if not file or not file.filename:
+            raise ValueError('Choose a PDF file.')
+        # Retain the filename for display; Azure gets a generated safe blob name.
+        filename = file.filename.replace('\\', '/').rsplit('/', 1)[-1]
+        _, created = import_pdf(file.stream, filename,
+            request.form.get('subject_code'), request.form.get('subject_name'),
+            request.form.get('year'), session['admin_user']['email'])
+        flash('PYQ uploaded.' if created else 'This PDF is already in the catalogue.', 'success')
+    except ValueError as error:
+        flash(str(error), 'error')
+    except Exception:
+        app.logger.exception('PYQ upload failed')
+        flash('PYQ upload failed. Please retry or check the server log.', 'error')
+    return redirect(url_for('admin_pyqs'))
+
+
+@app.route('/admin/pyqs/<int:paper_id>/delete', methods=['POST'])
+@admin_required
+@csrf_protected
+def admin_delete_pyq(paper_id):
+    try:
+        paper = pyq_query('SELECT blob_url FROM pyqs WHERE id = %s', (paper_id,), one=True)
+        if not paper:
+            flash('PYQ not found.', 'error')
+            return redirect(url_for('admin_pyqs'))
+        if not delete_file(paper['blob_url']):
+            flash('Cloud deletion failed; the record was kept for retry.', 'error')
+        else:
+            pyq_query('DELETE FROM pyqs WHERE id = %s', (paper_id,))
+            flash('PYQ deleted.', 'success')
+    except Exception:
+        app.logger.exception('PYQ deletion failed')
+        flash('PYQ deletion failed. Please retry.', 'error')
+    return redirect(url_for('admin_pyqs'))
 
 
 @app.route('/contribute')
@@ -638,15 +798,47 @@ def contribute():
 
 @app.route('/books')
 def books():
-    return render_template('books.html')
+    return _resource_catalogue('book', 'Digital Books', 'books')
 
 @app.route('/notes')
 def notes():
-    return render_template('notes.html')
+    return _resource_catalogue('notes', 'Notes', 'notes')
 
 @app.route('/assignments')
 def assignments():
-    return render_template('assignments.html')
+    return _resource_catalogue('assignment', 'Assignments', 'assignments')
+
+
+def _resource_catalogue(category, title, endpoint):
+    branch = request.args.get('branch', '').strip().lower()
+    semester = request.args.get('semester', '').strip()
+    search = request.args.get('q', '').strip()[:200]
+    try:
+        page = int(request.args.get('page', '1'))
+        if not 1 <= page <= 1000000 or (branch and branch not in ALLOWED_BRANCHES) or (semester and semester not in ALLOWED_SEMESTERS):
+            raise ValueError()
+    except ValueError:
+        abort(400, 'Invalid department, semester or page.')
+    error = None
+    try:
+        resources, total = get_resource_catalogue(category, branch or None, semester or None, search, page)
+        for resource in resources:
+            uploader = normalize_email(resource.get('uploaded_by'))
+            resource['is_admin_upload'] = uploader == 'admin' or uploader in ADMIN_EMAILS
+            resource['uploader_label'] = (
+                'Admin' if resource['is_admin_upload']
+                else resource.get('contributor_name') or 'User'
+            )
+    except Exception:
+        app.logger.exception('Could not load the %s catalogue', category)
+        resources, total = [], 0
+        error = 'This library is temporarily unavailable. Please try again shortly.'
+    return render_template('resource-catalogue.html', title=title, endpoint=endpoint,
+        resources=resources, total=total, branch=branch, semester=semester, search=search,
+        page=page, error=error), 503 if error else 200
+
+
+register_communications_routes(app, admin_required, csrf_protected, ADMIN_EMAILS)
 
 
 if __name__ == '__main__':

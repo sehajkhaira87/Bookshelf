@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage PYQs · Bookshelf</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin-pyqs.css') }}">
+</head>
+<body>
+    <div class="archive-shell">
+        <nav class="archive-nav" aria-label="Page navigation">
+            <a class="brand" href="{{ url_for('admin_dashboard') }}"><span class="brand-mark">B</span> Bookshelf <span class="admin-label">ADMIN</span></a>
+            <a href="{{ url_for('admin_dashboard') }}">← Admin dashboard</a>
+        </nav>
+        <header class="archive-heading">
+            <div><p class="eyebrow">EXAM ARCHIVE</p><h1>Manage PYQs</h1><p class="muted">Organise your papers. Keep every subject easy to find.</p></div>
+            <div class="archive-total"><strong>{{ '{:,}'.format(archive.total) }}</strong><span>papers in the shared library</span></div>
+        </header>
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+        <p class="notice {{ category }}" role="status">{{ message }}</p>
+        {% endfor %}
+        <details class="upload-panel">
+            <summary><span>＋ Upload a PDF</span><span class="muted">Add a single paper</span></summary>
+            <form action="{{ url_for('admin_upload_pyq') }}" method="post" enctype="multipart/form-data" class="upload-form">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <label>Subject code<input name="subject_code" required maxlength="100" placeholder="e.g. CS301"></label>
+                <label>Subject name<input name="subject_name" required maxlength="255" placeholder="e.g. Data Structures"></label>
+                <label>Exam year<input name="year" type="number" required min="1900" max="9999" placeholder="2025"></label>
+                <label>PDF · up to 50 MB<input name="file_upload" type="file" accept=".pdf,application/pdf" required></label>
+                <button class="primary" type="submit">Upload PYQ</button>
+            </form>
+        </details>
+        <section class="library" aria-label="PYQ library">
+            <form class="search-bar" method="get" role="search">
+                <label class="search-field"><span class="sr-only">Subject code or name</span><input name="q" value="{{ search }}" placeholder="Search subject code or name…" maxlength="200"></label>
+                <label><span class="sr-only">Exam year</span><select name="year"><option value="">All years</option>
+                    {% for available_year in archive.years %}<option value="{{ available_year }}"{% if year == available_year %} selected{% endif %}>{{ available_year }}</option>{% endfor %}
+                    {% if year and year not in archive.years %}<option value="{{ year }}" selected>{{ year }}</option>{% endif %}
+                </select></label>
+                <button type="submit" class="primary">Search</button>
+                {% if search or year %}<a href="{{ url_for('admin_pyqs') }}">Clear</a>{% endif %}
+            </form>
+            <div class="list-caption"><span>{{ '{:,}'.format(total) }} papers{% if search or year %} found{% endif %}</span><span>Showing up to 50 per page</span></div>
+            <ul class="pyq-list">
+                {% for paper in papers %}
+                <li class="pyq-row">
+                    <div class="paper-heading">
+                        <span class="pdf-icon" aria-hidden="true">PDF</span>
+                        <div class="paper-info"><h2>{{ paper.title }}</h2><p class="filename">{{ paper.original_filename }}</p></div>
+                        <span class="year-pill">{{ paper.year }}</span>
+                        <a class="open-link" href="{{ paper.blob_url }}" target="_blank" rel="noopener">Open PDF ↗</a>
+                    </div>
+                    <div class="row-controls">
+                        <details class="name-editor">
+                            <summary>Edit name</summary>
+                            <form method="post" action="{{ url_for('admin_rename_pyq', paper_id=paper.id) }}" class="rename-form">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="expected_name" value="{{ paper.subject_name }}">
+                                <input type="hidden" name="q" value="{{ search }}">
+                                <input type="hidden" name="filter_year" value="{{ year or '' }}">
+                                <input type="hidden" name="page" value="{{ page }}">
+                                <label for="name-{{ paper.id }}">Subject name</label>
+                                <div class="rename-fields"><input id="name-{{ paper.id }}" name="subject_name" value="{{ paper.subject_name }}" required maxlength="255"><button type="submit" class="primary">Save name</button><button type="button" class="cancel-edit">Cancel</button></div>
+                                <p class="muted">Updates this paper’s display name for everyone. Subject code, year and PDF stay the same.</p>
+                            </form>
+                        </details>
+                        <form action="{{ url_for('admin_delete_pyq', paper_id=paper.id) }}" method="post" class="delete-form" onsubmit="return confirm('Permanently delete this PYQ?');">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><button class="delete-button" type="submit" aria-label="Delete PYQ: {{ paper.title }}">Delete PYQ</button>
+                        </form>
+                    </div>
+                </li>
+                {% else %}<li class="empty-state"><h2>No papers found</h2><p>Try another subject or year, or upload a PDF to get started.</p></li>{% endfor %}
+            </ul>
+        </section>
+        <nav class="pagination" aria-label="Paper pages">
+            <span>Page {{ page }}</span><div>
+            {% if page > 1 %}<a href="{{ url_for('admin_pyqs', page=page-1, q=search, year=year or '') }}">← Previous</a>{% endif %}
+            {% if page * 50 < total %}<a href="{{ url_for('admin_pyqs', page=page+1, q=search, year=year or '') }}">Next →</a>{% endif %}
+            </div>
+        </nav>
+    </div>
+    <script>
+        document.querySelectorAll('.cancel-edit').forEach(button => {
+            button.addEventListener('click', () => {
+                button.closest('form').reset();
+                const editor = button.closest('details');
+                editor.open = false;
+                editor.querySelector('summary').focus();
+            });
+        });
+    </script>
+</body>
+</html>

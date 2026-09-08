@@ -24,12 +24,12 @@ STUDENT_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9/-]{2,49}$")
 
 USER_SELECT_COLUMNS = """
     id, email, name, google_name, preferred_name, department, urn, crn,
-    semester_no, profile_completed, is_banned, banned_at, created_at, updated_at
+    semester_no, profile_completed, is_banned, banned_at, created_at, updated_at, contributor_badge
 """
 USER_RESULT_COLUMNS = (
     "id", "email", "name", "google_name", "preferred_name", "department",
     "urn", "crn", "semester_no", "profile_completed", "is_banned",
-    "banned_at", "created_at", "updated_at",
+    "banned_at", "created_at", "updated_at", "contributor_badge",
 )
 
 
@@ -98,6 +98,11 @@ def create_tables():
             ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN NOT NULL DEFAULT FALSE;
             ALTER TABLE users ADD COLUMN IF NOT EXISTS banned_at TIMESTAMPTZ;
             ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS contributor_badge VARCHAR(20) NOT NULL DEFAULT ''
+                CHECK (contributor_badge IN ('', 'trusted', 'best_contributor'));
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS last_seen_at TIMESTAMPTZ;
+            CREATE INDEX IF NOT EXISTS idx_users_last_seen ON users (last_seen_at DESC)
+                WHERE last_seen_at IS NOT NULL;
 
             UPDATE users
                SET google_name = COALESCE(NULLIF(google_name, ''), NULLIF(name, ''), split_part(email, '@', 1)),

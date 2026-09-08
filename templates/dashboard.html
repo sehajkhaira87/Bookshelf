@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% from '_contributor_badge.html' import contributor_badge %}
 <html lang="en">
 <head>
     
@@ -8,6 +9,8 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Canela:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='contributor-badges.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='notifications.css') }}">
 </head>
 
     {% set dashboard_user = profile if profile is defined and profile else user %}
@@ -105,14 +108,27 @@
                 <img src="{{ url_for('static', filename='images/logo.svg') }}" class="brand-logo" alt="Bookshelf Logo">
             </div>
             
-            <nav class="sidebar-nav">
-                <a href="#" class="nav-item active">Overview</a>
-                
-<a href="{{ url_for('contribute') }}" class="nav-item">Contribution</a>            </nav>
+            <nav class="sidebar-nav" aria-label="Dashboard navigation">
+                <a href="#" class="nav-item active">
+                    <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3V10Zm6 10v-7h6v7"/></svg>
+                    <span>Overview</span>
+                </a>
+                <a href="{{ url_for('pyqs') }}" class="nav-item" aria-label="PYQ archive">
+                    <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v16M3 3c4 0 7 1 9 3 2-2 5-3 9-3v15c-4 0-7 1-9 3-2-2-5-3-9-3V3Z"/></svg>
+                    <span class="nav-label-desktop">PYQ archive</span><span class="nav-label-mobile" aria-hidden="true">PYQs</span>
+                </a>
+                <a href="{{ url_for('contribute') }}" class="nav-item" aria-label="Contribution">
+                    <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 7v10M7 12h10"/></svg>
+                    <span class="nav-label-desktop">Contribution</span><span class="nav-label-mobile" aria-hidden="true">Contribute</span>
+                </a>
+            </nav>
 
             <div class="sidebar-footer">
                 <div style="position: relative;">
-                    <a href="#" class="nav-item" id="settingsBtn">Settings</a>
+                    <a href="#" class="nav-item" id="settingsBtn" aria-expanded="false" aria-controls="settingsPopup">
+                        <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 3 4 0 1 3 3 1 3 3v4l-3 3-3 1-1 3h-4l-1-3-3-1-3-3v-4l3-3 3-1 1-3Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>Settings</span>
+                    </a>
                     
                     <div id="settingsPopup" class="settings-popup hidden">
     <a href="mailto:support@bookshelf.com" class="settings-link">
@@ -135,7 +151,10 @@
 </div>
                 </div>
                 
-                <a href="/logout" class="nav-item text-danger">Log Out</a>
+                <a href="/logout" class="nav-item text-danger">
+                    <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3H3v18h6M9 12h12m-5-5 5 5-5 5"/></svg>
+                    <span>Log Out</span>
+                </a>
             </div>
         </aside>
 
@@ -147,7 +166,25 @@
                     <p class="subtitle" id="instruction-text">Select your department to continue.</p>
                 </div>
                 <div class="user-profile">
-                    <div class="avatar" aria-label="{{ display_name }}">{{ display_name[0]|upper }}</div>
+                    <div class="notification-center" data-endpoint="{{ url_for('student_notifications') }}" data-csrf="{{ csrf_token() }}">
+                        <button type="button" id="notificationBell" class="notification-bell" aria-label="Notifications" aria-expanded="false" aria-controls="notificationPanel">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+                            <span id="notificationCount" class="notification-count" hidden></span>
+                        </button>
+                        <section id="notificationPanel" class="notification-panel" aria-label="Notifications" hidden>
+                            <div class="notification-heading"><h2>Notifications</h2><button type="button" id="closeNotifications" aria-label="Close notifications">×</button></div>
+                            <div class="notification-toolbar"><span>Official updates</span><button type="button" id="readAllNotifications" disabled>Mark all read</button></div>
+                            <p id="notificationStatus" role="status">Loading notifications…</p>
+                            <button type="button" id="retryNotifications" hidden>Try again</button>
+                            <ul id="notificationList"></ul>
+                            <button type="button" id="moreNotifications" hidden>Load older notifications</button>
+                        </section>
+                    </div>
+                    <div class="avatar" aria-label="{{ display_name }}">
+                        <span>{{ display_name[0]|upper }}</span>
+                        {% if user is defined and user.picture %}<img class="profile-photo" src="{{ user.picture }}" alt="{{ display_name }} profile photo" referrerpolicy="no-referrer">{% endif %}
+                    </div>
+                    {{ contributor_badge(profile.contributor_badge if profile is defined and profile else '', 'profile-contributor-badge') }}
                 </div>
             </header>
 
@@ -173,12 +210,23 @@
             </section>
             {% endif %}
 
+            {% if announcement %}
+            <section class="pyq-archive-card official-announcement" aria-labelledby="officialAnnouncementTitle">
+                <div>
+                    <span class="pyq-archive-label">Official announcement</span>
+                    <h2 id="officialAnnouncementTitle">{{ announcement.title }}</h2>
+                    <p>{{ announcement.body }}</p>
+                </div>
+                {% if announcement.link_url %}<a class="pyq-archive-action" href="{{ announcement.link_url }}">View notice <span aria-hidden="true">→</span></a>{% endif %}
+            </section>
+            {% endif %}
+
             <div class="dashboard-flow">
                 
                 <div class="selection-step" id="step-dept">
                     <div class="dept-squares">
                         
-                        <div class="dept-card" data-dept="cse">
+                        <div class="dept-card" data-dept="cse" role="button" tabindex="0">
                             <img src="{{ url_for('static', filename='images/cse-icon.svg') }}" class="dept-icon" alt="CSE Icon">
                             <div>
                                 <div class="card-badge" style="margin-bottom: 8px;">CSE</div>
@@ -186,7 +234,7 @@
                             </div>
                         </div>
                         
-                        <div class="dept-card" data-dept="it">
+                        <div class="dept-card" data-dept="it" role="button" tabindex="0">
                             <img src="{{ url_for('static', filename='images/it-icon.svg') }}" class="dept-icon" alt="IT Icon">
                             <div>
                                 <div class="card-badge" style="margin-bottom: 8px;">IT</div>
@@ -194,20 +242,24 @@
                             </div>
                         </div>
 
+                        {% for code, name in [('ece', 'Electronics'), ('ee', 'Electrical'), ('me', 'Mechanical'), ('ce', 'Civil')] %}
+                        <div class="dept-card" data-dept="{{ code }}" role="button" tabindex="0">
+                            <img src="{{ url_for('static', filename='images/' ~ code ~ '-icon.svg') }}" class="dept-icon" alt="{{ name }} Icon">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">{{ code|upper }}</div>
+                                <h3>{{ name }}</h3>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
                 
                 <div class="selection-step hidden" id="step-sem">
                     <h4 class="step-label">Select Semester</h4>
                     <div class="semester-grid">
-                        <button class="sem-card"><span class="sem-prefix">Sem</span> 1</button>
-                        <button class="sem-card"><span class="sem-prefix">Sem</span> 2</button>
-                        <button class="sem-card"><span class="sem-prefix">Sem</span> 3</button>
-                        <button class="sem-card"><span class="sem-prefix">Sem</span> 4</button>
-                        <button class="sem-card"><span class="sem-prefix">Sem</span> 5</button>
-                        <button class="sem-card"><span class="sem-prefix">Sem</span> 6</button>
-                        <button class="sem-card"><span class="sem-prefix">Sem</span> 7</button>
-                        <button class="sem-card"><span class="sem-prefix">Sem</span> 8</button>
+                        {% for value in range(1, 9) %}
+                        <button class="sem-card" type="button" data-semester="{{ value }}"><span class="sem-prefix">Sem</span> {{ value }}</button>
+                        {% endfor %}
                     </div>
                 </div>
 
@@ -215,7 +267,7 @@
                     <h4 class="step-label">What are you looking for?</h4>
                     <div class="category-squares">
                         
-                        <div class="category-card" data-category="pyqs">
+                        <div class="category-card" data-category="pyqs" data-url="{{ url_for('pyqs') }}" role="link" tabindex="0">
                             <img src="{{ url_for('static', filename='images/pyq-icon.svg') }}" class="category-icon" alt="PYQ">
                             <div>
                                 <div class="card-badge" style="margin-bottom: 8px;">01</div>
@@ -223,15 +275,15 @@
                             </div>
                         </div>
                         
-                        <div class="category-card" data-category="books">
+                        <div class="category-card" data-category="books" data-url="{{ url_for('books') }}" role="link" tabindex="0">
                             <img src="{{ url_for('static', filename='images/books-icon.svg') }}" class="category-icon" alt="Books">
                             <div>
                                 <div class="card-badge" style="margin-bottom: 8px;">02</div>
-                                <h3>Books</h3>
+                                <h3>Digital Books</h3>
                             </div>
                         </div>
                         
-                        <div class="category-card" data-category="assignments">
+                        <div class="category-card" data-category="assignments" data-url="{{ url_for('assignments') }}" role="link" tabindex="0">
                             <img src="{{ url_for('static', filename='images/assignment-icon.svg') }}" class="category-icon" alt="Assignments">
                             <div>
                                 <div class="card-badge" style="margin-bottom: 8px;">03</div>
@@ -239,7 +291,7 @@
                             </div>
                         </div>
                         
-                        <div class="category-card" data-category="notes">
+                        <div class="category-card" data-category="notes" data-url="{{ url_for('notes') }}" role="link" tabindex="0">
                             <img src="{{ url_for('static', filename='images/notes-icon.svg') }}" class="category-icon" alt="Notes">
                             <div>
                                 <div class="card-badge" style="margin-bottom: 8px;">04</div>
@@ -257,6 +309,7 @@
     </div>
     
     <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='notifications.js') }}"></script>
 
     <script>
         console.log("1. Script section reached!");
@@ -282,23 +335,9 @@
                 
             }, 4000); 
         });
-        document.querySelectorAll('.category-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const category = card.getAttribute('data-category');
-                
-                if (category === 'books') {
-                    window.location.href = '/books';
-                } else if (category === 'notes') {
-                    window.location.href = '/notes';
-                } else if (category === 'assignments') { 
-                    window.location.href = '/assignments'; 
-                } else if (category === 'pyqs') {
-                    window.location.href = '/pyqs';
-                }
-            });
-        });
     </script>
 
     
+{% include '_student_activity.html' %}
 </body>
 </html>

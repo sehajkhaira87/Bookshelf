@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+{% from '_contributor_badge.html' import contributor_badge %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} · Bookshelf</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='books.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='resource-catalogue.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='contributor-badges.css') }}">
+</head>
+<body>
+<div class="page-wrapper">
+    <nav class="top-nav"><strong>BOOKSHELF</strong><a href="{{ url_for('dashboard') }}" class="back-btn">← Return to Dashboard</a></nav>
+    <header class="header-section"><div class="page-title"><h1>{{ title }}</h1><p>Browse uploaded study materials for your department and semester.</p></div></header>
+    <nav class="library-tabs" aria-label="Study materials">
+        {% for target, label in [('notes', 'Notes'), ('assignments', 'Assignments'), ('books', 'Digital Books')] %}
+        <a href="{{ url_for(target, branch=branch, semester=semester) }}"{% if endpoint == target %} aria-current="page"{% endif %}>{{ label }}</a>
+        {% endfor %}
+    </nav>
+    <form class="resource-filters" method="get" role="search">
+        <label class="search-label">Search<input name="q" value="{{ search }}" maxlength="200" placeholder="Title or subject name"></label>
+        <label>Department<select name="branch"><option value="">All departments</option>{% for code in ['cse', 'it', 'ece', 'ee', 'me', 'ce'] %}<option value="{{ code }}"{% if branch == code %} selected{% endif %}>{{ code|upper }}</option>{% endfor %}</select></label>
+        <label>Semester<select name="semester"><option value="">All semesters</option>{% for value in range(1, 9) %}<option value="{{ value }}"{% if semester == value|string %} selected{% endif %}>Semester {{ value }}</option>{% endfor %}</select></label>
+        <button type="submit">Search</button>
+        {% if search or branch or semester %}<a href="{{ url_for(endpoint) }}">Clear filters</a>{% endif %}
+    </form>
+    {% if error %}<p class="library-message" role="alert">{{ error }}</p>
+    {% else %}<p class="result-count">{{ total }} resources{% if branch %} · {{ branch|upper }}{% endif %}{% if semester %} · Semester {{ semester }}{% endif %}</p>
+    <main class="content-grid">
+        {% for resource in resources %}
+        <article class="resource-card">
+            <span class="resource-course">{{ resource.branch|upper }} · Semester {{ resource.semester }}</span>
+            {% if resource.is_admin_upload %}
+            <span class="admin-upload-badge" title="Uploaded directly by a Bookshelf administrator.">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z"/><path d="m8.5 12 2.3 2.3 4.7-4.8"/></svg>
+                <span>Official · Admin upload</span>
+            </span>
+            {% else %}
+            {{ contributor_badge(resource.contributor_badge) }}
+            {% endif %}
+            <h2>{{ resource.title }}</h2>
+            {% if resource.subject_name %}<p class="resource-subject">{{ resource.subject_name }}</p>{% endif %}
+            <p class="resource-uploader">Uploaded by <strong>{{ resource.uploader_label }}</strong></p>
+            {% if resource.file_name %}<p class="resource-filename">{{ resource.file_name }}</p>{% endif %}
+            {% if resource.file_size %}<p class="resource-size">{{ '%.2f'|format(resource.file_size / 1048576) }} MB</p>{% endif %}
+            <a class="resource-open" href="{{ resource.blob_url }}" target="_blank" rel="noopener">Open file ↗</a>
+        </article>
+        {% else %}<div class="placeholder-card"><h2>No {{ title|lower }} found</h2><p>Try another search or clear the filters. New verified uploads will appear here.</p></div>{% endfor %}
+    </main>
+    <nav class="resource-pagination" aria-label="Resource pages"><span>Page {{ page }}</span><div>
+        {% if page > 1 %}<a href="{{ url_for(endpoint, branch=branch, semester=semester, q=search, page=page-1) }}">← Previous</a>{% endif %}
+        {% if page * 50 < total %}<a href="{{ url_for(endpoint, branch=branch, semester=semester, q=search, page=page+1) }}">Next →</a>{% endif %}
+    </div></nav>
+    {% endif %}
+</div>
+{% include '_student_activity.html' %}
+</body>
+</html>

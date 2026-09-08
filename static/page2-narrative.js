@@ -205,10 +205,11 @@
     
     let watching = false;
     let cueHidden = false;
+    const watchLoop = window.createDesktopAnimationLoop?.(page2, watch);
 
     function watch() {
         if (!watching) return;
-        requestAnimationFrame(watch);
+        if (watchLoop) watchLoop.request(); else requestAnimationFrame(watch);
         const i = frontIndex();
         if (i < 0) return;
         if (i !== rendered) swapTo(i);
@@ -237,7 +238,7 @@
             setTimeout(function () {
                 ticks.forEach(function (tick) { tick.style.transitionDelay = '0s'; });
                 watching = true;
-                requestAnimationFrame(watch);
+                if (watchLoop) watchLoop.request(); else requestAnimationFrame(watch);
             }, reduceMotion ? 200 : 1000);
             
         }, 6000); 

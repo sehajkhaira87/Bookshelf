@@ -162,6 +162,7 @@ def search_users(search_term: str | None = None, limit: int = DEFAULT_USER_LIMIT
                 u.created_at,
                 COALESCE(u.is_banned, FALSE) AS is_banned,
                 u.banned_at,
+                u.contributor_badge,
                 COUNT(w.id)::INTEGER AS warning_count,
                 MAX(w.created_at) AS latest_warning_at
             FROM users AS u
@@ -179,6 +180,23 @@ def search_users(search_term: str | None = None, limit: int = DEFAULT_USER_LIMIT
     finally:
         if cursor is not None:
             cursor.close()
+        connection.close()
+
+
+def set_contributor_badge(user_id: Any, badge: str) -> bool:
+    """Set one admin-assigned recognition badge; an empty value removes it."""
+    user_id = _positive_user_id(user_id)
+    if badge not in ('', 'trusted', 'best_contributor'):
+        raise AdminUserValidationError('Choose No badge, Trusted, or Best Contributor.')
+    connection = _open_connection()
+    try:
+        with connection, connection.cursor() as cursor:
+            cursor.execute('''UPDATE users SET contributor_badge=%s, updated_at=CURRENT_TIMESTAMP
+                WHERE id=%s RETURNING id''', (badge, user_id))
+            return cursor.fetchone() is not None
+    except Exception as exc:
+        raise AdminUserServiceError('Could not update the contributor badge.') from exc
+    finally:
         connection.close()
 
 
