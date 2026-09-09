@@ -46,32 +46,70 @@ p {
     font-size: 16px;
     font-style: italic;
     color: #a39b8f; 
-    margin-bottom: 60px;
+    margin-bottom: 40px;
     letter-spacing: 0.5px;
 }
 
-input[type="password"] {
-    width: 280px;
-    padding: 12px;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid #5a4b41; 
-    color: #e5e0d8;
-    font-size: 20px;
-    text-align: center;
-    outline: none;
-    transition: all 0.5s ease;
-    font-family: sans-serif;
-    letter-spacing: 4px; 
+.google-sign-in {
+    width: min(320px, calc(100vw - 80px));
+    min-height: 52px;
+    margin: 0 auto;
+    padding: 0 20px;
+    border: 1px solid rgba(229, 224, 216, 0.28);
+    border-radius: 8px;
+    background: #f8f6f2;
+    color: #2c211c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 13px;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-input[type="password"]:focus {
-    border-bottom: 1px solid #d4c5b0;
-    box-shadow: 0px 10px 15px -10px rgba(212, 197, 176, 0.3);
+.google-sign-in:hover {
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.38);
 }
 
-button {
-    display: none; 
+.google-sign-in:focus-visible {
+    outline: 2px solid #d4c5b0;
+    outline-offset: 4px;
+}
+
+.google-icon {
+    width: 21px;
+    height: 21px;
+    flex: 0 0 auto;
+}
+
+.access-note {
+    display: block;
+    margin-top: 18px;
+    color: #8f857b;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.25px;
+}
+
+.admin-alert {
+    width: min(420px, calc(100vw - 80px));
+    margin: -20px auto 24px;
+    padding: 11px 14px;
+    box-sizing: border-box;
+    border: 1px solid rgba(235, 159, 145, 0.4);
+    border-radius: 7px;
+    background: rgba(120, 34, 28, 0.28);
+    color: #f1c0b7;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
 }
 
 .admin-stool {
@@ -93,5 +131,19 @@ button {
     transition: transform 0.4s ease, opacity 0.4s ease;
     cursor: pointer;
     z-index: 50;   
+}
+
+@media (max-width: 700px) {
+    .secret-container {
+        padding: 24px;
+    }
+
+    h1 {
+        font-size: 25px;
+    }
+
+    .guardian-combo {
+        display: none;
+    }
 }
 

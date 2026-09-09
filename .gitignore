@@ -2,3 +2,10 @@ __pycache__/
 *.pyc
 static.zip
 .env
+.venv-test/
+.pyq-test-deps/
+pyq-import-report.json
+admin only/manifest.json
+admin only/pdfs/
+admin only/
+tests/

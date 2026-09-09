@@ -1,0 +1,26 @@
+.communications-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+.communications-card { background: #fff; border: 1px solid #e0e6ef; border-radius: 18px; padding: 28px; min-width: 0; }
+.communications-card h2 { margin: 10px 0 12px; font-size: 23px; }
+.communications-card p { line-height: 1.6; }
+.communications-form { display: grid; gap: 18px; margin-top: 22px; }
+.communications-form label { display: grid; gap: 8px; font-size: 15px; font-weight: 600; }
+.communications-form input, .communications-form textarea, .communications-form select { width: 100%; min-width: 0; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 9px; padding: 12px; background: #fff; color: #202c40; font: inherit; }
+.communications-form textarea { resize: vertical; }
+.communications-form p { margin: 0; font-size: 14px; }
+.communications-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.publication-state { display: inline-block; background: #eaf1ff; padding: 6px 10px; border-radius: 7px; font-size: 14px; }
+.recipient-results { max-height: 250px; overflow-y: auto; margin: 12px 0; }
+.recipient-results label { display: flex; align-items: start; gap: 10px; padding: 12px 6px; border-bottom: 1px solid #e8edf4; cursor: pointer; }
+.recipient-results input { width: 18px; flex-shrink: 0; margin-top: 3px; }
+.recipient-results small { display: block; font-weight: 400; overflow-wrap: anywhere; }
+.selected-recipients { display: flex; flex-wrap: wrap; gap: 8px; }
+.selected-recipients button { max-width: 100%; overflow-wrap: anywhere; }
+.sent-history { margin-top: 24px; }
+.sent-history ul { list-style: none; padding: 0; }
+.sent-history li { display: flex; justify-content: space-between; align-items: start; gap: 20px; padding: 20px 0; border-top: 1px solid #e0e6ef; }
+.sent-history li > div { min-width: 0; }
+.sent-history strong, .sent-message { overflow-wrap: anywhere; white-space: pre-wrap; }
+.sent-history small, .sent-history li > span { color: #596a80; font-size: 14px; }
+.sent-history li > span { flex-shrink: 0; }
+[hidden] { display: none !important; }
+@media (max-width: 850px) { .communications-grid { grid-template-columns: minmax(0, 1fr); } .communications-card { padding: 20px; } .sent-history li { flex-direction: column; gap: 10px; } }

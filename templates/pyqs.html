@@ -15,31 +15,72 @@
                 <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="nav-logo">
             </div>
             
-            <a href="{{ url_for('dashboard') }}" class="back-btn">
+            <a href="{{ url_for('admin_dashboard' if admin else 'dashboard') }}" class="back-btn">
                 <span>←</span> Return to Dashboard
             </a>
         </nav>
         <header class="header-section">
             <div class="page-title">
-                <h1>Previous Papers</h1>
-                <p>Search and download examination archives.</p>
+                <h1>{{ 'Manage PYQs' if admin else 'Previous Papers' }}</h1>
+                <p>Shared papers for all students. Search by subject and exam year.</p>
             </div>
 
-            <div class="minimal-search-box">
+            <form method="get" class="minimal-search-box">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input type="text" class="minimal-search-input" placeholder="Search subjects, years..." autocomplete="off">
-            </div>
+                <input name="q" value="{{ search }}" aria-label="Subject code or name" class="minimal-search-input" placeholder="Subject code or name" maxlength="200">
+                <select name="year" aria-label="Exam year">
+                    <option value="">All years</option>
+                    {% for available_year in archive.years %}
+                    <option value="{{ available_year }}"{% if year == available_year %} selected{% endif %}>{{ available_year }}</option>
+                    {% endfor %}
+                    {% if year and year not in archive.years %}<option value="{{ year }}" selected>{{ year }}</option>{% endif %}
+                </select>
+                <button type="submit">Search</button>
+                {% if search or year %}<a class="clear-search" href="{{ url_for('admin_pyqs' if admin else 'pyqs') }}">Clear</a>{% endif %}
+            </form>
         </header>
 
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+        <p role="status">{{ message }}</p>
+        {% endfor %}
+        {% if admin %}
+        <h2>Upload a PDF</h2>
+        <form class="paper-form" action="{{ url_for('admin_upload_pyq') }}" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+            <label>Subject code <input name="subject_code" required maxlength="100"></label>
+            <label>Subject name <input name="subject_name" required maxlength="255"></label>
+            <label>Exam year <input name="year" type="number" required min="1900" max="9999"></label>
+            <label>PDF (up to 50 MB) <input name="file_upload" type="file" accept=".pdf,application/pdf" required></label>
+            <button type="submit">Upload PYQ</button>
+        </form>
+        {% endif %}
+        <p>{{ '{:,}'.format(total) }} papers found · {{ '{:,}'.format(archive.total) }} in the shared archive</p>
         <main class="content-grid">
-            <div class="placeholder-card">
-                Paper results will pop here.
-            </div>
+            {% for paper in papers %}
+            <article class="paper-card">
+                <h2>{{ paper.title }}</h2>
+                <p>Exam year: {{ paper.year }}</p>
+                <a href="{{ paper.blob_url }}" target="_blank" rel="noopener">Open PDF ↗</a>
+                {% if admin %}
+                <p>{{ paper.original_filename }}</p>
+                <form action="{{ url_for('admin_delete_pyq', paper_id=paper.id) }}" method="post" onsubmit="return confirm('Permanently delete this PYQ?');">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit">Delete PYQ</button>
+                </form>
+                {% endif %}
+            </article>
+            {% else %}<p>No papers found.</p>{% endfor %}
         </main>
+        <nav class="pagination" aria-label="Paper pages">
+            {% if page > 1 %}<a href="{{ url_for('admin_pyqs' if admin else 'pyqs', page=page-1, q=search, year=year or '') }}">Previous</a>{% endif %}
+            <span>Page {{ page }}</span>
+            {% if page * 50 < total %}<a href="{{ url_for('admin_pyqs' if admin else 'pyqs', page=page+1, q=search, year=year or '') }}">Next</a>{% endif %}
+        </nav>
     </div>
 
+{% include '_student_activity.html' %}
 </body>
 </html>

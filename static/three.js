@@ -229,10 +229,11 @@ function initBook3D(canvas, container) {
  // RENDER LOOP 
  let running = true;
  let baseX = 2.3;
+ const renderLoop = window.createDesktopAnimationLoop?.(container, animate);
 
  function animate(t) {
  if (!running) return;
- requestAnimationFrame(animate);
+ if (renderLoop) renderLoop.request(); else requestAnimationFrame(animate);
  const e = t * 0.001;
 
  if (auraMesh && introPlayed) {
@@ -262,11 +263,13 @@ function initBook3D(canvas, container) {
 
  renderer.render(scene, camera);
  }
- requestAnimationFrame(animate);
+ if (renderLoop) renderLoop.request(); else requestAnimationFrame(animate);
 
+ if (!renderLoop) {
  new IntersectionObserver(es => {
  es.forEach(e => { running = e.isIntersecting; if (running) requestAnimationFrame(animate); });
  }, { threshold: 0.05 }).observe(container);
+ }
 }
 
 function initScrollCueBook(sourceBookGroup) {
@@ -305,10 +308,13 @@ function initScrollCueBook(sourceBookGroup) {
 
  cueScene.add(cueBook);
 
+ const cue = cueCanvas.closest('.scroll-cue');
+ const cueLoop = window.createDesktopAnimationLoop?.(cueCanvas, animateCue, () => cue?.style.opacity !== '0');
+ if (cueLoop) window.requestScrollCueRender = cueLoop.request;
  function animateCue(t) {
- requestAnimationFrame(animateCue);
+ if (cueLoop) cueLoop.request(); else requestAnimationFrame(animateCue);
  cueBook.rotation.y = t * 0.0005;
  cueRenderer.render(cueScene, cueCamera);
  }
- requestAnimationFrame(animateCue);
-} 
+ if (cueLoop) cueLoop.request(); else requestAnimationFrame(animateCue);
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notices & notifications · Bookshelf Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin-pyqs.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin-communications.css') }}">
+</head>
+<body>
+<main class="archive-shell">
+    <nav class="archive-nav"><a class="brand" href="{{ url_for('admin_dashboard') }}"><span class="brand-mark">B</span> Bookshelf <span class="admin-label">ADMIN</span></a><a href="{{ url_for('admin_dashboard') }}">← Admin dashboard</a></nav>
+    <header class="archive-heading"><div><p class="eyebrow">STUDENT COMMUNICATIONS</p><h1>Notices & notifications</h1><p class="muted">Keep students informed with official updates from Bookshelf.</p></div></header>
+    {% for category, message in get_flashed_messages(with_categories=true) %}<p class="notice {{ category }}" role="status">{{ message }}</p>{% endfor %}
+    {% if error %}<p class="notice error" role="alert">{{ error }}</p>{% endif %}
+    <div class="communications-grid">
+        <section class="communications-card">
+            <span class="eyebrow">DASHBOARD BANNER</span><h2>Official announcement</h2>
+            <p class="muted">One announcement for everyone. Publishing replaces the current bar; removing it hides the bar.</p>
+            <p class="publication-state">{{ 'Published on the dashboard' if announcement and announcement.active else 'No announcement is published' }}</p>
+            <form action="{{ url_for('admin_announcement') }}" method="post" class="communications-form">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="revision" value="{{ announcement.revision if announcement else 0 }}">
+                <label>Title<input name="notice_title" maxlength="160" required value="{{ submitted.get('notice_title', announcement.title if announcement else '') }}" placeholder="e.g. Library updates for this week"></label>
+                <label>Message<textarea name="notice_body" maxlength="2000" rows="5" required>{{ submitted.get('notice_body', announcement.body if announcement else '') }}</textarea></label>
+                <label>Link <span class="muted">(optional)</span><input name="notice_link" maxlength="2000" value="{{ submitted.get('notice_link', announcement.link_url if announcement else '') }}" placeholder="https://… or /pyqs"></label>
+                <p class="muted">This updates the bar only. Use the notification form to send an inbox update.</p>
+                <div class="communications-actions"><button class="primary" name="action" value="publish" {% if unavailable %}disabled{% endif %}>{{ 'Save announcement' if announcement and announcement.active else 'Publish announcement' }}</button>
+                {% if announcement and announcement.active %}<button name="action" value="remove" formnovalidate {% if unavailable %}disabled{% endif %}>Remove from dashboard</button>{% endif %}</div>
+            </form>
+        </section>
+        <section class="communications-card">
+            <span class="eyebrow">STUDENT INBOX</span><h2>Send a notification</h2>
+            <p class="muted">Deliver an official message to the bell on each recipient’s dashboard.</p>
+            <form action="{{ url_for('admin_send_notification') }}" method="post" class="communications-form" id="sendNotificationForm">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="request_key" value="{{ request_key }}">
+                <label>Title<input name="title" required maxlength="160" value="{{ submitted.get('title', '') }}" placeholder="e.g. New study materials are available"></label>
+                <label>Message<textarea name="body" required maxlength="2000" rows="5">{{ submitted.get('body', '') }}</textarea></label>
+                <label>Link <span class="muted">(optional)</span><input name="link_url" maxlength="2000" value="{{ submitted.get('link_url', '') }}" placeholder="https://… or /notes"></label>
+                <label>Send to<select name="audience" id="notificationAudience"><option value="all">All students</option><option value="selected" {% if submitted.get('audience') == 'selected' %}selected{% endif %}>Selected students</option></select></label>
+                <p class="muted" id="audienceHint">All currently registered, active students. Administrators are excluded.</p>
+                <div id="recipientPicker" data-search-url="{{ url_for('notification_students') }}" hidden>
+                    <label>Find students<input type="search" id="recipientSearch" maxlength="200" placeholder="Name, email, URN or CRN" autocomplete="off"></label>
+                    <p id="recipientStatus" role="status"></p><div id="recipientResults" class="recipient-results"></div>
+                    <p><strong id="recipientCount">0 students selected</strong></p><div id="selectedRecipients" class="selected-recipients">
+                        {% for recipient in submitted.getlist('recipients') %}<input type="hidden" name="recipients" value="{{ recipient }}">{% endfor %}
+                    </div>
+                </div>
+                <button class="primary" id="sendNotificationButton" {% if unavailable %}disabled{% endif %}>Send to all students</button>
+                <p class="muted">Notifications stay in the student’s inbox. No email or browser push is sent.</p>
+            </form>
+        </section>
+    </div>
+    <section class="communications-card sent-history"><h2>Sent notifications</h2><p class="muted">Your latest 50 sends. Read counts show how many recipients marked the message as read.</p>
+        <ul>{% for item in sent %}<li><div><strong>{{ item.title }}</strong><p class="sent-message">{{ item.body }}</p><small>{{ item.created_at.strftime('%d %b %Y, %H:%M UTC') }} · {{ 'All students' if item.audience == 'all' else 'Selected students' }}</small></div><span>{{ item.recipients }} recipients · {{ item.read_count }} read</span></li>{% else %}<li>No notifications sent yet.</li>{% endfor %}</ul>
+    </section>
+</main>
+<script src="{{ url_for('static', filename='admin-communications.js') }}"></script>
+</body>
+</html>
