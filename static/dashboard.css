@@ -870,6 +870,8 @@ body.dark-mode .category-card.selected {
     margin-left: -20px; 
 }
 
+
+
 /*  MOBILE EXCLUSIVE STYLING (DASHBOARD)      */
 @media (max-width: 820px) {
     body {
