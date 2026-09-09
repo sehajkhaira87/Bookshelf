@@ -145,9 +145,8 @@ if create_tables():
     except AdminUserServiceError:
         app.logger.exception("Could not initialize user moderation tables")
 
-# ─────────────────────────────────────────────
 # PUBLIC ROUTES
-# ─────────────────────────────────────────────
+
 
 @app.route('/')
 def home():
@@ -157,17 +156,15 @@ def home():
 def login():
     return render_template('login.html')
 
-# ==========================================
+
 # DUMMY LOGIN FOR FRONTEND TESTING
-# Your backend friend can add the real OAuth back here later!
-# ==========================================
+
 @app.route('/auth/google')
 def auth_google():
     intent = request.args.get('role', 'student').strip().lower()
     if intent not in {'student', 'admin'}:
         intent = 'student'
 
-    # Rotate all session state before starting a fresh OAuth login.
     session.clear()
     session['oauth_intent'] = intent
 
@@ -276,9 +273,9 @@ def logout():
     session.clear()
     return redirect(url_for('home'))
 
-# ─────────────────────────────────────────────
+# 
 # ADMIN ROUTES
-# ─────────────────────────────────────────────
+# 
 
 @app.route('/admin') 
 def admin_panel():
