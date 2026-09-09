@@ -735,7 +735,12 @@ body.dark-mode .category-card.selected {
     margin-left: -20px; 
 }
 
-
+.dept-card {
+    /* Keep your existing padding, border-radius, background, etc. */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; 
+}
 
 /*  MOBILE EXCLUSIVE STYLING (DASHBOARD)      */
 @media (max-width: 820px) {
