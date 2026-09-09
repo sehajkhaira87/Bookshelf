@@ -214,6 +214,20 @@ body {
     margin-right: auto;
 }
 
+.login-alert {
+    width: 100%;
+    margin: -14px 0 8px;
+    padding: 10px 12px;
+    border: 1px solid rgba(177, 59, 45, 0.2);
+    border-radius: 9px;
+    background: rgba(177, 59, 45, 0.08);
+    color: #8a3026;
+    font-size: 12.5px;
+    line-height: 1.4;
+    opacity: 0;
+    animation: fadeIn 0.4s ease 0.55s forwards;
+}
+
 .login-google-hero {
     width: 100%;
     margin-top: 12px;

@@ -3,69 +3,669 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin | Control Center</title>
-    
+    <title>Bookshelf Admin — Control Room</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        (() => {
+            try {
+                const savedTheme = localStorage.getItem('bookshelf_admin_theme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                    document.documentElement.dataset.theme = 'dark';
+                }
+            } catch (_error) {
+                // The dashboard still works when browser storage is unavailable.
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='admin-dashboard.css') }}">
 </head>
 <body>
+    <button class="mobile-nav-toggle" id="mobileNavToggle" type="button" aria-label="Open navigation" aria-expanded="false">
+        <span></span><span></span><span></span>
+    </button>
+    <div class="mobile-scrim" id="mobileScrim" aria-hidden="true"></div>
 
-    <div class="sidebar">
-        <h2>Admin Vault</h2>
-        <button class="nav-btn active"> Upload Resources</button>
-        <button class="nav-btn"> User Database</button>
-        <button class="nav-btn"> Contributions <span class="badge">Later</span></button>
-    </div>
-
-    <div class="content">
-        <h1 class="header-title">Resource Manager</h1>
-        
-        <div class="card">
-            <h3>Upload New File</h3>
-            <p>Add a new PYQ, Assignment, or Book directly to the database.</p>
-            
-            <form action="/upload" method="POST" enctype="multipart/form-data">
-                
-                <label>Category</label>
-                <select name="category" required>
-                    <option value="pyq">Past Year Question (PYQ)</option>
-                    <option value="assignment">Assignment / Lab File</option>
-                    <option value="book">Digital Book</option>
-                </select>
-
-                <label>Branch</label>
-                <select name="branch" required>
-                    <option value="" disabled selected>Select a Branch...</option>
-                    <option value="cse">Computer Science (CSE)</option>
-                    <option value="ece">Information and Technology (IT)</option>
-                    <option value="ee">Electrical (EE)</option>
-                    <option value="me">Mechanical (ME)</option>
-                    <option value="ce">Civil (CE)</option>
-                </select>
-   
-                <label>Semester</label>
-                <select name="semester" required>
-                    <option value="" disabled selected>Select a Semester...</option>
-                    <option value="1">1st Semester</option>
-                    <option value="2">2nd Semester</option>
-                    <option value="3">3rd Semester</option>
-                    <option value="4">4th Semester</option>
-                    <option value="5">5th Semester</option>
-                    <option value="6">6th Semester</option>
-                    <option value="7">7th Semester</option>
-                    <option value="8">8th Semester</option>
-                </select>
-
-                <label>Resource Title</label>
-                <input type="text" name="title" placeholder="e.g., Artificial Intelligence PYQ 2025" required>
-
-                <label>Attach File</label>
-                <input type="file" name="file_upload" required>
-
-                <button type="submit" class="btn-submit">Upload to Database</button>
-            </form>
+    <div class="app-shell">
+    <aside class="sidebar" id="adminSidebar">
+        <div class="brand-lockup">
+            <div class="brand-mark" aria-hidden="true">B</div>
+            <div>
+                <span class="brand-name">Bookshelf</span>
+                <span class="brand-subtitle">Administration</span>
+            </div>
         </div>
 
+        <div class="nav-label">Workspace</div>
+        <nav class="sidebar-nav" aria-label="Admin workspace">
+            <button class="nav-btn active" type="button" data-panel="upload" aria-current="page" onclick="switchPanel('upload')">
+                <span class="nav-icon" aria-hidden="true">＋</span><span>Upload resource</span>
+            </button>
+            <button class="nav-btn" type="button" data-panel="library" onclick="switchPanel('library')">
+                <span class="nav-icon" aria-hidden="true">▤</span><span>Resource library</span>
+            </button>
+            <a class="nav-btn pyq-nav-link" href="{{ url_for('admin_pyqs') }}">
+                <span class="nav-icon" aria-hidden="true">▥</span><span>PYQ library</span>
+            </a>
+            <button class="nav-btn" type="button" data-panel="users" onclick="switchPanel('users')">
+                <span class="nav-icon" aria-hidden="true">◎</span><span>User database</span>
+            </button>
+            <a class="nav-btn pyq-nav-link" href="{{ url_for('admin_communications') }}">
+                <span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></span><span>Notices & notifications</span>
+            </a>
+            <button class="nav-btn nav-btn-disabled" type="button" disabled>
+                <span class="nav-icon" aria-hidden="true">↗</span><span>Contributions</span><span class="badge">Soon</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="theme-toggle" id="adminThemeToggle" type="button" aria-pressed="false">
+                <span class="theme-toggle-icon" aria-hidden="true">☾</span>
+                <span class="theme-toggle-label">Dark mode</span>
+                <span class="theme-toggle-track" aria-hidden="true"><span></span></span>
+            </button>
+            <div class="admin-profile">
+                <span class="admin-avatar">{{ session.get('admin_user', {}).get('name', 'A')[:1]|upper }}</span>
+                <span class="admin-profile-copy">
+                    <strong>{{ session.get('admin_user', {}).get('name', 'Administrator') }}</strong>
+                    <small>{{ session.get('admin_user', {}).get('email', 'Secure session') }}</small>
+                </span>
+            </div>
+            <a href="/logout" class="logout-btn"><span aria-hidden="true">↙</span> Sign out</a>
+        </div>
+    </aside>
+
+    <main class="content">
+        <header class="workspace-header">
+            <div>
+                <span class="eyebrow">Bookshelf administration</span>
+                <h1>Control room</h1>
+                <p>Keep the library useful, trusted, and ready for every student.</p>
+            </div>
+            <div class="workspace-status" title="Administrative services are available">
+                <span class="status-dot"></span>
+                <span>Systems ready</span>
+            </div>
+        </header>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+            <div class="flash-msg flash-{{ category }}">
+                <span>{{ message }}</span>
+                <button class="flash-close" onclick="this.parentElement.remove()">×</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Stats Bar -->
+        <section class="stats-bar" aria-label="Library overview">
+            <div class="stat-card stat-card-primary">
+                <span class="stat-label">Total resources</span>
+                <span class="stat-number">{{ stats.get('total', 0) }}</span>
+                <span class="stat-note">Across the full library</span>
+            </div>
+            <a class="stat-card pyq-stat-link" href="{{ url_for('admin_pyqs') }}">
+                <span class="stat-label">PYQs</span>
+                <span class="stat-number">{{ '{:,}'.format(pyq_summary.total) if pyq_summary is not none else '—' }}</span>
+                <span class="stat-note">Open shared exam archive →</span>
+            </a>
+            <div class="stat-card">
+                <span class="stat-label">Assignments</span>
+                <span class="stat-number">{{ stats.get('by_category', {}).get('assignment', 0) }}</span>
+                <span class="stat-note">Course work</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Notes / Books</span>
+                <span class="stat-number">{{ stats.get('by_category', {}).get('notes', 0) + stats.get('by_category', {}).get('book', 0) }}</span>
+                <span class="stat-note">Study material</span>
+            </div>
+            <div class="stat-card stat-verified">
+                <span class="stat-label">Verified</span>
+                <span class="stat-number">{{ stats.get('by_status', {}).get('verified', 0) }}</span>
+                <span class="stat-note">Ready for students</span>
+            </div>
+            <a class="stat-card active-students-stat" href="{{ url_for('admin_dashboard', panel='users') }}#activeStudents" title="Signed-in students seen in the last five minutes">
+                <span class="stat-label"><span class="presence-dot" aria-hidden="true"></span> Active now</span>
+                <span class="stat-number" id="activeStudentCount">—</span>
+                <span class="stat-note">Students · last 5 minutes</span>
+            </a>
+        </section>
+
+        <!-- ═══ PANEL 1: Upload Resources ═══ -->
+        <div class="panel active" id="panel-upload">
+            <div class="panel-heading">
+                <div>
+                    <span class="section-kicker">Library intake</span>
+                    <h2 class="header-title">Upload a resource</h2>
+                    <p>Publish trusted study material to the right course collection.</p>
+                </div>
+                <span class="panel-step">01</span>
+            </div>
+
+            <div class="card">
+                <div class="card-intro">
+                    <span class="card-icon" aria-hidden="true">↑</span>
+                    <div>
+                        <h3>Resource details</h3>
+                        <p>Add an assignment, note, or book directly to the library. <a href="{{ url_for('admin_pyqs') }}">Upload and manage shared PYQs →</a></p>
+                    </div>
+                </div>
+                
+                <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select name="category" required>
+                                <option value="" disabled selected>Select Type...</option>
+                                <option value="assignment">Assignment / Lab File</option>
+                                <option value="book">Digital Book</option>
+                                <option value="notes">Notes</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Branch</label>
+                            <select name="branch" required>
+                                <option value="" disabled selected>Select Branch...</option>
+                                <option value="cse">Computer Science (CSE)</option>
+                                <option value="it">Information Technology (IT)</option>
+                                <option value="ece">Electronics (ECE)</option>
+                                <option value="ee">Electrical (EE)</option>
+                                <option value="me">Mechanical (ME)</option>
+                                <option value="ce">Civil (CE)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Semester</label>
+                            <select name="semester" required>
+                                <option value="" disabled selected>Select Semester...</option>
+                                <option value="1">1st Semester</option>
+                                <option value="2">2nd Semester</option>
+                                <option value="3">3rd Semester</option>
+                                <option value="4">4th Semester</option>
+                                <option value="5">5th Semester</option>
+                                <option value="6">6th Semester</option>
+                                <option value="7">7th Semester</option>
+                                <option value="8">8th Semester</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Subject Name <span class="optional-tag">optional</span></label>
+                            <input type="text" name="subject_name" placeholder="e.g., Data Structures, Operating Systems">
+                        </div>
+                    </div>
+
+                    <label>Resource Title</label>
+                    <input type="text" name="title" placeholder="e.g., Artificial Intelligence PYQ 2025" required>
+
+                    <label>Attach File</label>
+                    <div class="file-drop-zone" id="dropZone">
+                        <input type="file" name="file_upload" id="fileInput" required>
+                        <div class="drop-text">
+                            <span class="drop-icon">↑</span>
+                            <p>Drop file here or <strong>click to browse</strong></p>
+                            <span class="drop-hint">PDF, DOCX, PPT, Images — Max 50MB</span>
+                        </div>
+                        <div class="file-preview hidden" id="filePreview">
+                            <span class="file-icon">📎</span>
+                            <span class="file-name" id="fileName"></span>
+                            <span class="file-size" id="fileSize"></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        <span class="btn-text">Publish resource <span aria-hidden="true">→</span></span>
+                        <span class="btn-loading hidden">Uploading...</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ═══ PANEL 2: Resource Library ═══ -->
+        <div class="panel" id="panel-library">
+            <div class="panel-heading">
+                <div>
+                    <span class="section-kicker">Content operations</span>
+                    <h2 class="header-title">Resource library</h2>
+                    <p>Review availability, verification status, and course placement. <a href="{{ url_for('admin_pyqs') }}">Manage shared PYQs →</a></p>
+                </div>
+                <span class="panel-step">02</span>
+            </div>
+
+            <!-- Filters -->
+            <div class="filter-bar">
+                <select id="filterCategory" onchange="filterTable()">
+                    <option value="">All Categories</option>
+                    <option value="pyq">PYQ</option>
+                    <option value="assignment">Assignment</option>
+                    <option value="book">Book</option>
+                    <option value="notes">Notes</option>
+                </select>
+                <select id="filterBranch" onchange="filterTable()">
+                    <option value="">All Branches</option>
+                    <option value="cse">CSE</option>
+                    <option value="it">IT</option>
+                    <option value="ece">ECE</option>
+                    <option value="ee">EE</option>
+                    <option value="me">ME</option>
+                    <option value="ce">CE</option>
+                </select>
+                <select id="filterStatus" onchange="filterTable()">
+                    <option value="">All Status</option>
+                    <option value="verified">Verified</option>
+                    <option value="unverified">Unverified</option>
+                </select>
+                <span class="resource-count" id="resourceCount">{{ resources|length }} resources</span>
+            </div>
+            
+            {% if resources %}
+            <div class="table-wrapper">
+                <table class="resource-table" id="resourceTable">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Branch</th>
+                            <th>Sem</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Uploaded</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in resources %}
+                        <tr data-category="{{ r.category }}" data-branch="{{ r.branch }}" data-status="{{ r.status }}">
+                            <td class="td-title">
+                                <a href="{{ r.blob_url }}" target="_blank" class="resource-link">{{ r.title }}</a>
+                                {% if r.file_name %}
+                                <span class="td-filename">{{ r.file_name }}</span>
+                                {% endif %}
+                            </td>
+                            <td><span class="cat-badge cat-{{ r.category }}">{{ r.category|upper }}</span></td>
+                            <td><span class="branch-tag">{{ r.branch|upper }}</span></td>
+                            <td>{{ r.semester }}</td>
+                            <td>{{ r.subject_name or '—' }}</td>
+                            <td>
+                                <span class="status-badge status-{{ r.status }}">{{ r.status }}</span>
+                            </td>
+                            <td class="td-date">{{ r.created_at[:10] if r.created_at else '—' }}</td>
+                            <td class="td-actions">
+                                <a href="{{ r.blob_url }}" target="_blank" class="action-btn action-view" title="Open file">↗</a>
+                                <form action="/admin/toggle-status/{{ r.id }}" method="POST" style="display:inline;">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="action-btn action-toggle" title="Toggle status">⟳</button>
+                                </form>
+                                <form action="/admin/delete/{{ r.id }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this resource permanently?');">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="action-btn action-delete" title="Delete">✕</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <span class="empty-icon">📚</span>
+                <h3>No resources yet</h3>
+                <p>Upload your first resource using the Upload panel.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ═══ PANEL 3: User Database ═══ -->
+        <div class="panel" id="panel-users">
+            <div class="panel-heading">
+                <div>
+                    <span class="section-kicker">Community oversight</span>
+                    <h2 class="header-title">User database</h2>
+                    <p>Find student accounts, review details, and manage access.</p>
+                </div>
+                <span class="panel-step">03</span>
+            </div>
+
+            <section class="active-students-panel" id="activeStudents" data-endpoint="{{ url_for('admin_active_students') }}" data-user-url="{{ url_for('admin_dashboard', panel='users') }}">
+                <div class="active-students-heading">
+                    <div class="active-students-overview"><strong class="presence-total" id="activeStudentPanelCount">—</strong><div><h3>Active students</h3><p>Seen in the last 5 minutes · updates every 30 seconds.</p></div></div>
+                    <div class="active-students-controls">
+                        <button type="button" id="toggleActiveStudents" aria-expanded="true" aria-controls="activeStudentList">Hide students</button>
+                        <button type="button" id="refreshActiveStudents">Refresh</button>
+                    </div>
+                </div>
+                <p id="activeStudentStatus" role="status">Loading active students…</p>
+                <ul id="activeStudentList"></ul>
+            </section>
+
+            <div class="user-toolbar">
+                <form action="/admin-dashboard" method="GET" class="user-search-form" role="search">
+                    <label for="userSearch" class="sr-only">Search registered users</label>
+                    <input
+                        type="search"
+                        id="userSearch"
+                        name="q"
+                        value="{{ request.args.get('q', '') }}"
+                        maxlength="200"
+                        placeholder="Search name, email, URN or CRN"
+                        autocomplete="off"
+                    >
+                    <button type="submit" class="user-search-btn">Search</button>
+                    {% if request.args.get('q') %}
+                    <a href="/admin-dashboard?panel=users" class="user-clear-btn">Clear</a>
+                    {% endif %}
+                </form>
+                <span class="user-result-count">
+                    {{ users|default([], true)|length }} user{% if users|default([], true)|length != 1 %}s{% endif %}
+                </span>
+            </div>
+
+            {% if users|default([], true) %}
+            <div class="table-wrapper user-table-wrapper">
+                <table class="resource-table user-table" role="table" aria-label="Registered students">
+                    <thead role="rowgroup">
+                        <tr role="row">
+                            <th role="columnheader" scope="col">Names</th>
+                            <th role="columnheader" scope="col">Account</th>
+                            <th role="columnheader" scope="col">Academic details</th>
+                            <th role="columnheader" scope="col">Warnings</th>
+                            <th role="columnheader" scope="col">Status</th>
+                            <th role="columnheader" scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody role="rowgroup">
+                        {% for managed_user in users %}
+                        <tr role="row">
+                            <td class="user-name-cell" role="cell"><span class="user-cell-label" aria-hidden="true">Names</span>
+                                <span class="preferred-name">{{ managed_user.preferred_name or 'Not provided' }}</span>
+                                <span class="name-caption">Entered name</span>
+                                <span class="google-name">{{ managed_user.google_name or 'Not provided' }}</span>
+                                <span class="name-caption">Google name</span>
+                                <form action="{{ url_for('admin_contributor_badge', user_id=managed_user.id) }}" method="post" class="contributor-badge-form">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="q" value="{{ request.args.get('q', '') }}">
+                                    <label for="badge-{{ managed_user.id }}">Contributor badge</label>
+                                    <select name="badge" id="badge-{{ managed_user.id }}">
+                                        <option value="">No badge</option>
+                                        <option value="trusted"{% if managed_user.contributor_badge == 'trusted' %} selected{% endif %}>Trusted</option>
+                                        <option value="best_contributor"{% if managed_user.contributor_badge == 'best_contributor' %} selected{% endif %}>Best Contributor</option>
+                                    </select>
+                                    <button type="submit" class="moderation-btn">Save badge</button>
+                                </form>
+                            </td>
+                            <td role="cell"><span class="user-cell-label" aria-hidden="true">Account</span>
+                                <span class="user-email">{{ managed_user.email }}</span>
+                                <span class="user-meta">Joined {{ managed_user.created_at.strftime('%d %b %Y') if managed_user.created_at else '—' }}</span>
+                            </td>
+                            <td role="cell"><span class="user-cell-label" aria-hidden="true">Academic details</span>
+                                <span class="academic-primary">
+                                    {{ managed_user.department|upper if managed_user.department else 'Department —' }}
+                                    {% if managed_user.semester_no %} · Sem {{ managed_user.semester_no }}{% endif %}
+                                </span>
+                                <span class="user-meta">URN {{ managed_user.urn or '—' }}</span>
+                                <span class="user-meta">CRN {{ managed_user.crn or '—' }}</span>
+                            </td>
+                            <td role="cell"><span class="user-cell-label" aria-hidden="true">Warnings</span>
+                                <span class="warning-count{% if managed_user.warning_count %} has-warnings{% endif %}">
+                                    {{ managed_user.warning_count or 0 }} warning{% if managed_user.warning_count != 1 %}s{% endif %}
+                                </span>
+                                {% if managed_user.latest_warning_at %}
+                                <span class="user-meta">Latest {{ managed_user.latest_warning_at.strftime('%d %b %Y') }}</span>
+                                {% endif %}
+                                {% set warning_history = warnings_by_user|default({}) %}
+                                {% set managed_warnings = warning_history.get(managed_user.id, []) %}
+                                {% if managed_warnings %}
+                                <details class="warning-history">
+                                    <summary>View / remove</summary>
+                                    <div class="warning-history-list">
+                                        {% for warning in managed_warnings %}
+                                        <div class="warning-history-item">
+                                            <p>{{ warning.message }}</p>
+                                            <div class="warning-history-meta">
+                                                <span>{{ warning.created_at.strftime('%d %b %Y') if warning.created_at else 'Date unavailable' }}</span>
+                                                <form
+                                                    action="/admin/users/{{ managed_user.id }}/warnings/{{ warning.id }}/delete"
+                                                    method="POST"
+                                                    onsubmit="return confirm('Remove this warning from the user?');"
+                                                >
+                                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                                    <button type="submit" class="warning-remove-btn">Remove</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </details>
+                                {% endif %}
+                            </td>
+                            <td role="cell"><span class="user-cell-label" aria-hidden="true">Status</span>
+                                {% if managed_user.is_banned %}
+                                <span class="user-status user-status-banned">Banned</span>
+                                {% if managed_user.banned_at %}
+                                <span class="user-meta">{{ managed_user.banned_at.strftime('%d %b %Y') }}</span>
+                                {% endif %}
+                                {% else %}
+                                <span class="user-status user-status-active">Active</span>
+                                {% endif %}
+                            </td>
+                            <td class="user-actions" role="cell"><span class="user-cell-label" aria-hidden="true">Actions</span>
+                                <div class="user-action-row">
+                                    {% if managed_user.is_banned %}
+                                    <form action="/admin/users/{{ managed_user.id }}/unban" method="POST" onsubmit="return confirm('Restore access for this user?');">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="moderation-btn moderation-unban">Unban</button>
+                                    </form>
+                                    {% else %}
+                                    <form action="/admin/users/{{ managed_user.id }}/ban" method="POST" onsubmit="return confirm('Ban this user from Bookshelf?');">
+                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="moderation-btn moderation-ban">Ban</button>
+                                    </form>
+                                    {% endif %}
+
+                                    <details class="warning-composer">
+                                        <summary class="moderation-btn moderation-warn">Warn</summary>
+                                        <form action="/admin/users/{{ managed_user.id }}/warn" method="POST" class="warning-form">
+                                            <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                                            <label for="warning-{{ managed_user.id }}">Warning for {{ managed_user.preferred_name or managed_user.google_name or managed_user.email }}</label>
+                                            <textarea
+                                                id="warning-{{ managed_user.id }}"
+                                                name="message"
+                                                maxlength="2000"
+                                                rows="4"
+                                                placeholder="Explain what the user needs to correct…"
+                                                required
+                                            ></textarea>
+                                            <button type="submit" class="warning-send-btn">Send warning</button>
+                                        </form>
+                                    </details>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <span class="empty-icon">👥</span>
+                {% if request.args.get('q') %}
+                <h3>No users found</h3>
+                <p>Try a different name, email, URN or CRN.</p>
+                {% else %}
+                <h3>No registered users</h3>
+                <p>Users will appear here after signing in.</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+    </main>
     </div>
 
+    <script>
+        // ── Panel Switching ──
+        function switchPanel(panelName) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.sidebar .nav-btn').forEach(button => {
+                button.classList.remove('active');
+                button.removeAttribute('aria-current');
+            });
+            
+            const panel = document.getElementById('panel-' + panelName);
+            if (panel) panel.classList.add('active');
+
+            // Highlight the correct nav button
+            const activeButton = Array.from(document.querySelectorAll('.sidebar .nav-btn[data-panel]'))
+                .find(button => button.dataset.panel === panelName);
+            if (activeButton) {
+                activeButton.classList.add('active');
+                activeButton.setAttribute('aria-current', 'page');
+            }
+
+            document.body.classList.remove('sidebar-open');
+            document.getElementById('mobileNavToggle').setAttribute('aria-expanded', 'false');
+        }
+
+        const mobileNavToggle = document.getElementById('mobileNavToggle');
+        const mobileScrim = document.getElementById('mobileScrim');
+        mobileNavToggle.addEventListener('click', () => {
+            const isOpen = document.body.classList.toggle('sidebar-open');
+            mobileNavToggle.setAttribute('aria-expanded', String(isOpen));
+        });
+        mobileScrim.addEventListener('click', () => {
+            document.body.classList.remove('sidebar-open');
+            mobileNavToggle.setAttribute('aria-expanded', 'false');
+        });
+
+        // ── Persistent Admin Theme ──
+        const adminThemeToggle = document.getElementById('adminThemeToggle');
+        const themeToggleIcon = adminThemeToggle.querySelector('.theme-toggle-icon');
+        const themeToggleLabel = adminThemeToggle.querySelector('.theme-toggle-label');
+
+        function syncAdminThemeToggle() {
+            const isDark = document.documentElement.dataset.theme === 'dark';
+            adminThemeToggle.setAttribute('aria-pressed', String(isDark));
+            adminThemeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+            themeToggleIcon.textContent = isDark ? '☀' : '☾';
+            themeToggleLabel.textContent = isDark ? 'Light mode' : 'Dark mode';
+        }
+
+        adminThemeToggle.addEventListener('click', () => {
+            const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+            if (nextTheme === 'dark') {
+                document.documentElement.dataset.theme = 'dark';
+            } else {
+                delete document.documentElement.dataset.theme;
+            }
+            try {
+                localStorage.setItem('bookshelf_admin_theme', nextTheme);
+            } catch (_error) {
+                // Keep the active theme even if persistence is unavailable.
+            }
+            syncAdminThemeToggle();
+        });
+
+        syncAdminThemeToggle();
+
+        // ── File Input Preview ──
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const filePreview = document.getElementById('filePreview');
+        const dropText = dropZone.querySelector('.drop-text');
+
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                document.getElementById('fileName').textContent = file.name;
+                document.getElementById('fileSize').textContent = formatFileSize(file.size);
+                filePreview.classList.remove('hidden');
+                dropText.classList.add('hidden');
+            }
+        });
+
+        // Drag & drop visual feedback
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+
+        // ── Upload Form Loading State ──
+        document.getElementById('uploadForm').addEventListener('submit', function() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.querySelector('.btn-text').classList.add('hidden');
+            btn.querySelector('.btn-loading').classList.remove('hidden');
+        });
+
+        // ── Table Filtering ──
+        function filterTable() {
+            const category = document.getElementById('filterCategory').value;
+            const branch = document.getElementById('filterBranch').value;
+            const status = document.getElementById('filterStatus').value;
+            
+            const rows = document.querySelectorAll('#resourceTable tbody tr');
+            let visible = 0;
+
+            rows.forEach(row => {
+                const matchCat = !category || row.dataset.category === category;
+                const matchBranch = !branch || row.dataset.branch === branch;
+                const matchStatus = !status || row.dataset.status === status;
+                
+                if (matchCat && matchBranch && matchStatus) {
+                    row.style.display = '';
+                    visible++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            document.getElementById('resourceCount').textContent = visible + ' resources';
+        }
+
+        // ── Auto-dismiss flash messages ──
+        setTimeout(() => {
+            document.querySelectorAll('.flash-msg').forEach(msg => {
+                msg.style.opacity = '0';
+                msg.style.transform = 'translateY(-10px)';
+                setTimeout(() => msg.remove(), 400);
+            });
+        }, 5000);
+
+        // Keep user management visible after a search or moderation redirect.
+        const dashboardParams = new URLSearchParams(window.location.search);
+        const requestedPanel = dashboardParams.get('panel');
+        if (requestedPanel && ['upload', 'library', 'users'].includes(requestedPanel)) {
+            switchPanel(requestedPanel);
+        } else if (dashboardParams.has('q')) {
+            switchPanel('users');
+        }
+    </script>
+
+<script src="{{ url_for('static', filename='admin-presence.js') }}"></script>
 </body>
 </html>

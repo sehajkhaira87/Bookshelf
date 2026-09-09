@@ -17,12 +17,30 @@
     const MIN_ROT = -(N - 1) * STEP;
     const MAX_ROT = 0;
 
+    let layoutLoop = null;
+    let height = container.clientHeight;
+    let dirty = true;
+    const writtenStyles = new WeakMap();
+    function setStyle(element, property, value) {
+        if (!layoutLoop?.desktop) {
+            writtenStyles.delete(element);
+            element.style[property] = value;
+            return;
+        }
+        let previous = writtenStyles.get(element);
+        if (!previous) { previous = {}; writtenStyles.set(element, previous); }
+        if (previous[property] === value) return;
+        previous[property] = value;
+        element.style[property] = value;
+    }
+
     let rotation = 0, targetRotation = 0;
     let tiltX = 0, tiltY = 0, targetTiltX = 0, targetTiltY = 0;
 
     // exposed so ScrollTrigger can drive this directly from scroll progress
     window.setPageWheelProgress = function (p) {
         targetRotation = MAX_ROT + (MIN_ROT - MAX_ROT) * p;
+        if (layoutLoop) layoutLoop.request();
     };
 
     function makeContentSVG() {
@@ -75,16 +93,20 @@
         const r = container.getBoundingClientRect();
         targetTiltY = ((e.clientX - r.left) / r.width - 0.5) * 8;
         targetTiltX = ((e.clientY - r.top) / r.height - 0.5) * -5;
+        if (layoutLoop) layoutLoop.request();
     });
 
     function layout() {
-        const ch = container.clientHeight;
+        const ch = layoutLoop?.desktop ? height : container.clientHeight;
+        const previousRotation = rotation, previousTiltX = tiltX, previousTiltY = tiltY;
         const cx = -60, cy = ch / 2, R = Math.min(260, ch * 0.42);
 
         rotation += (targetRotation - rotation) * 0.09;
         tiltX += (targetTiltX - tiltX) * 0.06;
         tiltY += (targetTiltY - tiltY) * 0.06;
-        stage.style.transform = `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+        const unchanged = previousRotation === rotation && previousTiltX === tiltX && previousTiltY === tiltY;
+        if (layoutLoop?.desktop && unchanged && !dirty) return;
+        setStyle(stage, 'transform', `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`);
 
         const sorted = [];
         for (let i = 0; i < N; i++) {
@@ -109,29 +131,40 @@
             if (wrapped < -Math.PI) wrapped += Math.PI * 2;
             const rotY = -wrapped * (180 / Math.PI) * 0.85;
 
-            card.style.left = (x - 66) + 'px';
-            card.style.top = (y - 86) + 'px';
-            card.style.transform = `translateZ(${front * 40}px) scale(${scale}) rotateY(${rotY}deg)`;
-            card.style.opacity = opacity;
-            card.style.filter = `blur(${blur}px)`;
-            card.style.zIndex = Math.round(front * 1000) + 2000;
+            setStyle(card, 'left', (x - 66) + 'px');
+            setStyle(card, 'top', (y - 86) + 'px');
+            setStyle(card, 'transform', `translateZ(${front * 40}px) scale(${scale}) rotateY(${rotY}deg)`);
+            setStyle(card, 'opacity', opacity);
+            setStyle(card, 'filter', `blur(${blur}px)`);
+            setStyle(card, 'zIndex', Math.round(front * 1000) + 2000);
 
             const isFront = front > 0.9;
             const frontT = Math.max(0, (front - 0.9) / 0.1);
-            card.style.boxShadow = isFront
+            setStyle(card, 'boxShadow', isFront
                 ? `inset 0 1px 0 rgba(255,255,255,0.6), 0 30px 70px rgba(0,0,0,0.5), 0 0 0 1px rgba(242,193,78,${0.5 * frontT}), 0 0 45px rgba(242,193,78,${0.3 * frontT})`
-                : `inset 0 1px 0 rgba(255,255,255,0.6), 0 20px 40px rgba(0,0,0,0.35)`;
-            card.style.borderColor = isFront ? `rgba(242,193,78,${0.5 * frontT})` : 'rgba(140,100,32,0.1)';
+                : `inset 0 1px 0 rgba(255,255,255,0.6), 0 20px 40px rgba(0,0,0,0.35)`);
+            setStyle(card, 'borderColor', isFront ? `rgba(242,193,78,${0.5 * frontT})` : 'rgba(140,100,32,0.1)');
 
-            label.style.left = (x + 100) + 'px'; label.style.top = (y - 18) + 'px';
-            label.style.opacity = isFront ? frontT : 0;
-            desc.style.left = (x + 100) + 'px'; desc.style.top = (y + 16) + 'px';
-            desc.style.opacity = isFront ? frontT * 0.9 : 0;
-            line.style.left = (x + 100) + 'px'; line.style.top = (y + 2) + 'px'; line.style.width = '70px';
-            line.style.opacity = isFront ? frontT * 0.7 : 0;
+            setStyle(label, 'left', (x + 100) + 'px'); setStyle(label, 'top', (y - 18) + 'px');
+            setStyle(label, 'opacity', isFront ? frontT : 0);
+            setStyle(desc, 'left', (x + 100) + 'px'); setStyle(desc, 'top', (y + 16) + 'px');
+            setStyle(desc, 'opacity', isFront ? frontT * 0.9 : 0);
+            setStyle(line, 'left', (x + 100) + 'px'); setStyle(line, 'top', (y + 2) + 'px'); setStyle(line, 'width', '70px');
+            setStyle(line, 'opacity', isFront ? frontT * 0.7 : 0);
         });
 
-        requestAnimationFrame(layout);
+        dirty = false;
+        if (layoutLoop) {
+            if (!layoutLoop.desktop || !unchanged) layoutLoop.request();
+        } else requestAnimationFrame(layout);
     }
-    layout();
+    layoutLoop = window.createDesktopAnimationLoop?.(container, layout);
+    if (layoutLoop) {
+        new ResizeObserver(() => {
+            height = container.clientHeight;
+            dirty = true;
+            layoutLoop.request();
+        }).observe(container);
+        layoutLoop.request();
+    } else layout();
 })();

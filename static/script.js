@@ -1,3 +1,34 @@
+// Desktop effects share a single-flight scheduler. The original mobile/tablet
+// paths remain in use, and visible animations still run at the display's cadence.
+window.createDesktopAnimationLoop = function (element, render, isEnabled = () => true) {
+ const desktop = window.matchMedia('(min-width: 961px) and (hover: hover) and (pointer: fine)');
+ if (!desktop.matches) return null;
+ let frame = null;
+ let visible = false;
+ const active = () => !desktop.matches || (visible && !document.hidden && isEnabled());
+ function request() {
+  if (frame !== null || !active()) return;
+  frame = requestAnimationFrame(time => {
+   frame = null;
+   if (active()) render(time);
+  });
+ }
+ function cancel() {
+  if (frame !== null) cancelAnimationFrame(frame);
+  frame = null;
+ }
+ function sync() {
+  if (active()) request(); else cancel();
+ }
+ new IntersectionObserver(entries => {
+  visible = entries[0].isIntersecting;
+  sync();
+ }).observe(element);
+ document.addEventListener('visibilitychange', sync);
+ desktop.addEventListener('change', sync);
+ return { request, cancel, get desktop() { return desktop.matches; } };
+};
+
 gsap.registerPlugin(ScrollTrigger);
 if ("scrollRestoration" in history) {
  history.scrollRestoration = "manual";
@@ -115,16 +146,20 @@ let bulbParallaxY = 0;
 
 let anchorX = 0;
 let mouseX = 0;
+let heroBounds = { left: 0, width: 0 };
+let ropeSize = { width: 0, height: 0 };
 
 function computeAnchor() {
  const heroRect = heroEl.getBoundingClientRect();
  anchorX = heroRect.width * 0.60;
+ heroBounds = { left: heroRect.left, width: heroRect.width };
 }
 
 function sizeRopeCanvas() {
  const dpr = Math.min(window.devicePixelRatio || 1, 2);
- ropeCanvas.width = ropeCanvas.clientWidth * dpr;
- ropeCanvas.height = ropeCanvas.clientHeight * dpr;
+ ropeSize = { width: ropeCanvas.clientWidth, height: ropeCanvas.clientHeight };
+ ropeCanvas.width = ropeSize.width * dpr;
+ ropeCanvas.height = ropeSize.height * dpr;
  ropeCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
@@ -247,8 +282,8 @@ function toggleLight() {
 }
 
 function drawRope() {
- const cw = ropeCanvas.clientWidth;
- const ch = ropeCanvas.clientHeight;
+ const cw = bulbLoop?.desktop ? ropeSize.width : ropeCanvas.clientWidth;
+ const ch = bulbLoop?.desktop ? ropeSize.height : ropeCanvas.clientHeight;
  ropeCtx.clearRect(0, 0, cw, ch);
 
  const bulbPos = getBulbPos();
@@ -291,6 +326,12 @@ function drawRope() {
 }
 
 
+const bulbLoop = window.createDesktopAnimationLoop(heroEl, animateBulb);
+if (bulbLoop) {
+ new ResizeObserver(() => { computeAnchor(); sizeRopeCanvas(); }).observe(heroEl);
+ ScrollTrigger.addEventListener('refresh', computeAnchor);
+}
+
 function animateBulb() {
  if (!bulbRunning) return;
 
@@ -300,7 +341,7 @@ function animateBulb() {
  angleVel += gravityForce;
 
  
- const heroRect = heroEl.getBoundingClientRect();
+ const heroRect = bulbLoop?.desktop ? heroBounds : heroEl.getBoundingClientRect();
  const relMouse = (mouseX - heroRect.left) / heroRect.width;
  const targetAngle = (relMouse - 0.6) * 0.06;
  const mouseForce = (targetAngle - angle) * MOUSE_STRENGTH;
@@ -327,10 +368,13 @@ function animateBulb() {
  // Apply parallax to canvas
  ropeCanvas.style.transform = `translateY(${bulbParallaxY}px)`;
 
- requestAnimationFrame(animateBulb);
+ if (bulbLoop) bulbLoop.request(); else requestAnimationFrame(animateBulb);
 }
 
-animateBulb();
+function startBulb() {
+ if (bulbLoop) bulbLoop.request(); else animateBulb();
+}
+startBulb();
 
 // Turn on glow
 bulbEl.classList.add("on");
@@ -543,10 +587,10 @@ ScrollTrigger.create({
  trigger: ".hero",
  start: "top bottom",
  end: "bottom top",
- onEnter: () => { bulbRunning = true; animateBulb(); },
- onLeave: () => { bulbRunning = false; },
- onEnterBack: () => { bulbRunning = true; animateBulb(); },
- onLeaveBack: () => { bulbRunning = false; }
+ onEnter: () => { bulbRunning = true; startBulb(); },
+ onLeave: () => { bulbRunning = false; if (bulbLoop) bulbLoop.cancel(); },
+ onEnterBack: () => { bulbRunning = true; startBulb(); },
+ onLeaveBack: () => { bulbRunning = false; if (bulbLoop) bulbLoop.cancel(); }
 });
 
 //  PENCIL DRAW TRAIL (page2) //
@@ -685,6 +729,7 @@ if (scrollCue) {
  onUpdate: (self) => {
  scrollCue.style.opacity = 1 - self.progress;
  scrollCue.style.pointerEvents = self.progress > 0.8 ? "none" : "auto";
+ if (window.requestScrollCueRender) window.requestScrollCueRender();
  }
  });
 }

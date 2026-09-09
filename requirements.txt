@@ -4,3 +4,4 @@ flask
 gunicorn
 authlib
 requests
+azure-storage-blob
