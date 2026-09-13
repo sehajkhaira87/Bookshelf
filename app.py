@@ -687,7 +687,6 @@ def api_pyqs():
         return jsonify(error='Invalid page or year.'), 400
     try:
         papers, total = list_pyqs(request.args.get('q', '').strip()[:200], year, page)
-        # Public results omit internal uploader and file hash fields.
         items = [{key: paper[key] for key in
                   ('id', 'title', 'subject_code', 'subject_name', 'year', 'blob_url')}
                  for paper in papers]
