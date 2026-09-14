@@ -871,7 +871,6 @@ body.dark-mode .category-card.selected {
 }
 
 .dept-card {
-    /* Keep your existing padding, border-radius, background, etc. */
     display: flex;
     flex-direction: column;
     justify-content: space-between; 
@@ -934,7 +933,7 @@ body.dark-mode .category-card.selected {
         .semester-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
     }
 
-    /*  4. PREMIUM FLOATING "PILL" BOTTOM NAV     */
+    
     .sidebar {
         position: fixed !important;
         display: grid !important;
