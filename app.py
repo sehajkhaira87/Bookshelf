@@ -494,9 +494,7 @@ def admin_delete_warning(user_id, warning_id):
     return _moderation_redirect()
 
 
-# ─────────────────────────────────────────────
-# UPLOAD ROUTE (Agent 1 + Agent 2 working together)
-# ─────────────────────────────────────────────
+
 
 @app.route('/upload', methods=['POST'])
 @admin_required
@@ -538,7 +536,6 @@ def upload():
         flash("The file contents do not match the selected file type.", "error")
         return redirect(url_for('admin_dashboard'))
 
-    # Determine the size without loading the entire file into application memory.
     file.stream.seek(0, os.SEEK_END)
     file_size = file.stream.tell()
     file.stream.seek(0)
@@ -586,9 +583,6 @@ def upload():
     return redirect(url_for('admin_dashboard'))
 
 
-# ─────────────────────────────────────────────
-# ADMIN MANAGEMENT ROUTES
-# ─────────────────────────────────────────────
 
 @app.route('/admin/toggle-status/<int:resource_id>', methods=['POST'])
 @admin_required
@@ -643,9 +637,7 @@ def handle_file_too_large(_error):
     return redirect(url_for(endpoint))
 
 
-# ─────────────────────────────────────────────
-# API ROUTES (for student dashboard consumption)
-# ─────────────────────────────────────────────
+
 
 @app.route('/api/resources')
 def api_resources():
@@ -754,7 +746,6 @@ def admin_upload_pyq():
     try:
         if not file or not file.filename:
             raise ValueError('Choose a PDF file.')
-        # Retain the filename for display; Azure gets a generated safe blob name.
         filename = file.filename.replace('\\', '/').rsplit('/', 1)[-1]
         _, created = import_pdf(file.stream, filename,
             request.form.get('subject_code'), request.form.get('subject_name'),
