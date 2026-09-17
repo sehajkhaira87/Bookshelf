@@ -24,8 +24,22 @@
         <section class="hero">
             <header class="navbar">
                 <div class="logo">
-                    <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo">
-                </div>
+    <img 
+        src="{{ url_for('static', filename='images/logo.svg') }}" 
+        alt="Bookshelf Logo"
+        class="bookshelf-logo"
+    >
+
+    <span class="logo-divider"></span>
+
+    <div class="gndec-logo-wrap">
+        <img 
+            src="{{ url_for('static', filename='images/gndec-logo.png') }}" 
+            alt="GNDEC Logo"
+            class="gndec-logo"
+        >
+    </div>
+</div>
                 <nav class="nav-links">
                     <a href="#">Home</a>
                     <a href="#">About</a>

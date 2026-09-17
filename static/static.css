@@ -87,6 +87,80 @@ body{
     display: block;
     transition: transform .35s ease;
 }
+/*
+   BOOKSHELF + GNDEC LOGO
+   */
+
+.logo{
+    display: flex;
+    align-items: center;
+    position: relative;
+    left: 0;
+    gap: 0;
+}
+
+.bookshelf-logo{
+    width: clamp(110px, 9vw, 145px);
+    height: auto;
+    display: block;
+}
+
+.logo-divider{
+    width: 1px;
+    height: clamp(28px, 2.6vw, 38px);
+    margin: 0 clamp(10px, 1.3vw, 18px);
+    flex-shrink: 0;
+
+    background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(30,26,23,.25) 20%,
+        rgba(30,26,23,.45) 50%,
+        rgba(30,26,23,.25) 80%,
+        transparent 100%
+    );
+}
+
+.gndec-logo-wrap{
+    width: clamp(42px, 4vw, 58px);
+    height: clamp(42px, 4vw, 58px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    perspective: 900px;
+    transform-style: preserve-3d;
+}
+
+.gndec-logo{
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+
+    transform-style: preserve-3d;
+    transform-origin: center center;
+
+    animation: gndecSlowSpin 14s linear infinite;
+
+    /* subtle depth */
+    filter:
+        drop-shadow(0 3px 4px rgba(30,26,23,.18))
+        drop-shadow(0 8px 12px rgba(30,26,23,.08));
+
+    will-change: transform;
+}
+
+@keyframes gndecSlowSpin{
+    from{
+        transform: rotateY(0deg);
+    }
+
+    to{
+        transform: rotateY(360deg);
+    }
+}
 
 .logo h2{
     color: white;
@@ -1377,3 +1451,5 @@ body.mobile-exit {
         to { opacity: 1; transform: translateY(0); } 
     }
 }
+
+
