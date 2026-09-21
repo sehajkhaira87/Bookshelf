@@ -107,81 +107,81 @@ body{
 }
 
 .gndec-logo-wrap {
+    width: clamp(45px, 7vw, 110px) !important;
+    height: clamp(45px, 7vw, 110px) !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important; 
+    
     transform: translateY(clamp(-5px, -0.66vw, -10px)) !important; 
     position: relative; 
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1; 
+    z-index: 1;
 }
 
 .gndec-logo-wrap::after {
     content: "";
     position: absolute;
-    width: 140%;
-    height: 140%;
-    /* Soft burnished gold glow fading into transparent */
-    background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, transparent 65%);
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, rgba(30, 26, 23, 0.05) 0%, transparent 65%);
     border-radius: 50%;
     z-index: -1;
     pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+}
+
+.gndec-logo-wrap:hover::after {
+    opacity: 1;
 }
 
 .gndec-logo {
-    width: clamp(45px, 6vw, 90px) !important;
-    height: clamp(45px, 6vw, 90px) !important;
-    flex-shrink: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: 1 / 1 !important; 
     
-    object-fit: contain;
+    object-fit: contain !important;
     display: block;
 
     border-radius: 50%;
-    border: 2px solid #D4AF37;
-    padding: 3px;
-    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(30, 26, 23, 0.02) 100%);
-    box-shadow: inset 0 0 6px rgba(180, 134, 42, 0.5); 
+    border: 1px solid rgba(30, 26, 23, 0.12);
+    padding: 4px;
+    background: transparent;
+    box-shadow: none; 
 
     transform-origin: center center;
     will-change: transform, filter;
-
     transition: transform 0.6s ease-out, filter 0.6s ease-out;
 }
 
 .gndec-logo:hover {
-    animation: gndecHalfSpin 9s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+    animation: gndecHalfSpin 6s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
 @keyframes gndecHalfSpin {
     0%, 100% {
         transform: perspective(900px) rotateY(0deg);
-        filter: 
-            drop-shadow(0 4px 6px rgba(30,26,23,.25)) 
-            drop-shadow(0 10px 15px rgba(30,26,23,.15));
+        filter: drop-shadow(0 4px 6px rgba(30,26,23,.08));
     }
     25% {
         transform: perspective(900px) rotateY(70deg);
         filter: 
-            drop-shadow(1px 0 0 #D4AF37) 
-            drop-shadow(3px 0 0 #B4862A) 
-            drop-shadow(5px 0 3px rgba(180, 134, 42, 0.5))
-            drop-shadow(0 10px 18px rgba(30,26,23,.20));
+            drop-shadow(2px 0 1px rgba(30,26,23,.15)) 
+            drop-shadow(0 12px 20px rgba(30,26,23,.12));
     }
     50% {
         transform: perspective(900px) rotateY(0deg);
-        filter: 
-            drop-shadow(0 4px 6px rgba(30,26,23,.25)) 
-            drop-shadow(0 10px 15px rgba(30,26,23,.15));
+        filter: drop-shadow(0 4px 6px rgba(30,26,23,.08));
     }
     75% {
         transform: perspective(900px) rotateY(-70deg);
         filter: 
-            drop-shadow(-1px 0 0 #D4AF37) 
-            drop-shadow(-3px 0 0 #B4862A) 
-            drop-shadow(-5px 0 3px rgba(180, 134, 42, 0.5))
-            drop-shadow(0 10px 18px rgba(30,26,23,.20));
+            drop-shadow(-2px 0 1px rgba(30,26,23,.15)) 
+            drop-shadow(0 12px 20px rgba(30,26,23,.12));
     }
 }
-
 .logo h2{
     color: white;
     font-size: 30px;
