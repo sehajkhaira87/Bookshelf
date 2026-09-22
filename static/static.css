@@ -1,3 +1,14 @@
+/* highlighted text.. */
+::selection {
+    background-color: rgba(30, 26, 23, 0.85); 
+    color: #F5F2EB; 
+}
+
+::-moz-selection {
+    background-color: rgba(30, 26, 23, 0.85);
+    color: #F5F2EB;
+}
+
 * {
     -webkit-tap-highlight-color: transparent !important;
 }
