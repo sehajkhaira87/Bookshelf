@@ -2,7 +2,6 @@
 <html>
 
 <head>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login — Bookshelf</title>
@@ -30,7 +29,8 @@
                         class="login-logo" style="width: 110px; height: auto;">
 
                     <h1>Welcome back</h1>
-                    <p class="login-subtext">Sign in with Google to pick up right where you left off.</p>
+                    <!-- Updated subtext to reflect the new login method -->
+                    <p class="login-subtext">Enter your CRN and password to pick up right where you left off.</p>
 
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% for category, message in messages %}
@@ -38,21 +38,21 @@
                         {% endfor %}
                     {% endwith %}
 
-                    <a href="{{ url_for('auth_google', role='student') }}" class="login-google-hero" id="googleSignIn">
-                        <span class="login-google-icon">
-                            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="">
-                        </span>
-                        <span class="login-google-label">Continue with Google</span>
-                        <span class="login-google-arrow">→</span>
-                    </a>
+                    <!-- NEW CRN & PASSWORD FORM -->
+                    <form method="POST" action="/login" class="login-custom-form">
+                        <div class="login-input-group">
+                            <input type="text" name="crn" class="login-input" placeholder="e.g., 2415262" required autocomplete="off">
+                        </div>
+                        
+                        <div class="login-input-group">
+                            <input type="password" name="password" class="login-input" placeholder="Password" required>
+                        </div>
 
-                    <p class="login-trust">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                        </svg>
-                        One click, no new passwords to remember
-                    </p>
+                        <button type="submit" class="login-submit-hero">
+                            <span class="login-google-label">Sign In</span>
+                            <span class="login-google-arrow">→</span>
+                        </button>
+                    </form>
 
                     <p class="login-terms">
                         By continuing, you agree to Bookshelf's
@@ -66,7 +66,6 @@
     </div>
 
     <script src="{{ url_for('static', filename='login.js') }}"></script>
-
 
 </body>
 
