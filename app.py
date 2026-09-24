@@ -11,13 +11,13 @@ from flask import (
     Flask, abort, flash, jsonify, redirect, render_template,
     request, session, url_for,
 )
-from authlib.integrations.flask_client import OAuth
 from database import (
     add_or_update_user,
     check_connection,
     create_tables,
     get_user_by_email,
     update_user_profile,
+    verify_student_login,
 )
 from admin_user_service import (
     AdminUserServiceError,
@@ -117,20 +117,6 @@ app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",
 )
 
-# Google OAuth setup
-google_client_id = os.getenv("google_Client_ID")
-google_client_secret = os.getenv("google_Client_Secret")
-if not google_client_id or not google_client_secret:
-    raise RuntimeError("Google OAuth client ID and secret must be configured.")
-
-oauth = OAuth(app)
-google = oauth.register(
-    name='google',
-    client_id=google_client_id,
-    client_secret=google_client_secret,
-    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={'scope': 'openid email profile'},
-)
 
 # Verify database connection and initialize tables on startup
 check_connection()
@@ -147,94 +133,51 @@ if create_tables():
 
 # PUBLIC ROUTES
 
-
 @app.route('/')
 def home():
     return render_template('index.html')
 
-@app.route('/login')
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+    if request.method == 'GET':
+        return render_template('login.html')
+        
+    crn = request.form.get('crn')
+    password = request.form.get('password')
 
-
-# DUMMY LOGIN FOR FRONTEND TESTING
-
-@app.route('/auth/google')
-def auth_google():
-    intent = request.args.get('role', 'student').strip().lower()
-    if intent not in {'student', 'admin'}:
-        intent = 'student'
-
-    session.clear()
-    session['oauth_intent'] = intent
-
-    redirect_uri = url_for('callback', _external=True)
-    authorization_options = {'prompt': 'select_account'} if intent == 'admin' else {}
-    try:
-        return google.authorize_redirect(redirect_uri, **authorization_options)
-    except Exception:
-        session.pop('oauth_intent', None)
-        app.logger.exception("Google OAuth authorization could not be started")
-        flash("Google sign-in is temporarily unavailable. Please try again.", "error")
-        endpoint = 'admin_panel' if intent == 'admin' else 'login'
-        return redirect(url_for(endpoint))
-
-@app.route('/callback')
-def callback():
-    intent = session.pop('oauth_intent', 'student')
-    failure_endpoint = 'admin_panel' if intent == 'admin' else 'login'
-    session.pop('user', None)
-    session.pop('admin_user', None)
-    session.pop('is_admin', None)
-
-    try:
-        token = google.authorize_access_token()
-        user_info = token.get('userinfo') if isinstance(token, Mapping) else None
-    except Exception:
-        app.logger.exception("Google OAuth callback failed")
-        flash("Google sign-in could not be completed. Please try again.", "error")
-        return redirect(url_for(failure_endpoint))
-
-    if not isinstance(user_info, Mapping):
-        flash("Google did not return a valid profile. Please try again.", "error")
-        return redirect(url_for(failure_endpoint))
-
-    email = normalize_email(user_info.get('email'))
-    name = str(user_info.get('name') or '').strip() or email.split('@')[0]
-    email_verified = user_info.get('email_verified')
-    is_verified = email_verified is True or str(email_verified).lower() == 'true'
-
-    if not email or not is_verified:
-        flash("A verified Google email address is required.", "error")
-        return redirect(url_for(failure_endpoint))
-
-    session['is_admin'] = False
-
-    if email in ADMIN_EMAILS:
-        session['is_admin'] = True
-        session['admin_user'] = {'email': email, 'name': name}
-        return redirect(url_for('admin_dashboard'))
-
-    if intent == 'admin':
-        flash("This Google account is not authorized for administrator access.", "error")
-        return redirect(url_for('admin_panel'))
-
-    if not add_or_update_user(email, name):
-        flash("Your account could not be saved. Please try again.", "error")
+    if not crn or not password:
+        flash("Please enter both your CRN and password.", "error")
         return redirect(url_for('login'))
 
-    profile = get_user_by_email(email)
-    if not profile:
-        flash("Your account could not be loaded. Please try again.", "error")
+    # Ping the database to securely verify the CRN and hashed password
+    user = verify_student_login(crn, password)
+    
+    if not user:
+        flash("Incorrect CRN or password. Please try again.", "error")
         return redirect(url_for('login'))
-    if profile.get('is_banned'):
+
+    if user.get('is_banned'):
         flash("This account has been banned. Contact an administrator for help.", "error")
         return redirect(url_for('login'))
 
-    picture = str(user_info.get('picture') or '')
-    session['user'] = {'email': email, 'name': name,
-                       'picture': picture if picture.startswith('https://') and len(picture) <= 2000 else ''}
+    session.clear()
+    session['is_admin'] = False
+    
+    email = user.get('email', '')
+    if email in ADMIN_EMAILS:
+        session['is_admin'] = True
+        session['admin_user'] = {'email': email, 'name': user.get('display_name')}
+        return redirect(url_for('admin_dashboard'))
+
+    session['user'] = {
+        'email': email, 
+        'name': user.get('display_name'),
+        'crn': user.get('crn'),
+        'picture': ''
+    }
     return redirect(url_for('dashboard'))
+
 
 @app.route('/dashboard')
 def dashboard():
@@ -635,8 +578,6 @@ def handle_file_too_large(_error):
     flash("Files must be 50 MB or smaller.", "error")
     endpoint = 'admin_dashboard' if session.get('is_admin') else 'admin_panel'
     return redirect(url_for(endpoint))
-
-
 
 
 @app.route('/api/resources')
