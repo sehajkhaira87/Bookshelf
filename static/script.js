@@ -1,11 +1,10 @@
-// Desktop effects share a single-flight scheduler. The original mobile/tablet
-// paths remain in use, and visible animations still run at the display's cadence.
+// Effects share a single-flight scheduler. Visibility also applies after resizing
+// to tablet/mobile, where the second section may be hidden by the existing CSS.
 window.createDesktopAnimationLoop = function (element, render, isEnabled = () => true) {
  const desktop = window.matchMedia('(min-width: 961px) and (hover: hover) and (pointer: fine)');
- if (!desktop.matches) return null;
  let frame = null;
  let visible = false;
- const active = () => !desktop.matches || (visible && !document.hidden && isEnabled());
+ const active = () => visible && !document.hidden && isEnabled();
  function request() {
   if (frame !== null || !active()) return;
   frame = requestAnimationFrame(time => {
@@ -60,326 +59,177 @@ gsap.ticker.add((time) => {
 
 gsap.ticker.lagSmoothing(0);
 
-//  LOADER & HERO INTRO 
-
-const loader = document.getElementById("loader");
-
-
-setTimeout(() => {
-
- loader.classList.add("hide-loader");
- 
-
- setTimeout(() => {
- loader.remove();
- }, 1200);
-
- gsap.set(".tag-line", {
- scaleX: 0,
- transformOrigin: "left center"
- });
-
- gsap.to(".tag-line", {
- scaleX: 1,
- duration: 1.8,
- ease: "power3.out",
- delay: 2.0
- });
-
- 
- gsap.from(".tag-text", {
- opacity: 0,
- x: 20,
- duration: 1.7,
- delay: 2.0,
- ease: "power3.out"
- });
-
- 
- const text = new SplitType(".hero-title", {
- types: "chars"
- });
-
- 
- gsap.from(text.chars, {
- opacity: 0,
- y: 120,
- rotationX: -90,
- stagger: 0.03,
- duration: 1.2,
- ease: "power4.out",
- delay: 0.9
- });
-
-}, 1500);
+// Prepare the heading and critical assets behind the loader, then reveal once.
+window.bookshelfIntro.start({ gsap, SplitType, refresh: () => ScrollTrigger.refresh() });
 
 // BULB PHYSICS & INTERACTION
-
-const bulbEl = document.querySelector(".bulb");
-const bulbWrapper = document.querySelector(".bulb-wrapper");
-const heroEl = document.querySelector(".hero");
-const ropeCanvas = document.getElementById("rope-canvas");
-const ropeCtx = ropeCanvas.getContext("2d");
-
-
-const ROPE_LENGTH = 50; 
-const GRAVITY = 0.004; 
-const DAMPING = 0.992; 
-const MOUSE_STRENGTH = 0.0001; 
-const MAX_SWING = Math.PI / 3; 
-let angle = 0; 
-let angleVel = 0; 
+const bulbEl = document.querySelector('.bulb');
+const bulbWrapper = document.querySelector('.bulb-wrapper');
+const heroEl = document.querySelector('.hero');
+const ropeCanvas = document.getElementById('rope-canvas');
+const ropeCtx = ropeCanvas.getContext('2d');
+const reducedBulbMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const ROPE_LENGTH = 50;
+const SOCKET_Y = 44;
+const pendulum = new BulbPendulum({ angle: reducedBulbMotion.matches ? 0 : 0.1 });
 let bulbRunning = true;
-let isDragging = false;
 let isLightOn = true;
-
-// Drag 
-let clickStartX = 0;
-let clickStartTime = 0;
-let lastDragX = 0;
-let lastDragTime = 0;
-let dragAngleVel = 0;
-
-
 let bulbParallaxY = 0;
-
-
 let anchorX = 0;
-let mouseX = 0;
-let heroBounds = { left: 0, width: 0 };
 let ropeSize = { width: 0, height: 0 };
+let bulbLoop = null, bulbFrame = null, lastBulbTime = null;
+let activePointer = null, grabOffset = 0, dragDistance = 0;
+let pointerStart = { x: 0, y: 0, time: 0 };
 
 function computeAnchor() {
- const heroRect = heroEl.getBoundingClientRect();
- anchorX = heroRect.width * 0.60;
- heroBounds = { left: heroRect.left, width: heroRect.width };
+ anchorX = heroEl.clientWidth * 0.60;
+ // The bulb's centre of mass is below the cord/socket attachment.
+ const bodyBelowSocket = Math.max(15, bulbEl.offsetHeight * 0.78 - SOCKET_Y);
+ pendulum.length = ROPE_LENGTH + bodyBelowSocket;
 }
 
 function sizeRopeCanvas() {
  const dpr = Math.min(window.devicePixelRatio || 1, 2);
  ropeSize = { width: ropeCanvas.clientWidth, height: ropeCanvas.clientHeight };
- ropeCanvas.width = ropeSize.width * dpr;
- ropeCanvas.height = ropeSize.height * dpr;
+ ropeCanvas.width = Math.round(ropeSize.width * dpr);
+ ropeCanvas.height = Math.round(ropeSize.height * dpr);
  ropeCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
-computeAnchor();
-sizeRopeCanvas();
-window.addEventListener("resize", () => {
+function pointerAngle(event) {
+ const rect = heroEl.getBoundingClientRect();
+ return Math.atan2(event.clientX - rect.left - anchorX,
+     Math.max(10, event.clientY - rect.top - bulbParallaxY));
+}
+
+function stopBulb() {
+ if (bulbLoop) bulbLoop.cancel();
+ if (bulbFrame !== null) cancelAnimationFrame(bulbFrame);
+ bulbFrame = lastBulbTime = null;
+ pendulum.resetClock();
+ finishBulbDrag(null, true);
+}
+
+function startBulb() {
+ if (!bulbRunning || document.hidden) return;
+ if (bulbLoop) bulbLoop.request();
+ else if (bulbFrame === null) bulbFrame = requestAnimationFrame(animateBulb);
+}
+
+function refreshBulbGeometry() {
  computeAnchor();
  sizeRopeCanvas();
-}, { passive: true });
-
-// Compute bulb position 
-function getBulbPos() {
- return {
- x: anchorX + Math.sin(angle) * ROPE_LENGTH,
- y: Math.cos(angle) * ROPE_LENGTH
- };
+ startBulb();
 }
 
-function angleToPoint(px, py) {
- const heroRect = heroEl.getBoundingClientRect();
- const dx = (px - heroRect.left) - anchorX;
- const dy = (py - heroRect.top);
- return Math.atan2(dx, Math.max(10, dy));
+bulbWrapper.addEventListener('pointerdown', event => {
+ if (event.button !== 0 || activePointer !== null || !event.isPrimary) return;
+ activePointer = event.pointerId;
+ pointerStart = { x: event.clientX, y: event.clientY, time: performance.now() };
+ dragDistance = 0;
+ // Preserve the grabbed point: pressing the side of the bulb must not teleport it.
+ grabOffset = pointerAngle(event) - pendulum.angle;
+ pendulum.beginDrag();
+ bulbWrapper.setPointerCapture(event.pointerId);
+ event.preventDefault();
+ startBulb();
+});
+
+bulbWrapper.addEventListener('pointermove', event => {
+ if (event.pointerId !== activePointer) return;
+ dragDistance = Math.max(dragDistance, Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y));
+ pendulum.moveDrag(pointerAngle(event) - grabOffset);
+ if (reducedBulbMotion.matches) { pendulum.angle = pendulum.target; pendulum.velocity = 0; }
+ startBulb();
+});
+
+function finishBulbDrag(event, cancelled = false) {
+ if (activePointer === null || (event && event.pointerId !== activePointer)) return;
+ const pointer = activePointer;
+ activePointer = null;
+ pendulum.endDrag();
+ if (bulbWrapper.hasPointerCapture(pointer)) bulbWrapper.releasePointerCapture(pointer);
+ if (event) dragDistance = Math.max(dragDistance, Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y));
+ if (cancelled) pendulum.velocity = 0;
+ if (reducedBulbMotion.matches) { pendulum.angle = 0; pendulum.velocity = 0; }
+ if (!cancelled && dragDistance < 8 && performance.now() - pointerStart.time < 300) toggleLight();
+ if (!cancelled) startBulb();
+ return true;
 }
 
-document.addEventListener("mousemove", (e) => {
- mouseX = e.clientX;
-}, { passive: true });
-
-bulbWrapper.addEventListener("mousedown", (e) => {
- isDragging = true;
- clickStartX = e.clientX;
- clickStartTime = Date.now();
- lastDragX = e.clientX;
- lastDragTime = Date.now();
- dragAngleVel = 0;
- document.body.style.userSelect = "none";
- e.preventDefault();
-});
-
-document.addEventListener("mousemove", (e) => {
- if (!isDragging) return;
- const now = Date.now();
- const dt = Math.max(1, now - lastDragTime);
-
- const prevAngle = angle;
- angle = angleToPoint(e.clientX, e.clientY);
- angle = Math.max(-1.2, Math.min(1.2, angle));
- dragAngleVel = (angle - prevAngle) / dt * 16;
-
- lastDragX = e.clientX;
- lastDragTime = now;
- angleVel = 0;
-}, { passive: true });
-
-document.addEventListener("mouseup", (e) => {
- if (!isDragging) return;
- isDragging = false;
- document.body.style.userSelect = "";
- const elapsed = Date.now() - clickStartTime;
- const moved = Math.abs(e.clientX - clickStartX);
- if (elapsed < 300 && moved < 8) {
- toggleLight();
- } else {
- angleVel = dragAngleVel; 
- }
-});
-
-bulbWrapper.addEventListener("touchstart", (e) => {
- const t = e.touches[0];
- isDragging = true;
- clickStartX = t.clientX;
- clickStartTime = Date.now();
- lastDragX = t.clientX;
- lastDragTime = Date.now();
- dragAngleVel = 0;
- e.preventDefault();
-}, { passive: false });
-
-document.addEventListener("touchmove", (e) => {
- if (!isDragging) return;
- const t = e.touches[0];
- const now = Date.now();
- const dt = Math.max(1, now - lastDragTime);
-
- const prevAngle = angle;
- angle = angleToPoint(t.clientX, t.clientY);
- angle = Math.max(-1.2, Math.min(1.2, angle));
- dragAngleVel = (angle - prevAngle) / dt * 16;
-
- lastDragX = t.clientX;
- lastDragTime = now;
- angleVel = 0;
-}, { passive: true });
-
-document.addEventListener("touchend", (e) => {
- if (!isDragging) return;
- isDragging = false;
- const t = e.changedTouches[0];
- const elapsed = Date.now() - clickStartTime;
- const moved = Math.abs(t.clientX - clickStartX);
- if (elapsed < 300 && moved < 8) {
- toggleLight();
- } else {
- angleVel = dragAngleVel; 
+bulbWrapper.addEventListener('pointerup', event => finishBulbDrag(event));
+bulbWrapper.addEventListener('pointercancel', event => { if (finishBulbDrag(event, true)) startBulb(); });
+bulbWrapper.addEventListener('lostpointercapture', event => { if (finishBulbDrag(event, true)) startBulb(); });
+window.addEventListener('blur', stopBulb);
+window.addEventListener('focus', startBulb);
+document.addEventListener('visibilitychange', () => { if (document.hidden) stopBulb(); else startBulb(); });
+bulbWrapper.addEventListener('keydown', event => {
+ if (event.key === 'Enter' || event.key === ' ') {
+  event.preventDefault();
+  if (!event.repeat) toggleLight();
  }
 });
 
 function toggleLight() {
  isLightOn = !isLightOn;
- if (isLightOn) {
- heroEl.classList.remove("lights-off");
- bulbEl.classList.add("on");
- bulbEl.classList.add("flicker");
- setTimeout(() => bulbEl.classList.remove("flicker"), 700);
- } else {
- heroEl.classList.add("lights-off");
- bulbEl.classList.remove("on");
+ bulbWrapper.setAttribute('aria-pressed', String(isLightOn));
+ heroEl.classList.toggle('lights-off', !isLightOn);
+ bulbEl.classList.toggle('on', isLightOn);
+ if (isLightOn && !reducedBulbMotion.matches) {
+  bulbEl.classList.add('flicker');
+  setTimeout(() => bulbEl.classList.remove('flicker'), 700);
  }
 }
 
-function drawRope() {
- const cw = bulbLoop?.desktop ? ropeSize.width : ropeCanvas.clientWidth;
- const ch = bulbLoop?.desktop ? ropeSize.height : ropeCanvas.clientHeight;
- ropeCtx.clearRect(0, 0, cw, ch);
-
- const bulbPos = getBulbPos();
- const startX = anchorX;
- const startY = 0;
- const endX = bulbPos.x;
- const endY = bulbPos.y;
-
- // Control point: placed at ~40% along the rope with dynamic sag
- const t = 0.4;
- let sagTotal = 0;
- if (isDragging) {
- // Bend noticeably when dragging the heavy bulb against the cord
- const sagVel = Math.abs(dragAngleVel) * 150;
- const sagDir = dragAngleVel > 0 ? -1 : 1;
- sagTotal = (2 + sagVel) * sagDir;
- } else {
- // Bend very slightly due to air resistance when free-swinging
- const sagVel = Math.abs(angleVel) * 30;
- const sagDir = angleVel > 0 ? -1 : 1;
- sagTotal = sagVel * sagDir;
- }
-
- // The "straight" midpoint along the rope
- const midX = startX + (endX - startX) * t;
- const midY = startY + (endY - startY) * t;
-
- // Perpendicular to the rope direction for the sag
- const ropeAngle = Math.atan2(endY - startY, endX - startX);
- const cpX = midX + Math.cos(ropeAngle + Math.PI/2) * sagTotal;
- const cpY = midY + Math.sin(ropeAngle + Math.PI/2) * sagTotal;
-
+function animateBulb(time) {
+ bulbFrame = null;
+ if (!bulbRunning || document.hidden) { lastBulbTime = null; return; }
+ // Reset after offscreen/hidden intervals; never inject a large resume impulse.
+ const elapsed = lastBulbTime === null || time - lastBulbTime > 250 ? 0 : (time - lastBulbTime) / 1000;
+ lastBulbTime = time;
+ if (!reducedBulbMotion.matches) pendulum.advance(elapsed);
+ const angle = pendulum.angle;
+ const x = anchorX + Math.sin(angle) * ROPE_LENGTH;
+ const y = Math.cos(angle) * ROPE_LENGTH;
+ bulbWrapper.style.transform = `translateX(calc(-50% + ${x - anchorX}px)) translateY(${bulbParallaxY}px)`;
+ bulbWrapper.style.top = `${y - SOCKET_Y}px`;
+ // Positive displacement is rightward: CSS rotation must be negative to keep
+ // the bulb's body aligned with the downward cord rather than leaning inward.
+ bulbEl.style.transform = `rotate(${-angle * 180 / Math.PI}deg)`;
+ ropeCtx.clearRect(0, 0, ropeSize.width, ropeSize.height);
+ const bow = Math.max(-1.2, Math.min(1.2, -pendulum.velocity * 0.25));
  ropeCtx.beginPath();
- ropeCtx.moveTo(startX, startY);
- ropeCtx.quadraticCurveTo(cpX, cpY, endX, endY);
- ropeCtx.strokeStyle = "#1a1a1a";
+ ropeCtx.moveTo(anchorX, 0);
+ ropeCtx.quadraticCurveTo((anchorX + x) / 2 + Math.cos(angle) * bow,
+     y / 2 - Math.sin(angle) * bow, x, y);
+ ropeCtx.strokeStyle = '#1a1a1a';
  ropeCtx.lineWidth = 2.5;
- ropeCtx.lineCap = "round";
+ ropeCtx.lineCap = 'round';
  ropeCtx.stroke();
-}
-
-
-const bulbLoop = window.createDesktopAnimationLoop(heroEl, animateBulb);
-if (bulbLoop) {
- new ResizeObserver(() => { computeAnchor(); sizeRopeCanvas(); }).observe(heroEl);
- ScrollTrigger.addEventListener('refresh', computeAnchor);
-}
-
-function animateBulb() {
- if (!bulbRunning) return;
-
- if (!isDragging) {
- 
- const gravityForce = -GRAVITY * Math.sin(angle);
- angleVel += gravityForce;
-
- 
- const heroRect = bulbLoop?.desktop ? heroBounds : heroEl.getBoundingClientRect();
- const relMouse = (mouseX - heroRect.left) / heroRect.width;
- const targetAngle = (relMouse - 0.6) * 0.06;
- const mouseForce = (targetAngle - angle) * MOUSE_STRENGTH;
- angleVel += mouseForce;
-
- angleVel *= DAMPING;
- angle += angleVel;
- angle = Math.max(-1.2, Math.min(1.2, angle));
- }
-
- // Position the wrapper from the pendulum math
- const bulbPos = getBulbPos();
- const offsetX = bulbPos.x - anchorX;
- bulbWrapper.style.transform = `translateX(calc(-50% + ${offsetX}px)) translateY(${bulbParallaxY}px)`;
- bulbWrapper.style.top = `${bulbPos.y - 44}px`;
-
- // Rotate the inner bulb to follow the swing
- const angleDeg = angle * (180 / Math.PI);
- bulbEl.style.transform = `rotate(${angleDeg}deg)`;
-
- // Draw the flexible rope
- drawRope();
-
- // Apply parallax to canvas
  ropeCanvas.style.transform = `translateY(${bulbParallaxY}px)`;
-
- if (bulbLoop) bulbLoop.request(); else requestAnimationFrame(animateBulb);
+ if (!reducedBulbMotion.matches && (pendulum.dragging || pendulum.angle !== 0 || pendulum.velocity !== 0)) startBulb();
 }
 
-function startBulb() {
- if (bulbLoop) bulbLoop.request(); else animateBulb();
-}
-startBulb();
-
-// Turn on glow
-bulbEl.classList.add("on");
+bulbLoop = window.createDesktopAnimationLoop(heroEl, animateBulb, () => bulbRunning);
+new ResizeObserver(refreshBulbGeometry).observe(heroEl);
+new ResizeObserver(refreshBulbGeometry).observe(bulbEl);
+window.addEventListener('resize', refreshBulbGeometry, { passive: true });
+ScrollTrigger.addEventListener('refresh', refreshBulbGeometry);
+reducedBulbMotion.addEventListener('change', () => {
+ pendulum.angle = pendulum.velocity = 0;
+ pendulum.resetClock();
+ startBulb();
+});
+refreshBulbGeometry();
+bulbEl.classList.add('on');
 
 //SCROLL PARALLAX 
+
+// Reuse setters instead of constructing four new tweens on every scroll update.
+const setHeroTextY = gsap.quickSetter('.hero-text', 'y', 'px');
+const setHeroImageY = gsap.quickSetter('.hero-image', 'y', 'px');
+const setFeaturesY = gsap.quickSetter('.features-container', 'y', 'px');
+const setCatY = gsap.quickSetter('.cat', 'y', 'px');
 
 ScrollTrigger.create({
  trigger: ".hero",
@@ -389,11 +239,12 @@ ScrollTrigger.create({
 
  onUpdate: self => {
  const p = self.progress;
- gsap.set(".hero-text", { y: p * -180 });
- gsap.set(".hero-image", { y: p * -100 });
- gsap.set(".features-container", { y: p * -60 });
- bulbParallaxY = p * -40; // Use variable to pass to physics loop
- gsap.set(".cat", { y: p * -100 });
+ setHeroTextY(p * -180);
+ setHeroImageY(p * -100);
+ setFeaturesY(p * -60);
+ bulbParallaxY = p * -40; // Keep the socket and cord together during parallax.
+ startBulb();
+ setCatY(p * -100);
  }
 });
 
@@ -588,9 +439,9 @@ ScrollTrigger.create({
  start: "top bottom",
  end: "bottom top",
  onEnter: () => { bulbRunning = true; startBulb(); },
- onLeave: () => { bulbRunning = false; if (bulbLoop) bulbLoop.cancel(); },
+ onLeave: () => { bulbRunning = false; stopBulb(); },
  onEnterBack: () => { bulbRunning = true; startBulb(); },
- onLeaveBack: () => { bulbRunning = false; if (bulbLoop) bulbLoop.cancel(); }
+ onLeaveBack: () => { bulbRunning = false; stopBulb(); }
 });
 
 //  PENCIL DRAW TRAIL (page2) //
@@ -773,22 +624,6 @@ const isMobileDevice = window.matchMedia("(max-width: 820px)").matches;
 
 if (isMobileDevice) {
     console.log("Mobile layout initialized");
-
-    // 1. Text Delay for CSS Animation
-    let charIndex = 0;
-    const BASE_DELAY = 2; // Syncs with loader timing
-    document.querySelectorAll('.hero-title span').forEach(lineEl => {
-        const text = lineEl.textContent;
-        lineEl.innerHTML = '';
-        [...text].forEach(ch => {
-            const s = document.createElement('span');
-            s.className = 'char';
-            s.style.animationDelay = (BASE_DELAY + charIndex * 0.025) + 's';
-            s.textContent = ch === ' ' ? '\u00A0' : ch;
-            lineEl.appendChild(s);
-            charIndex++;
-        });
-    });
 
     // 2. Feature Card Swiping Logic
     const fcTrack = document.getElementById('featuresTrack');

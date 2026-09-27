@@ -109,11 +109,16 @@
         setStyle(stage, 'transform', `rotateX(${tiltX}deg) rotateY(${tiltY}deg)`);
 
         const sorted = [];
+        let frontIndex = -1, frontZ = -Infinity;
         for (let i = 0; i < N; i++) {
             const angle = rotation + (i / N) * Math.PI * 2;
             const x = cx + Math.cos(angle) * R;
             const y = cy + Math.sin(angle) * R;
             const front = Math.cos(angle);
+            const zIndex = Math.round(front * 1000) + 2000;
+            // Match the narrative's original DOM-order z-index selection,
+            // including ties, without polling the card styles every frame.
+            if (zIndex > frontZ) { frontZ = zIndex; frontIndex = i; }
             sorted.push({ i, angle, x, y, front });
         }
         sorted.sort((a, b) => a.front - b.front);
@@ -131,9 +136,12 @@
             if (wrapped < -Math.PI) wrapped += Math.PI * 2;
             const rotY = -wrapped * (180 / Math.PI) * 0.85;
 
-            setStyle(card, 'left', (x - 66) + 'px');
-            setStyle(card, 'top', (y - 86) + 'px');
-            setStyle(card, 'transform', `translateZ(${front * 40}px) scale(${scale}) rotateY(${rotY}deg)`);
+            // Position within the transform instead of invalidating layout for
+            // every scroll frame. Leading translation preserves the same 3D
+            // transform origin, perspective, size and visual coordinates.
+            setStyle(card, 'left', '0px');
+            setStyle(card, 'top', '0px');
+            setStyle(card, 'transform', `translate3d(${x - 66}px, ${y - 86}px, ${front * 40}px) scale(${scale}) rotateY(${rotY}deg)`);
             setStyle(card, 'opacity', opacity);
             setStyle(card, 'filter', `blur(${blur}px)`);
             setStyle(card, 'zIndex', Math.round(front * 1000) + 2000);
@@ -145,13 +153,21 @@
                 : `inset 0 1px 0 rgba(255,255,255,0.6), 0 20px 40px rgba(0,0,0,0.35)`);
             setStyle(card, 'borderColor', isFront ? `rgba(242,193,78,${0.5 * frontT})` : 'rgba(140,100,32,0.1)');
 
-            setStyle(label, 'left', (x + 100) + 'px'); setStyle(label, 'top', (y - 18) + 'px');
+            setStyle(label, 'left', '0px'); setStyle(label, 'top', '0px');
+            setStyle(label, 'transform', `translate(${x + 100}px, ${y - 18}px)`);
             setStyle(label, 'opacity', isFront ? frontT : 0);
-            setStyle(desc, 'left', (x + 100) + 'px'); setStyle(desc, 'top', (y + 16) + 'px');
+            setStyle(desc, 'left', '0px'); setStyle(desc, 'top', '0px');
+            setStyle(desc, 'transform', `translate(${x + 100}px, ${y + 16}px)`);
             setStyle(desc, 'opacity', isFront ? frontT * 0.9 : 0);
-            setStyle(line, 'left', (x + 100) + 'px'); setStyle(line, 'top', (y + 2) + 'px'); setStyle(line, 'width', '70px');
+            setStyle(line, 'left', '0px'); setStyle(line, 'top', '0px');
+            setStyle(line, 'transform', `translate(${x + 100}px, ${y + 2}px)`); setStyle(line, 'width', '70px');
             setStyle(line, 'opacity', isFront ? frontT * 0.7 : 0);
         });
+
+        if (window.pageWheelFrontIndex !== frontIndex) {
+            window.pageWheelFrontIndex = frontIndex;
+            window.dispatchEvent(new CustomEvent('pagewheelchange', { detail: { index: frontIndex } }));
+        }
 
         dirty = false;
         if (layoutLoop) {

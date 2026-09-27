@@ -19,6 +19,7 @@
 
     const N = CATEGORIES.length;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const countFormat = new Intl.NumberFormat('en-US');
 
     
     const layer = document.createElement('div');
@@ -138,18 +139,23 @@
             if (i < words.length - 1) quoteEl.appendChild(document.createTextNode(' '));
             masks.push(mask);
         });
-        void quoteEl.offsetWidth;
         return masks;
     }
 
     function revealWords(masks, baseMs, mine) {
         const step = reduceMotion ? 0 : 120;
-        masks.forEach(function (mask, i) {
-            setTimeout(function () {
-                if (mine !== token) return;
-                mask.classList.add('is-in');
-            }, baseMs + i * step);
-        });
+        const start = performance.now();
+        // Let the browser establish the initial word styles without forcing a
+        // synchronous layout of the entire pinned section during a scroll frame.
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            if (mine !== token) return;
+            masks.forEach(function (mask, i) {
+                setTimeout(function () {
+                    if (mine !== token) return;
+                    mask.classList.add('is-in');
+                }, Math.max(0, baseMs + i * step - (performance.now() - start)));
+            });
+        }));
     }
 
     function enter(i, baseMs, mine) {
@@ -185,32 +191,37 @@
     function runCounters() {
         if (reduceMotion) {
             STATS.forEach(function (stat, i) {
-                valueEls[i].textContent = stat.value.toLocaleString('en-US') + stat.suffix;
+                valueEls[i].textContent = countFormat.format(stat.value) + stat.suffix;
             });
             return;
         }
-        STATS.forEach(function (stat, i) {
-            const start = performance.now() + 200 + i * 130;
-            const dur = 3500;
-            (function step(now) {
+        const startedAt = performance.now();
+        const dur = 3500;
+        const counterLoop = window.createDesktopAnimationLoop?.(page2, step);
+        function step(now) {
+            let unfinished = false;
+            STATS.forEach(function (stat, i) {
+                const start = startedAt + 200 + i * 130;
                 const p = Math.min(1, Math.max(0, (now - start) / dur));
                 const eased = 1 - Math.pow(1 - p, 4);
-                valueEls[i].textContent =
-                    Math.round(stat.value * eased).toLocaleString('en-US') + stat.suffix;
-                if (p < 1) requestAnimationFrame(step);
-            })(performance.now());
-        });
+                const text = countFormat.format(Math.round(stat.value * eased)) + stat.suffix;
+                if (valueEls[i].textContent !== text) valueEls[i].textContent = text;
+                if (p < 1) unfinished = true;
+            });
+            if (unfinished) {
+                if (counterLoop) counterLoop.request(); else requestAnimationFrame(step);
+            }
+        }
+        if (counterLoop) counterLoop.request(); else requestAnimationFrame(step);
     }
 
     
     let watching = false;
     let cueHidden = false;
-    const watchLoop = window.createDesktopAnimationLoop?.(page2, watch);
 
     function watch() {
         if (!watching) return;
-        if (watchLoop) watchLoop.request(); else requestAnimationFrame(watch);
-        const i = frontIndex();
+        const i = window.pageWheelFrontIndex ?? frontIndex();
         if (i < 0) return;
         if (i !== rendered) swapTo(i);
         if (!cueHidden && i !== 0) {
@@ -218,6 +229,7 @@
             cue.classList.add('is-hidden');
         }
     }
+    window.addEventListener('pagewheelchange', watch);
 
     
     let started = false;
@@ -238,7 +250,7 @@
             setTimeout(function () {
                 ticks.forEach(function (tick) { tick.style.transitionDelay = '0s'; });
                 watching = true;
-                if (watchLoop) watchLoop.request(); else requestAnimationFrame(watch);
+                watch();
             }, reduceMotion ? 200 : 1000);
             
         }, 6000); 

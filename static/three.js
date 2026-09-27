@@ -3,9 +3,122 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const bookCanvas = document.getElementById('book-canvas');
 const page2El = document.querySelector('.page2');
-if (bookCanvas && page2El) initBook3D(bookCanvas, page2El);
+if (bookCanvas && page2El) {
+ let initialized = false;
+ function prepareVisibleBook() {
+ // This entire section and its cue are hidden by the mobile design. Keep
+ // their GPU work out of mobile startup, but still support desktop resizing.
+ if (initialized || !page2El.getClientRects().length) return;
+ initialized = true;
+ window.removeEventListener('resize', prepareVisibleBook);
+ // Register before any work starts, so the loader can cover the first GPU
+ // upload. The intro coordinator caps its wait when a connection is slow.
+ const preparation = Promise.resolve().then(() => initBook3D(bookCanvas, page2El));
+ window.bookshelfIntro?.hold(preparation);
+ preparation.catch(error => console.error('[Book3D]', error));
+ }
+ window.addEventListener('resize', prepareVisibleBook, { passive: true });
+ prepareVisibleBook();
+}
 
-function initBook3D(canvas, container) {
+async function waitForIntroQuiet() {
+ // A late model must not compile/upload in the middle of the text reveal.
+ if (window.bookshelfIntro?.phase === 'revealing') await window.bookshelfIntro.ready;
+}
+
+async function prepareBookShaders(renderer, scene, camera) {
+ await waitForIntroQuiet();
+ // Three r160 polls parallel shader compilation instead of immediately
+ // blocking on program readiness. Keep the fallback for older renderers.
+ if (renderer.compileAsync) await renderer.compileAsync(scene, camera);
+ else renderer.compile(scene, camera);
+ await waitForIntroQuiet();
+}
+
+async function finishBookWarmup(renderer) {
+ // Rendering queues GPU work; wait without blocking JavaScript until the
+ // warmup has actually finished, rather than competing with the first glyphs.
+ const gl = renderer.getContext();
+ if (!gl.fenceSync || gl.isContextLost()) return;
+ const fence = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+ if (!fence) return;
+ gl.flush();
+ const deadline = performance.now() + 3000;
+ try {
+ while (!gl.isContextLost() && performance.now() < deadline) {
+ const status = gl.clientWaitSync(fence, 0, 0);
+ if (status !== gl.TIMEOUT_EXPIRED) break;
+ await new Promise(resolve => setTimeout(resolve, 16));
+ }
+ } finally { gl.deleteSync(fence); }
+ await waitForIntroQuiet();
+}
+
+// The exported book repeats identical page geometry. Send those pages to the
+// GPU together while keeping every vertex, normal, UV, material and transform.
+// The site animates the whole book, so these child transforms stay static.
+function instanceStaticBookPages(root) {
+ function sameAttribute(a, b) {
+ if (!a || !b) return a === b;
+ if (a.isInterleavedBufferAttribute || b.isInterleavedBufferAttribute ||
+     a.itemSize !== b.itemSize || a.normalized !== b.normalized ||
+     a.array.constructor !== b.array.constructor || a.array.length !== b.array.length) return false;
+ return a.array.every((value, index) => value === b.array[index]);
+ }
+ function sameGeometry(a, b) {
+ if (!sameAttribute(a.index, b.index)) return false;
+ const names = Object.keys(a.attributes);
+ return names.length === Object.keys(b.attributes).length &&
+        names.every(name => sameAttribute(a.attributes[name], b.attributes[name]));
+ }
+
+ const batches = [];
+ for (const mesh of root.children) {
+ if (!mesh.isMesh || mesh.isSkinnedMesh || mesh.children.length || !mesh.visible ||
+     Array.isArray(mesh.material) || mesh.material.transparent ||
+     Object.keys(mesh.geometry.morphAttributes).length || mesh.geometry.groups.length ||
+     mesh.geometry.drawRange.start !== 0 || mesh.geometry.drawRange.count !== Infinity) continue;
+ mesh.updateMatrix();
+ // InstancedMesh does not support reflected transforms.
+ if (mesh.matrix.determinant() <= 0) continue;
+ const batch = batches.find(items => {
+ const first = items[0];
+ return first.material === mesh.material && first.castShadow === mesh.castShadow &&
+        first.receiveShadow === mesh.receiveShadow && first.renderOrder === mesh.renderOrder &&
+        first.layers.mask === mesh.layers.mask && sameGeometry(first.geometry, mesh.geometry);
+ });
+ if (batch) batch.push(mesh); else batches.push([mesh]);
+ }
+
+ for (const meshes of batches) {
+ if (meshes.length < 2) continue;
+ const first = meshes[0];
+ const pages = new THREE.InstancedMesh(first.geometry, first.material, meshes.length);
+ pages.name = 'Static book pages';
+ pages.castShadow = first.castShadow;
+ pages.receiveShadow = first.receiveShadow;
+ pages.renderOrder = first.renderOrder;
+ pages.layers.mask = first.layers.mask;
+ meshes.forEach((mesh, index) => pages.setMatrixAt(index, mesh.matrix));
+ pages.instanceMatrix.needsUpdate = true;
+ pages.computeBoundingBox();
+ pages.computeBoundingSphere();
+ root.add(pages);
+ meshes.forEach(mesh => root.remove(mesh));
+ }
+
+ // Only the parent pivot (and the cue's root clone) moves during animation.
+ root.traverse(child => {
+ if (child !== root) {
+ child.updateMatrix();
+ child.matrixAutoUpdate = false;
+ }
+ });
+}
+
+async function initBook3D(canvas, container) {
+
+ await waitForIntroQuiet();
 
  container.style.backgroundColor = '#16100c';
 
@@ -92,14 +205,21 @@ function initBook3D(canvas, container) {
 
  //  LOAD GLB 
  let bookPivot = null;
+ let prepared = false;
  let introPlayed = false;
  let idleStartTime = 0;
  let startYOffset = 0;
 
  const loader = new GLTFLoader();
- loader.load(
- '/static/models/book.glb',
- (gltf) => {
+ const preparation = (async () => {
+ const response = await fetch('/static/models/book.glb');
+ if (!response.ok) throw new Error(`Book download failed (${response.status})`);
+ const data = await response.arrayBuffer();
+ // Download independently, but keep GLTF parsing and scene construction out
+ // of a reveal already in progress on a slow connection.
+ await waitForIntroQuiet();
+ const gltf = await loader.parseAsync(data, '/static/models/');
+ await waitForIntroQuiet();
  const bookGroup = gltf.scene;
 
  const box = new THREE.Box3().setFromObject(bookGroup);
@@ -122,17 +242,30 @@ function initBook3D(canvas, container) {
  }
  }
  });
- initScrollCueBook(bookGroup);
+ instanceStaticBookPages(bookGroup);
 
  bookPivot = new THREE.Group();
  bookPivot.add(bookGroup);
  scene.add(bookPivot);
 
- renderer.compile(scene, camera);
+ bookPivot.rotation.set(0.3, 0, 0.1);
+ await prepareBookShaders(renderer, scene, camera);
+ // A compile alone leaves texture uploads and shadow/depth programs for the
+ // first visible frame. Warm those now, then restore the hidden intro pose
+ // before the browser can paint, so entering this section does not stall.
+ renderer.render(scene, camera);
 
  bookPivot.scale.setScalar(0); 
  bookPivot.position.set(0, 0, 0); 
- bookPivot.rotation.set(0.3, 0, 0.1); 
+ renderer.render(scene, camera);
+ await finishBookWarmup(renderer);
+
+ // Keep the main render loop paused until the visible warmup pose has been
+ // restored. Otherwise an asynchronous compile could briefly show the book.
+ prepared = true;
+ if (renderLoop) renderLoop.request(); else requestAnimationFrame(animate);
+
+ await initScrollCueBook(bookGroup);
 
  //  CINEMATIC SEQUENCE 
  if (typeof gsap !== 'undefined') {
@@ -210,10 +343,7 @@ function initBook3D(canvas, container) {
  }
  });
  }
- },
- (xhr) => { if (xhr.total) console.log(`[Book3D] ${Math.round(xhr.loaded/xhr.total*100)}%`); },
- (err) => { console.error('[Book3D] ❌', err); }
- );
+ })();
 
  // MOUSE HOVER 
  let mx = 0, my = 0, hov = false;
@@ -229,10 +359,10 @@ function initBook3D(canvas, container) {
  // RENDER LOOP 
  let running = true;
  let baseX = 2.3;
- const renderLoop = window.createDesktopAnimationLoop?.(container, animate);
+ const renderLoop = window.createDesktopAnimationLoop?.(container, animate, () => prepared);
 
  function animate(t) {
- if (!running) return;
+ if (!running || !prepared) return;
  if (renderLoop) renderLoop.request(); else requestAnimationFrame(animate);
  const e = t * 0.001;
 
@@ -270,11 +400,14 @@ function initBook3D(canvas, container) {
  es.forEach(e => { running = e.isIntersecting; if (running) requestAnimationFrame(animate); });
  }, { threshold: 0.05 }).observe(container);
  }
+ await preparation;
 }
 
-function initScrollCueBook(sourceBookGroup) {
+async function initScrollCueBook(sourceBookGroup) {
  const cueCanvas = document.getElementById('scrollCueCanvas');
  if (!cueCanvas) return;
+
+ await waitForIntroQuiet();
 
  const cueRenderer = new THREE.WebGLRenderer({
  canvas: cueCanvas,
@@ -307,6 +440,9 @@ function initScrollCueBook(sourceBookGroup) {
  cueBook.rotation.x = 0.35;
 
  cueScene.add(cueBook);
+ await prepareBookShaders(cueRenderer, cueScene, cueCamera);
+ cueRenderer.render(cueScene, cueCamera);
+ await finishBookWarmup(cueRenderer);
 
  const cue = cueCanvas.closest('.scroll-cue');
  const cueLoop = window.createDesktopAnimationLoop?.(cueCanvas, animateCue, () => cue?.style.opacity !== '0');
