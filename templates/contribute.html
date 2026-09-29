@@ -11,52 +11,64 @@
 
     <div class="page-wrapper">
        <!-- Top Navigation -->
-        <nav class="top-nav">
+        <nav class="top-nav" aria-label="Main navigation">
             <div class="brand">
                 <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="nav-logo">
             </div>
             
             <a href="{{ url_for('dashboard') }}" class="back-btn">
-                <span>←</span> Return to Dashboard
+                <span aria-hidden="true">←</span> <span>Back to Dashboard</span>
             </a>
         </nav>
 
         <header class="header-section">
             <div class="page-title">
-                <h1>Contribute</h1>
-                <p>Upload notes, assignments, and papers to help build the archive.</p>
+                <span class="eyebrow">THE COMMUNITY ARCHIVE</span>
+                <h1>Contribute<span class="title-dot">.</span></h1>
+                <p>Your notes could make someone’s next chapter easier.
+                    <br class="desktop-break">Share what you know. Help the archive grow.</p>
             </div>
         </header>
 
         <main class="split-layout">
             
-            <aside class="leaderboard-panel">
+            <aside class="leaderboard-panel" aria-labelledby="fame-title">
                 <div class="panel-header">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="gold-icon"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
-                    <h2>Hall of Fame</h2>
+                    <h2 id="fame-title">Hall of Fame</h2>
                 </div>
                 
                 <ul class="leaderboard-list">
-                    <!-- Premium Animated Empty State -->
-                    <div class="empty-fame-state">
-                        <svg class="empty-fame-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <!-- Empty state until contributors are available. -->
+                    <li class="empty-fame-state">
+                        <svg class="empty-fame-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg>
                         <span class="empty-fame-text">The archive is currently empty.</span>
                         <span class="empty-fame-highlight">Be the first to leave your mark.</span>
-                    </div>
+                    </li>
                 </ul>
+                <p class="panel-note">A little recognition for the people<br>who make learning a little easier.</p>
             </aside>
 
-            <section class="upload-panel">
+            <section class="upload-panel" aria-label="Contribute a document">
                 
                 <div class="upload-state" id="state-start">
-                    <button class="big-contribute-btn">
+                    <div class="upload-emblem" aria-hidden="true">
+                        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 13c-5-4-11-5-18-3v26c7-2 13-1 18 3 5-4 11-5 18-3V10c-7-2-13-1-18 3Z"/><path d="M24 13v26M12 17c3-.3 5 .2 7 1.3M12 23c3-.3 5 .2 7 1.3M30 18c2-1.2 4-1.6 6-1.3M30 24c2-1.2 4-1.6 6-1.3"/></svg>
+                    </div>
+                    <span class="eyebrow">PASS THE KNOWLEDGE ON</span>
+                    <h2 class="upload-heading">Good notes deserve<br>a second reader.</h2>
+                    <p class="state-description">Notes, assignments, or that helpful past paper.<br>Make room for them on the shelf.</p>
+                    <button type="button" class="big-contribute-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                         <span>Shelf your Notes</span>
                     </button>
+                    <p class="file-hint">PDF, JPG &amp; PNG <span aria-hidden="true">·</span> A little effort. A shared resource.</p>
                 </div>
 
                 <div class="upload-state hidden" id="state-options">
+                    <span class="eyebrow">ADD YOUR DOCUMENT</span>
                     <h3 class="step-title">How would you like to add it?</h3>
+                    <p class="state-description">A fresh scan or a file you already have.</p>
                     
                     <div class="choice-cards">
                         <button class="choice-card" id="btn-camera">
@@ -74,12 +86,14 @@
                 </div>
 
                 <div class="upload-state hidden" id="state-form">
-                    <h3 class="step-title">Catalog this Document</h3>
+                    <span class="eyebrow">THE FINISHING TOUCHES</span>
+                    <h3 class="step-title">Find it a place on the shelf.</h3>
+                    <p class="state-description">Add a few details so others can find your document.</p>
                     
                     <div class="selected-file-box">
                         <svg class="file-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                         <span id="file-name-display">document.pdf</span>
-                        <button id="btn-cancel-file" class="remove-btn">✕</button>
+                        <button type="button" id="btn-cancel-file" class="remove-btn" aria-label="Remove selected file">✕</button>
                     </div>
 
                     <form id="metadata-form" action="{{ url_for('contribute') }}" method="POST" enctype="multipart/form-data">
@@ -88,6 +102,7 @@
                         <input type="file" id="native-camera" name="file" accept="image/*" capture="environment" class="hidden">
 
                         <div class="form-row">
+                            <label class="form-field">Branch
                             <select name="branch" required class="book-input">
                                 <option value="" disabled selected>Select Branch...</option>
                                 <option value="cse">Computer Science</option>
@@ -98,16 +113,20 @@
                                 <option value="electronics">Electronics</option>
                             </select>
 
+                            </label>
+                            <label class="form-field">Category
                             <select name="category" required class="book-input">
                                 <option value="" disabled selected>Select Category...</option>
                                 <option value="mst">MST Papers</option>
                                 <option value="notes">Study Notes</option>
                                 <option value="assignment">Assignment</option>
                             </select>
+                            </label>
                         </div>
 
                         <div class="form-row">
-                            <select name="semester" required class="book-input" style="flex: 0.5;">
+                            <label class="form-field semester-field">Semester
+                            <select name="semester" required class="book-input">
                                 <option value="" disabled selected>Semester...</option>
                                 <option value="1">Semester 1</option>
                                 <option value="2">Semester 2</option>
@@ -119,7 +138,10 @@
                                 <option value="8">Semester 8</option>
                             </select>
 
-                            <input type="text" name="subject" placeholder="Subject Name (e.g., Cyber Security)" required class="book-input" style="flex: 1.5;">
+                            </label>
+                            <label class="form-field subject-field">Subject
+                            <input type="text" name="subject" placeholder="e.g., Cyber Security" required class="book-input">
+                            </label>
                         </div>
 
                         <button type="submit" class="submit-btn">Place on the Shelf</button>
