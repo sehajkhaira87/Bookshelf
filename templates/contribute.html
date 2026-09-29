@@ -11,64 +11,60 @@
 
     <div class="page-wrapper">
        <!-- Top Navigation -->
-        <nav class="top-nav" aria-label="Main navigation">
+        <nav class="top-nav">
             <div class="brand">
                 <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="nav-logo">
             </div>
             
             <a href="{{ url_for('dashboard') }}" class="back-btn">
-                <span aria-hidden="true">←</span> <span>Back to Dashboard</span>
+                <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 5-7 7 7 7M5 12h14"/></svg>
+                <span>Return to Dashboard</span>
             </a>
         </nav>
 
         <header class="header-section">
             <div class="page-title">
-                <span class="eyebrow">THE COMMUNITY ARCHIVE</span>
-                <h1>Contribute<span class="title-dot">.</span></h1>
-                <p>Your notes could make someone’s next chapter easier.
-                    <br class="desktop-break">Share what you know. Help the archive grow.</p>
+                <span class="eyebrow">THE SHARED ARCHIVE</span>
+                <h1>Contribute</h1>
+                <p>Upload notes, assignments, and papers to help build the archive.</p>
             </div>
         </header>
 
         <main class="split-layout">
             
-            <aside class="leaderboard-panel" aria-labelledby="fame-title">
+            <aside class="leaderboard-panel">
                 <div class="panel-header">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="gold-icon"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
-                    <h2 id="fame-title">Hall of Fame</h2>
+                    <h2>Hall of Fame</h2>
                 </div>
                 
                 <ul class="leaderboard-list">
-                    <!-- Empty state until contributors are available. -->
                     <li class="empty-fame-state">
-                        <svg class="empty-fame-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3l-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg>
+                        <svg aria-hidden="true" class="empty-fame-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 5c3-1 6-1 9 1 3-2 6-2 9-1v14c-3-1-6-1-9 1-3-2-6-2-9-1z"/></svg>
                         <span class="empty-fame-text">The archive is currently empty.</span>
                         <span class="empty-fame-highlight">Be the first to leave your mark.</span>
                     </li>
                 </ul>
-                <p class="panel-note">A little recognition for the people<br>who make learning a little easier.</p>
+                <p class="panel-note">A little shared knowledge goes a long way.</p>
             </aside>
 
-            <section class="upload-panel" aria-label="Contribute a document">
+            <section class="upload-panel">
                 
                 <div class="upload-state" id="state-start">
                     <div class="upload-emblem" aria-hidden="true">
-                        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 13c-5-4-11-5-18-3v26c7-2 13-1 18 3 5-4 11-5 18-3V10c-7-2-13-1-18 3Z"/><path d="M24 13v26M12 17c3-.3 5 .2 7 1.3M12 23c3-.3 5 .2 7 1.3M30 18c2-1.2 4-1.6 6-1.3M30 24c2-1.2 4-1.6 6-1.3"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 3H20v19H6.5A2.5 2.5 0 0 1 4 19.5v-14A2.5 2.5 0 0 1 6.5 3Z"/><path d="M12 7v6m-3-3h6"/></svg>
                     </div>
-                    <span class="eyebrow">PASS THE KNOWLEDGE ON</span>
-                    <h2 class="upload-heading">Good notes deserve<br>a second reader.</h2>
-                    <p class="state-description">Notes, assignments, or that helpful past paper.<br>Make room for them on the shelf.</p>
-                    <button type="button" class="big-contribute-btn">
+                    <h2 class="upload-heading">Make room for a little knowledge.</h2>
+                    <p class="state-description">Your notes could make someone's next chapter easier.</p>
+                    <button class="big-contribute-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                         <span>Shelf your Notes</span>
                     </button>
-                    <p class="file-hint">PDF, JPG &amp; PNG <span aria-hidden="true">·</span> A little effort. A shared resource.</p>
+                    <p class="file-hint">PDF, JPG &amp; PNG</p>
                 </div>
 
                 <div class="upload-state hidden" id="state-options">
-                    <span class="eyebrow">ADD YOUR DOCUMENT</span>
                     <h3 class="step-title">How would you like to add it?</h3>
-                    <p class="state-description">A fresh scan or a file you already have.</p>
                     
                     <div class="choice-cards">
                         <button class="choice-card" id="btn-camera">
@@ -86,9 +82,7 @@
                 </div>
 
                 <div class="upload-state hidden" id="state-form">
-                    <span class="eyebrow">THE FINISHING TOUCHES</span>
-                    <h3 class="step-title">Find it a place on the shelf.</h3>
-                    <p class="state-description">Add a few details so others can find your document.</p>
+                    <h3 class="step-title">Catalog this Document</h3>
                     
                     <div class="selected-file-box">
                         <svg class="file-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -112,7 +106,6 @@
                                 <option value="mechanical">Mechanical</option>
                                 <option value="electronics">Electronics</option>
                             </select>
-
                             </label>
                             <label class="form-field">Category
                             <select name="category" required class="book-input">
@@ -125,7 +118,7 @@
                         </div>
 
                         <div class="form-row">
-                            <label class="form-field semester-field">Semester
+                            <label class="form-field">Semester
                             <select name="semester" required class="book-input">
                                 <option value="" disabled selected>Semester...</option>
                                 <option value="1">Semester 1</option>
@@ -137,9 +130,8 @@
                                 <option value="7">Semester 7</option>
                                 <option value="8">Semester 8</option>
                             </select>
-
                             </label>
-                            <label class="form-field subject-field">Subject
+                            <label class="form-field">Subject
                             <input type="text" name="subject" placeholder="e.g., Cyber Security" required class="book-input">
                             </label>
                         </div>
