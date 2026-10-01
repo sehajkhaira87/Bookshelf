@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Previous Papers - BOOKSHELF</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='pyqs.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='liquid-glass.css') }}">
 </head>
 <body>
 
@@ -15,7 +16,7 @@
                 <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="nav-logo">
             </div>
             
-            <a href="{{ url_for('admin_dashboard' if admin else 'dashboard') }}" class="back-btn">
+            <a href="{{ url_for('admin_dashboard' if admin else 'dashboard') }}" class="back-btn liquid-glass">
                 <span>←</span> Return to Dashboard
             </a>
         </nav>
@@ -38,8 +39,8 @@
                     {% endfor %}
                     {% if year and year not in archive.years %}<option value="{{ year }}" selected>{{ year }}</option>{% endif %}
                 </select>
-                <button type="submit">Search</button>
-                {% if search or year %}<a class="clear-search" href="{{ url_for('admin_pyqs' if admin else 'pyqs') }}">Clear</a>{% endif %}
+                <button type="submit" class="liquid-glass">Search</button>
+                {% if search or year %}<a class="clear-search liquid-glass" href="{{ url_for('admin_pyqs' if admin else 'pyqs') }}">Clear</a>{% endif %}
             </form>
         </header>
 
@@ -54,7 +55,7 @@
             <label>Subject name <input name="subject_name" required maxlength="255"></label>
             <label>Exam year <input name="year" type="number" required min="1900" max="9999"></label>
             <label>PDF (up to 50 MB) <input name="file_upload" type="file" accept=".pdf,application/pdf" required></label>
-            <button type="submit">Upload PYQ</button>
+            <button type="submit" class="liquid-glass">Upload PYQ</button>
         </form>
         {% endif %}
         <p>{{ '{:,}'.format(total) }} papers found · {{ '{:,}'.format(archive.total) }} in the shared archive</p>
@@ -63,21 +64,21 @@
             <article class="paper-card">
                 <h2>{{ paper.title }}</h2>
                 <p>Exam year: {{ paper.year }}</p>
-                <a href="{{ paper.blob_url }}" target="_blank" rel="noopener">Open PDF ↗</a>
+                <a href="{{ paper.blob_url }}" target="_blank" rel="noopener" class="liquid-glass">Open PDF ↗</a>
                 {% if admin %}
                 <p>{{ paper.original_filename }}</p>
                 <form action="{{ url_for('admin_delete_pyq', paper_id=paper.id) }}" method="post" onsubmit="return confirm('Permanently delete this PYQ?');">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit">Delete PYQ</button>
+                    <button type="submit" class="liquid-glass">Delete PYQ</button>
                 </form>
                 {% endif %}
             </article>
             {% else %}<p>No papers found.</p>{% endfor %}
         </main>
         <nav class="pagination" aria-label="Paper pages">
-            {% if page > 1 %}<a href="{{ url_for('admin_pyqs' if admin else 'pyqs', page=page-1, q=search, year=year or '') }}">Previous</a>{% endif %}
+            {% if page > 1 %}<a href="{{ url_for('admin_pyqs' if admin else 'pyqs', page=page-1, q=search, year=year or '') }}" class="liquid-glass">Previous</a>{% endif %}
             <span>Page {{ page }}</span>
-            {% if page * 50 < total %}<a href="{{ url_for('admin_pyqs' if admin else 'pyqs', page=page+1, q=search, year=year or '') }}">Next</a>{% endif %}
+            {% if page * 50 < total %}<a href="{{ url_for('admin_pyqs' if admin else 'pyqs', page=page+1, q=search, year=year or '') }}" class="liquid-glass">Next</a>{% endif %}
         </nav>
     </div>
 

@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contribute - BOOKSHELF</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='contribute.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='liquid-glass.css') }}">
+    <link rel="stylesheet" href="/static/contribute.css">
+    <link rel="stylesheet" href="/static/liquid-glass.css">
 </head>
 <body>
 
@@ -14,10 +14,10 @@
        <!-- Top Navigation -->
         <nav class="top-nav">
             <div class="brand">
-                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="nav-logo">
+                <img src="/static/images/logo.svg" alt="Bookshelf Logo" class="nav-logo">
             </div>
             
-            <a href="{{ url_for('dashboard') }}" class="back-btn liquid-glass">
+            <a href="/dashboard" class="back-btn liquid-glass">
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 5-7 7 7 7M5 12h14"/></svg>
                 <span>Return to Dashboard</span>
             </a>
@@ -91,7 +91,7 @@
                         <button type="button" id="btn-cancel-file" class="remove-btn liquid-glass" aria-label="Remove selected file">✕</button>
                     </div>
 
-                    <form id="metadata-form" action="{{ url_for('contribute') }}" method="POST" enctype="multipart/form-data">
+                    <form id="metadata-form" action="/contribute" method="POST" enctype="multipart/form-data">
                         
                         <input type="file" id="native-upload" name="file" accept=".pdf, .jpg, .jpeg, .png" class="hidden">
                         <input type="file" id="native-camera" name="file" accept="image/*" capture="environment" class="hidden">
@@ -144,7 +144,7 @@
             </section>
         </main>
     </div>
-<script src="{{ url_for('static', filename='contribute.js') }}"></script>
-{% include '_student_activity.html' %}
+<script src="/static/contribute.js"></script>
+
 </body>
 </html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Previous Papers - BOOKSHELF</title>
+    <link rel="stylesheet" href="/static/.glass-qa/before-pyqs.css">
+</head>
+<body>
+
+    <div class="page-wrapper">
+        <nav class="top-nav">
+            <div class="brand">
+                <img src="/static/images/logo.svg" alt="Bookshelf Logo" class="nav-logo">
+            </div>
+            
+            <a href="/dashboard" class="back-btn">
+                <span>←</span> Return to Dashboard
+            </a>
+        </nav>
+        <header class="header-section">
+            <div class="page-title">
+                <h1>Previous Papers</h1>
+                <p>Shared papers for all students. Search by subject and exam year.</p>
+            </div>
+
+            <form method="get" class="minimal-search-box">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input name="q" value="Preview" aria-label="Subject code or name" class="minimal-search-input" placeholder="Subject code or name" maxlength="200">
+                <select name="year" aria-label="Exam year">
+                    <option value="">All years</option>
+                    
+                    <option value="2025">2025</option>
+                    
+                    
+                </select>
+                <button type="submit">Search</button>
+                <a class="clear-search" href="/pyqs">Clear</a>
+            </form>
+        </header>
+
+        
+        
+        <p>120 papers found · 120 in the shared archive</p>
+        <main class="content-grid">
+            
+            <article class="paper-card">
+                <h2>Preview paper</h2>
+                <p>Exam year: 2025</p>
+                <a href="#preview" target="_blank" rel="noopener">Open PDF ↗</a>
+                
+            </article>
+            
+        </main>
+        <nav class="pagination" aria-label="Paper pages">
+            <a href="/pyqs?page=1&amp;q=Preview&amp;year=">Previous</a>
+            <span>Page 2</span>
+            <a href="/pyqs?page=3&amp;q=Preview&amp;year=">Next</a>
+        </nav>
+    </div>
+
+<script src="/static/.glass-qa/before-pyqs-glass.js" defer></script>
+
+</body>
+</html>
