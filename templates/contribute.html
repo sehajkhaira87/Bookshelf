@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contribute - BOOKSHELF</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='contribute.css') }}">
+    {% include '_site_effects.html' %}
 </head>
 <body>
 
@@ -37,11 +38,11 @@
                 </div>
                 
                 <ul class="leaderboard-list">
-                    <!-- LATER: We will wrap a Jinja for-loop here to pull real database stats -->
-                    
-                    <div style="text-align: center; padding: 40px 20px; color: rgba(244, 239, 227, 0.4); font-size: 14px; line-height: 1.6;">
-                        The archive is currently empty.<br>
-                        <span style="color: #F2C14E; font-family: 'Canela', serif; font-size: 16px;">Be the first to leave your mark.</span>
+                    <!-- Premium Animated Empty State -->
+                    <div class="empty-fame-state">
+                        <svg class="empty-fame-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        <span class="empty-fame-text">The archive is currently empty.</span>
+                        <span class="empty-fame-highlight">Be the first to leave your mark.</span>
                     </div>
                 </ul>
             </aside>
@@ -90,12 +91,7 @@
                         <div class="form-row">
                             <select name="branch" required class="book-input">
                                 <option value="" disabled selected>Select Branch...</option>
-                                <option value="cse">Computer Science</option>
-                                <option value="it">Information Tech</option>
-                                <option value="electrical">Electrical</option>
-                                <option value="civil">Civil</option>
-                                <option value="mechanical">Mechanical</option>
-                                <option value="electronics">Electronics</option>
+                                {% for department in site_departments() %}<option value="{{ department.code|lower }}">{{ department.name }} ({{ department.code }})</option>{% endfor %}
                             </select>
 
                             <select name="category" required class="book-input">

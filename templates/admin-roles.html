@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role assignments — Bookshelf</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='roles.css') }}">
+    {% include '_site_effects.html' %}
+</head>
+<body class="role-admin-page">
+<main class="role-admin-shell">
+    <a class="role-back" href="{{ url_for('admin_dashboard') }}">← Control room</a>
+    <header><span class="role-eyebrow">Administrator access</span><h1>Role assignments</h1>
+        <p>Give each person the tools they need. Every assigned section appears on their main dashboard immediately.</p></header>
+    <div class="role-explanations">
+        <article><h2>Notification head</h2><p>Publish announcements, send student notifications, and review delivery history.</p></article>
+        <article><h2>User manager</h2><p>Manage student accounts, warnings, badges, and student uploads.</p></article>
+        <article><h2>UI editor</h2><p>Customize the dashboard's appearance, welcome text, and layout.</p></article>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}<p class="role-message {{ category }}" role="status">{{ message }}</p>{% endfor %}
+    {% endwith %}
+    {% if error %}<p class="role-message error" role="alert">{{ error }}</p>{% endif %}
+    <section class="role-assignments" aria-labelledby="assignmentsHeading">
+        <h2 id="assignmentsHeading">People & permissions</h2>
+        <p>Select any combination of staff roles, then save. Leave every role unchecked for ordinary Student access. Only administrators can change roles.</p>
+        <form method="get" class="role-search">
+            <label for="roleSearch">Find a person by name, email, URN, or CRN</label>
+            <div><input id="roleSearch" type="search" name="q" value="{{ request.args.get('q', '') }}" maxlength="200" placeholder="Search people"><button type="submit">Search</button></div>
+        </form>
+        <div class="role-people">
+        {% for person in users %}
+            <article class="role-person">
+                <div><h3>{{ person.preferred_name or person.google_name or person.email }}</h3><p>{{ person.email }}</p>
+                    <small>CRN {{ person.crn or '—' }}{% if person.is_banned %} · Banned{% endif %}</small></div>
+                {% if person.email|trim|lower in admin_emails %}
+                <span class="role-owner">Administrator</span>
+                {% else %}
+                <form method="post" action="{{ url_for('admin_assign_role', user_id=person.id) }}" class="role-assignment-form">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="q" value="{{ request.args.get('q', '') }}">
+                    <input type="hidden" name="roles_present" value="1">
+                    {% set granted_roles = profile_roles(person) %}
+                    <fieldset class="role-choice-group"{% if person.is_banned %} aria-describedby="role-help-{{ person.id }}"{% endif %}>
+                        <legend class="role-sr-only">Staff roles for {{ person.email }}</legend>
+                        {% for value in ('notification_head', 'user_manager', 'ui_editor') %}
+                        <label class="role-choice" for="role-{{ person.id }}-{{ value }}"><input type="checkbox" id="role-{{ person.id }}-{{ value }}" name="roles" value="{{ value }}"{% if value in granted_roles %} checked{% endif %}{% if person.is_banned %} disabled{% endif %}><span>{{ role_labels[value] }}</span></label>
+                        {% endfor %}
+                    </fieldset>
+                    <button type="submit">{{ 'Remove staff roles' if person.is_banned else 'Save roles' }}</button>
+                    {% if person.is_banned %}<p class="role-assignment-help" id="role-help-{{ person.id }}">This account is banned. Existing roles can be removed; new roles cannot be granted.</p>{% endif %}
+                </form>
+                {% endif %}
+            </article>
+        {% else %}<p class="role-empty">No matching people found.</p>{% endfor %}
+        </div>
+        {% if users|length == 100 %}<p>Showing the first 100 matches. Refine your search to find a specific person.</p>{% endif %}
+    </section>
+</main>
+</body>
+</html>

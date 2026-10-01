@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ workspace_title }} — Bookshelf Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin-pyqs.css') }}">
+    {% block role_styles %}{% endblock %}
+    {% include '_site_effects.html' %}
+</head>
+<body class="admin-communications-page">
+    <main class="archive-shell">
+        <nav class="archive-nav" aria-label="Admin navigation">
+            <a class="brand" href="{{ url_for('admin_dashboard') }}"><span class="brand-mark">B</span> Bookshelf <span class="admin-label">ADMIN</span></a>
+            <a href="{{ url_for('admin_dashboard') }}">← Admin dashboard</a>
+        </nav>
+        <header class="archive-heading">
+            <div><p class="eyebrow">STUDENT COMMUNICATIONS</p><h1>{{ workspace_title }}</h1><p class="muted">{{ workspace_subtitle }}</p></div>
+        </header>
+        {% block role_content %}{% endblock %}
+    </main>
+    {% block role_scripts %}{% endblock %}
+</body>
+</html>

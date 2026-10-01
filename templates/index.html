@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='static.css') }}">
     <meta name="view-transition" content="same-origin">
+    {% include '_site_effects.html' %}
 </head>
 
 <body>
@@ -28,12 +29,26 @@
         <section class="hero">
             <header class="navbar">
                 <div class="logo">
-                    <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo">
-                </div>
+    <img 
+        src="{{ url_for('static', filename='images/logo.svg') }}" 
+        alt="Bookshelf Logo"
+        class="bookshelf-logo"
+    >
+    
+    
+    
+    <div class="gndec-logo-wrap">
+        <img 
+            src="{{ url_for('static', filename='images/gndec-logo.png') }}" 
+            alt="GNDEC Logo"
+            class="gndec-logo"
+        >
+    </div>
+</div>
                 <nav class="nav-links">
                     <a href="#">Home</a>
                     <a href="#">About</a>
-                    <a href="#">Contact</a>
+                    <a href="mailto:support@bookshelf.com?subject=Bookshelf%20Inquiry%20-%20GNDEC">Contact</a>
                     <a href="/login" class="login-btn">
                         <span>Login</span>
                         <span class="arrow">→</span>

@@ -3,13 +3,20 @@ import secrets
 import zipfile
 import communications_service
 from communications_routes import register_routes as register_communications_routes
+from role_access import is_administrator, profile_roles, ROLE_LABELS
+from role_routes import register_routes as register_role_routes
+import role_service
+import ui_settings_service
+import department_service
+from user_manager_routes import register_routes as register_user_manager_routes
+from ui_editor_routes import register_routes as register_ui_editor_routes
 from collections.abc import Mapping
 from functools import wraps
 from pathlib import Path
 
 from flask import (
     Flask, abort, flash, jsonify, redirect, render_template,
-    request, session, url_for,
+    request, session, url_for, g,
 )
 from authlib.integrations.flask_client import OAuth
 from database import (
@@ -18,6 +25,7 @@ from database import (
     create_tables,
     get_user_by_email,
     update_user_profile,
+    verify_student_login,
 )
 from admin_user_service import (
     AdminUserServiceError,
@@ -67,7 +75,6 @@ ALLOWED_EXTENSIONS = {
     ".png", ".jpg", ".jpeg", ".webp",
 }
 ALLOWED_CATEGORIES = {"assignment", "book", "notes"}
-ALLOWED_BRANCHES = {"cse", "it", "ece", "ee", "me", "ce"}
 ALLOWED_SEMESTERS = {str(value) for value in range(1, 9)}
 
 
@@ -115,14 +122,16 @@ app.config.update(
     MAX_CONTENT_LENGTH=MAX_REQUEST_BYTES,
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
+    ADMIN_EMAILS=ADMIN_EMAILS,
+    ROLE_PROFILE_LOADER=lambda email: get_user_by_email(email),
 )
 
-# Google OAuth setup
-google_client_id = os.getenv("google_Client_ID")
-google_client_secret = os.getenv("google_Client_Secret")
-if not google_client_id or not google_client_secret:
-    raise RuntimeError("Google OAuth client ID and secret must be configured.")
 
+# Existing administrator accounts were created using Google and may have no
+# local CRN/password. Keep their verified Google sign-in alongside student login.
+google_client_id = os.getenv('google_Client_ID')
+google_client_secret = os.getenv('google_Client_Secret')
+app.config['GOOGLE_ADMIN_LOGIN_ENABLED'] = bool(google_client_id and google_client_secret)
 oauth = OAuth(app)
 google = oauth.register(
     name='google',
@@ -132,9 +141,19 @@ google = oauth.register(
     client_kwargs={'scope': 'openid email profile'},
 )
 
+
 # Verify database connection and initialize tables on startup
 check_connection()
 if create_tables():
+    try:
+        department_service.create_schema()
+    except Exception:
+        app.logger.exception('Could not initialize departments')
+    try:
+        role_service.create_schema()
+        ui_settings_service.create_schema()
+    except Exception:
+        app.logger.exception('Could not initialize role assignments and dashboard appearance')
     create_pyq_schema()
     try:
         communications_service.create_schema()
@@ -145,102 +164,124 @@ if create_tables():
     except AdminUserServiceError:
         app.logger.exception("Could not initialize user moderation tables")
 
-# ─────────────────────────────────────────────
 # PUBLIC ROUTES
-# ─────────────────────────────────────────────
 
 @app.route('/')
 def home():
     return render_template('index.html')
 
-@app.route('/login')
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+    if request.method == 'GET':
+        if is_administrator():
+            return redirect(url_for('admin_dashboard'))
+        return render_template('login.html')
+        
+    crn = request.form.get('crn')
+    password = request.form.get('password')
 
-# ==========================================
-# DUMMY LOGIN FOR FRONTEND TESTING
-# Your backend friend can add the real OAuth back here later!
-# ==========================================
-@app.route('/auth/google')
-def auth_google():
-    intent = request.args.get('role', 'student').strip().lower()
-    if intent not in {'student', 'admin'}:
-        intent = 'student'
-
-    # Rotate all session state before starting a fresh OAuth login.
-    session.clear()
-    session['oauth_intent'] = intent
-
-    redirect_uri = url_for('callback', _external=True)
-    authorization_options = {'prompt': 'select_account'} if intent == 'admin' else {}
-    try:
-        return google.authorize_redirect(redirect_uri, **authorization_options)
-    except Exception:
-        session.pop('oauth_intent', None)
-        app.logger.exception("Google OAuth authorization could not be started")
-        flash("Google sign-in is temporarily unavailable. Please try again.", "error")
-        endpoint = 'admin_panel' if intent == 'admin' else 'login'
-        return redirect(url_for(endpoint))
-
-@app.route('/callback')
-def callback():
-    intent = session.pop('oauth_intent', 'student')
-    failure_endpoint = 'admin_panel' if intent == 'admin' else 'login'
-    session.pop('user', None)
-    session.pop('admin_user', None)
-    session.pop('is_admin', None)
-
-    try:
-        token = google.authorize_access_token()
-        user_info = token.get('userinfo') if isinstance(token, Mapping) else None
-    except Exception:
-        app.logger.exception("Google OAuth callback failed")
-        flash("Google sign-in could not be completed. Please try again.", "error")
-        return redirect(url_for(failure_endpoint))
-
-    if not isinstance(user_info, Mapping):
-        flash("Google did not return a valid profile. Please try again.", "error")
-        return redirect(url_for(failure_endpoint))
-
-    email = normalize_email(user_info.get('email'))
-    name = str(user_info.get('name') or '').strip() or email.split('@')[0]
-    email_verified = user_info.get('email_verified')
-    is_verified = email_verified is True or str(email_verified).lower() == 'true'
-
-    if not email or not is_verified:
-        flash("A verified Google email address is required.", "error")
-        return redirect(url_for(failure_endpoint))
-
-    session['is_admin'] = False
-
-    if email in ADMIN_EMAILS:
-        session['is_admin'] = True
-        session['admin_user'] = {'email': email, 'name': name}
-        return redirect(url_for('admin_dashboard'))
-
-    if intent == 'admin':
-        flash("This Google account is not authorized for administrator access.", "error")
-        return redirect(url_for('admin_panel'))
-
-    if not add_or_update_user(email, name):
-        flash("Your account could not be saved. Please try again.", "error")
+    if not crn or not password:
+        flash("Please enter both your CRN and password.", "error")
         return redirect(url_for('login'))
 
-    profile = get_user_by_email(email)
-    if not profile:
-        flash("Your account could not be loaded. Please try again.", "error")
+    # Ping the database to securely verify the CRN and hashed password
+    user = verify_student_login(crn, password)
+    
+    if not user:
+        flash("Incorrect CRN or password. Please try again.", "error")
         return redirect(url_for('login'))
-    if profile.get('is_banned'):
+
+    if user.get('is_banned'):
         flash("This account has been banned. Contact an administrator for help.", "error")
         return redirect(url_for('login'))
 
-    picture = str(user_info.get('picture') or '')
-    session['user'] = {'email': email, 'name': name,
-                       'picture': picture if picture.startswith('https://') and len(picture) <= 2000 else ''}
+    session.clear()
+    session['is_admin'] = False
+    
+    email = normalize_email(user.get('email', ''))
+    if email in ADMIN_EMAILS:
+        session['is_admin'] = True
+        session['admin_user'] = {'email': email, 'name': user.get('display_name')}
+        return redirect(url_for('admin_dashboard'))
+
+    session['user'] = {
+        'email': email, 
+        'name': user.get('display_name'),
+        'crn': user.get('crn'),
+        'picture': ''
+    }
     return redirect(url_for('dashboard'))
+
+
+@app.get('/auth/google')
+def auth_google():
+    """Start administrator Google login using the previously registered callback."""
+    if not app.config['GOOGLE_ADMIN_LOGIN_ENABLED']:
+        flash('Administrator Google sign-in is not configured. Contact the site owner.', 'error')
+        return redirect(url_for('admin_panel'))
+    session.clear()
+    session['oauth_intent'] = 'admin'
+    try:
+        return google.authorize_redirect(url_for('callback', _external=True), prompt='select_account')
+    except Exception:
+        session.clear()
+        app.logger.error('Could not start administrator Google sign-in')
+        flash('Google sign-in is temporarily unavailable. Please try again.', 'error')
+        return redirect(url_for('admin_panel'))
+
+
+@app.get('/callback')
+def callback():
+    """Exchange and validate Google's response before granting allowlisted access."""
+    if session.pop('oauth_intent', None) != 'admin' or not app.config['GOOGLE_ADMIN_LOGIN_ENABLED']:
+        flash('Start administrator sign-in again from this page.', 'error')
+        return redirect(url_for('admin_panel'))
+    try:
+        # Authlib verifies the OAuth state and the OpenID ID token/nonce.
+        token = google.authorize_access_token()
+        user_info = token.get('userinfo') if isinstance(token, Mapping) else None
+    except Exception:
+        session.clear()
+        app.logger.error('Administrator Google sign-in could not be completed')
+        flash('Google sign-in could not be completed. Please try again.', 'error')
+        return redirect(url_for('admin_panel'))
+
+    session.clear()
+    if not isinstance(user_info, Mapping):
+        flash('Google did not return a valid profile. Please try again.', 'error')
+        return redirect(url_for('admin_panel'))
+    email = normalize_email(user_info.get('email'))
+    verified = user_info.get('email_verified')
+    if not email or not (verified is True or verified == 'true'):
+        flash('A verified Google email address is required.', 'error')
+        return redirect(url_for('admin_panel'))
+    if email not in ADMIN_EMAILS:
+        flash('This Google account is not authorized for administrator access.', 'error')
+        return redirect(url_for('admin_panel'))
+    try:
+        profile = get_user_by_email(email)
+    except Exception:
+        app.logger.error('Could not load the administrator account during sign-in')
+        profile = None
+    if not profile:
+        flash('Your administrator account could not be loaded. Contact the site owner.', 'error')
+        return redirect(url_for('admin_panel'))
+    if profile.get('is_banned'):
+        flash('This account has been banned. Contact an administrator for help.', 'error')
+        return redirect(url_for('admin_panel'))
+    session['is_admin'] = True
+    session['admin_user'] = {
+        'email': email,
+        'name': profile.get('display_name') or str(user_info.get('name') or '').strip() or email.split('@')[0],
+    }
+    return redirect(url_for('admin_dashboard'))
+
 
 @app.route('/dashboard')
 def dashboard():
+    if is_administrator():
+        return redirect(url_for('admin_dashboard'))
     user = session.get('user')
     if not user:
         return redirect(url_for('login'))
@@ -266,9 +307,15 @@ def dashboard():
         announcement = communications_service.announcement()
     except Exception:
         app.logger.exception('Could not load official announcement')
+    try:
+        site_appearance = ui_settings_service.get_settings()
+    except Exception:
+        app.logger.exception('Could not load dashboard appearance')
+        site_appearance = ui_settings_service.DEFAULT_SETTINGS.copy()
     return render_template(
         'dashboard.html', user=user, profile=profile, user_warnings=warnings,
-        announcement=announcement,
+        announcement=announcement, dashboard_roles=profile_roles(profile),
+        role_labels=ROLE_LABELS, site_appearance=site_appearance,
     )
 
 @app.route('/logout')
@@ -276,13 +323,13 @@ def logout():
     session.clear()
     return redirect(url_for('home'))
 
-# ─────────────────────────────────────────────
+# 
 # ADMIN ROUTES
-# ─────────────────────────────────────────────
+# 
 
 @app.route('/admin') 
 def admin_panel():
-    if session.get('is_admin'):
+    if is_administrator():
         return redirect(url_for('admin_dashboard'))
     return render_template('admin.html')
 
@@ -291,7 +338,7 @@ def admin_required(view):
     """Require an authenticated administrator for a route."""
     @wraps(view)
     def wrapped(*args, **kwargs):
-        if not session.get('is_admin'):
+        if not is_administrator():
             return redirect(url_for('admin_panel'))
         return view(*args, **kwargs)
 
@@ -354,6 +401,11 @@ def complete_profile():
         )
     except ValueError as error:
         flash(str(error), "error")
+        return redirect(url_for('dashboard'))
+
+    except department_service.DepartmentUnavailable:
+        app.logger.exception('Could not validate profile department')
+        flash('Departments are temporarily unavailable. Please try again.', 'error')
         return redirect(url_for('dashboard'))
 
     if not updated_profile:
@@ -497,9 +549,7 @@ def admin_delete_warning(user_id, warning_id):
     return _moderation_redirect()
 
 
-# ─────────────────────────────────────────────
-# UPLOAD ROUTE (Agent 1 + Agent 2 working together)
-# ─────────────────────────────────────────────
+
 
 @app.route('/upload', methods=['POST'])
 @admin_required
@@ -518,7 +568,7 @@ def upload():
         flash("All required fields must be filled.", "error")
         return redirect(url_for('admin_dashboard'))
 
-    if category not in ALLOWED_CATEGORIES or branch not in ALLOWED_BRANCHES or semester not in ALLOWED_SEMESTERS:
+    if category not in ALLOWED_CATEGORIES or branch not in {item['code'].lower() for item in site_departments()} or semester not in ALLOWED_SEMESTERS:
         flash("Invalid category, branch, or semester.", "error")
         return redirect(url_for('admin_dashboard'))
 
@@ -541,7 +591,6 @@ def upload():
         flash("The file contents do not match the selected file type.", "error")
         return redirect(url_for('admin_dashboard'))
 
-    # Determine the size without loading the entire file into application memory.
     file.stream.seek(0, os.SEEK_END)
     file_size = file.stream.tell()
     file.stream.seek(0)
@@ -589,9 +638,6 @@ def upload():
     return redirect(url_for('admin_dashboard'))
 
 
-# ─────────────────────────────────────────────
-# ADMIN MANAGEMENT ROUTES
-# ─────────────────────────────────────────────
 
 @app.route('/admin/toggle-status/<int:resource_id>', methods=['POST'])
 @admin_required
@@ -646,10 +692,6 @@ def handle_file_too_large(_error):
     return redirect(url_for(endpoint))
 
 
-# ─────────────────────────────────────────────
-# API ROUTES (for student dashboard consumption)
-# ─────────────────────────────────────────────
-
 @app.route('/api/resources')
 def api_resources():
     """
@@ -690,7 +732,6 @@ def api_pyqs():
         return jsonify(error='Invalid page or year.'), 400
     try:
         papers, total = list_pyqs(request.args.get('q', '').strip()[:200], year, page)
-        # Public results omit internal uploader and file hash fields.
         items = [{key: paper[key] for key in
                   ('id', 'title', 'subject_code', 'subject_name', 'year', 'blob_url')}
                  for paper in papers]
@@ -758,7 +799,6 @@ def admin_upload_pyq():
     try:
         if not file or not file.filename:
             raise ValueError('Choose a PDF file.')
-        # Retain the filename for display; Azure gets a generated safe blob name.
         filename = file.filename.replace('\\', '/').rsplit('/', 1)[-1]
         _, created = import_pdf(file.stream, filename,
             request.form.get('subject_code'), request.form.get('subject_name'),
@@ -815,7 +855,7 @@ def _resource_catalogue(category, title, endpoint):
     search = request.args.get('q', '').strip()[:200]
     try:
         page = int(request.args.get('page', '1'))
-        if not 1 <= page <= 1000000 or (branch and branch not in ALLOWED_BRANCHES) or (semester and semester not in ALLOWED_SEMESTERS):
+        if not 1 <= page <= 1000000 or (branch and branch not in {item['code'].lower() for item in site_departments()}) or (semester and semester not in ALLOWED_SEMESTERS):
             raise ValueError()
     except ValueError:
         abort(400, 'Invalid department, semester or page.')
@@ -838,7 +878,54 @@ def _resource_catalogue(category, title, endpoint):
         page=page, error=error), 503 if error else 200
 
 
+def site_departments():
+    if not hasattr(g, 'site_departments'):
+        try:
+            g.site_departments = app.config.get('DEPARTMENT_LOADER', department_service.list_departments)()
+        except department_service.DepartmentUnavailable:
+            app.logger.exception('Could not load the department catalogue')
+            g.site_departments = department_service.DEFAULT_DEPARTMENTS
+    return g.site_departments
+
+
+@app.get('/api/site-effects')
+def site_effects():
+    try:
+        enabled = ui_settings_service.get_settings()['snowfall_enabled']
+        response = jsonify(snowfall_enabled=enabled)
+    except Exception:
+        app.logger.exception('Could not load website effects')
+        response = jsonify(snowfall_enabled=False)
+        response.status_code = 503
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
+
+@app.context_processor
+def department_context():
+    # Lazy: only templates with department controls need a database read.
+    return {'site_departments': site_departments}
+
+
 register_communications_routes(app, admin_required, csrf_protected, ADMIN_EMAILS)
+register_role_routes(app, admin_required, csrf_protected, ADMIN_EMAILS)
+register_user_manager_routes(app, csrf_protected, ADMIN_EMAILS)
+register_ui_editor_routes(app, csrf_protected)
+
+
+@app.context_processor
+def role_workspace_context():
+    # Role guards have already loaded and checked these grants for this request.
+    from flask import g
+    return {'assigned_workspace_roles': getattr(g, 'assigned_workspace_roles', ()),
+            'profile_roles': profile_roles}
+
+
+@app.after_request
+def private_workspace_response(response):
+    if request.path.startswith(('/dashboard', '/admin')):
+        response.headers['Cache-Control'] = 'private, no-store'
+    return response
 
 
 if __name__ == '__main__':

@@ -8,4 +8,12 @@ pyq-import-report.json
 admin only/manifest.json
 admin only/pdfs/
 admin only/
-tests/
+.role-test-deps/
+.dev/
+.venv/
+venv/
+.DS_Store
+output/
+tmp/
+tests/*
+!tests/test_*.py

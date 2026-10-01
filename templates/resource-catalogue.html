@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='books.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='resource-catalogue.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='contributor-badges.css') }}">
+    {% include '_site_effects.html' %}
 </head>
 <body>
 <div class="page-wrapper">
@@ -19,7 +20,7 @@
     </nav>
     <form class="resource-filters" method="get" role="search">
         <label class="search-label">Search<input name="q" value="{{ search }}" maxlength="200" placeholder="Title or subject name"></label>
-        <label>Department<select name="branch"><option value="">All departments</option>{% for code in ['cse', 'it', 'ece', 'ee', 'me', 'ce'] %}<option value="{{ code }}"{% if branch == code %} selected{% endif %}>{{ code|upper }}</option>{% endfor %}</select></label>
+        <label>Department<select name="branch"><option value="">All departments</option>{% for department in site_departments() %}<option value="{{ department.code|lower }}"{% if branch == department.code|lower %} selected{% endif %}>{{ department.name }} ({{ department.code }})</option>{% endfor %}</select></label>
         <label>Semester<select name="semester"><option value="">All semesters</option>{% for value in range(1, 9) %}<option value="{{ value }}"{% if semester == value|string %} selected{% endif %}>Semester {{ value }}</option>{% endfor %}</select></label>
         <button type="submit">Search</button>
         {% if search or branch or semester %}<a href="{{ url_for(endpoint) }}">Clear filters</a>{% endif %}
