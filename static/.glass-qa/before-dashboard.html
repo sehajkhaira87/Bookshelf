@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Bookshelf</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Canela:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/.glass-qa/before-dashboard.css">
+    <link rel="stylesheet" href="/static/.glass-qa/before-contributor-badges.css">
+    <link rel="stylesheet" href="/static/.glass-qa/before-notifications.css">
+</head>
+
+    
+    
+    
+<body data-profile-complete="true">
+    
+    
+    <div id="loader">
+        <video class="video-loader" autoplay muted playsinline>
+            <source src="/static/videos/bookshelf-loader.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    
+    <div class="onboarding-overlay hidden" id="onboardingOverlay" aria-hidden="true">
+        <div class="onboarding-modal" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle">
+            <h2 id="onboardingTitle">Set Up Your Bookshelf</h2>
+            <p>Just a few details so we can organize your resources.</p>
+
+            
+                
+            
+            
+            <form id="onboardingForm" class="onboarding-form" method="post" action="/complete_profile">
+                <input type="hidden" name="_csrf_token" value="preview-only">
+                
+                
+                <div class="input-group">
+                    <label for="studentName">Full Name</label>
+                    <input type="text" id="studentName" name="preferred_name" value="" required minlength="2" maxlength="255" autocomplete="name" placeholder="e.g. Just your real name">
+                    <span class="warning-text">⚠️ Please use your real registered name. Fake names will lead to immediate account restriction or a ban.</span>
+                </div>
+                
+                
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="urn">URN</label>
+                        <input type="text" id="urn" name="urn" value="" required minlength="3" maxlength="50" pattern="[A-Za-z0-9][A-Za-z0-9/\-]{2,49}" autocomplete="off" placeholder="e.g. 2435163">
+                    </div>
+                    <div class="input-group">
+                        <label for="crn">CRN</label>
+                        <input type="text" id="crn" name="crn" value="" required minlength="3" maxlength="50" pattern="[A-Za-z0-9][A-Za-z0-9/\-]{2,49}" autocomplete="off" placeholder="e.g. 2415262">
+                    </div>
+                </div>
+
+                
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="branch">Branch</label>
+                        <select id="branch" name="department" required>
+                            <option value="" disabled selected>Select Branch</option>
+                            <option value="CSE">Computer Science (CSE)</option>
+                            <option value="IT">Information Technology (IT)</option>
+                            <option value="ECE">Electronics (ECE)</option>
+                            <option value="EE">Electrical (EE)</option>
+                            <option value="ME">Mechanical (ME)</option>
+                            <option value="CE">Civil (CE)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="semester">Semester</label>
+                        <select id="semester" name="semester_no" required>
+                            <option value="" disabled selected>Select Sem</option>
+                            <option value="1">1st</option>
+                            <option value="2">2nd</option>
+                            <option value="3">3rd</option>
+                            <option value="4">4th</option>
+                            <option value="5">5th</option>
+                            <option value="6">6th</option>
+                            <option value="7">7th</option>
+                            <option value="8">8th</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="onboarding-submit">Access Dashboard</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <div class="dashboard-wrapper">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar">
+           <div class="sidebar-header">
+                <img src="/static/images/logo.svg" class="brand-logo" alt="Bookshelf Logo">
+            </div>
+            
+            <nav class="sidebar-nav" aria-label="Dashboard navigation">
+                <a href="#" class="nav-item active">
+                    <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3V10Zm6 10v-7h6v7"/></svg>
+                    <span>Overview</span>
+                </a>
+                <a href="/pyqs" class="nav-item" aria-label="PYQ archive">
+                    <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v16M3 3c4 0 7 1 9 3 2-2 5-3 9-3v15c-4 0-7 1-9 3-2-2-5-3-9-3V3Z"/></svg>
+                    <span class="nav-label-desktop">PYQ archive</span><span class="nav-label-mobile" aria-hidden="true">PYQs</span>
+                </a>
+                <a href="/contribute" class="nav-item" aria-label="Contribution">
+                    <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 7v10M7 12h10"/></svg>
+                    <span class="nav-label-desktop">Contribution</span><span class="nav-label-mobile" aria-hidden="true">Contribute</span>
+                </a>
+
+
+                <a href="#" class="nav-item" id="navNotifications" aria-label="Notification head">
+                    <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+                    <span class="nav-label-desktop">Notification head</span><span class="nav-label-mobile" aria-hidden="true">Alerts</span>
+                </a>
+
+
+                <a href="#" class="nav-item" id="navUserManager" aria-label="User Manager">
+                    <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span class="nav-label-desktop">User manager</span><span class="nav-label-mobile" aria-hidden="true">Users</span>
+                </a>
+
+
+                <a href="#" class="nav-item" id="navUiEditor" aria-label="UI Editor">
+                    <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+                    <span class="nav-label-desktop">UI editor</span><span class="nav-label-mobile" aria-hidden="true">UI Edit</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div style="position: relative;">
+                    <a href="#" class="nav-item" id="settingsBtn" aria-expanded="false" aria-controls="settingsPopup">
+                        <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 3 4 0 1 3 3 1 3 3v4l-3 3-3 1-1 3h-4l-1-3-3-1-3-3v-4l3-3 3-1 1-3Z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>Settings</span>
+                    </a>
+                    
+                    <div id="settingsPopup" class="settings-popup hidden">
+    <a href="mailto:support@bookshelf.com" class="settings-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+        Report an Issue
+    </a>
+    
+    <a href="#" class="settings-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        Update Profile
+    </a>
+    
+
+    <div class="settings-divider"></div>
+
+    <a href="/contribute" class="settings-link" style="margin-bottom: 0;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+        My Contributions
+    </a>
+</div>
+                </div>
+                
+                <a href="/logout" class="nav-item text-danger">
+                    <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3H3v18h6M9 12h12m-5-5 5 5-5 5"/></svg>
+                    <span>Log Out</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            
+            <header class="top-header">
+                <div>
+                    <h1>Welcome back, Preview</h1>
+                    <p class="subtitle" id="instruction-text">Select your department to continue.</p>
+                </div>
+                <div class="user-profile">
+                    <div class="notification-center" data-endpoint="/student_notifications" data-csrf="preview-only">
+                        <button type="button" id="notificationBell" class="notification-bell" aria-label="Notifications" aria-expanded="false" aria-controls="notificationPanel">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+                            <span id="notificationCount" class="notification-count" hidden></span>
+                        </button>
+                        <section id="notificationPanel" class="notification-panel" aria-label="Notifications" hidden>
+                            <div class="notification-heading"><h2>Notifications</h2><button type="button" id="closeNotifications" aria-label="Close notifications">×</button></div>
+                            <div class="notification-toolbar"><span>Official updates</span><button type="button" id="readAllNotifications" disabled>Mark all read</button></div>
+                            <p id="notificationStatus" role="status">Loading notifications…</p>
+                            <button type="button" id="retryNotifications" hidden>Try again</button>
+                            <ul id="notificationList"></ul>
+                            <button type="button" id="moreNotifications" hidden>Load older notifications</button>
+                        </section>
+                    </div>
+                    <div class="avatar" aria-label="Preview Student">
+                        <span>P</span>
+                        
+                    </div>
+                    
+                </div>
+            </header>
+
+            
+
+            
+
+            <div class="dashboard-flow">
+                
+                <div class="selection-step" style="opacity:1;transform:none" id="step-dept">
+                    <div class="dept-squares">
+                        
+                        <div class="dept-card" data-dept="cse" role="button" tabindex="0">
+                            <img src="/static/images/cse-icon.svg" class="dept-icon" alt="CSE Icon">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">CSE</div>
+                                <h3>Computer Science</h3>
+                            </div>
+                        </div>
+                        
+                        <div class="dept-card" data-dept="it" role="button" tabindex="0">
+                            <img src="/static/images/it-icon.svg" class="dept-icon" alt="IT Icon">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">IT</div>
+                                <h3>Information Technology</h3>
+                            </div>
+                        </div>
+
+<div class="dept-card" data-dept="ece" role="button" tabindex="0">
+                            <img src="/static/images/electronics.svg" class="dept-icon" alt="ECE Icon">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">ECE</div>
+                                <h3>Electronics</h3>
+                            </div>
+                        </div>
+
+                        <div class="dept-card" data-dept="ee" role="button" tabindex="0">
+                            <img src="/static/images/electrical.svg" class="dept-icon" alt="EE Icon">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">EE</div>
+                                <h3>Electrical Engg</h3>
+                            </div>
+                        </div>
+
+                        <div class="dept-card" data-dept="ce" role="button" tabindex="0">
+                            <img src="/static/images/civil.svg" class="dept-icon" alt="CE Icon">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">CE</div>
+                                <h3>Civil</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="selection-step" style="opacity:1;transform:none" id="step-sem">
+                    <h4 class="step-label">Select Semester</h4>
+                    <div class="semester-grid">
+                        
+                        <button class="sem-card" type="button" data-semester="1"><span class="sem-prefix">Sem</span> 1</button>
+                        
+                        <button class="sem-card" type="button" data-semester="2"><span class="sem-prefix">Sem</span> 2</button>
+                        
+                        <button class="sem-card" type="button" data-semester="3"><span class="sem-prefix">Sem</span> 3</button>
+                        
+                        <button class="sem-card" type="button" data-semester="4"><span class="sem-prefix">Sem</span> 4</button>
+                        
+                        <button class="sem-card" type="button" data-semester="5"><span class="sem-prefix">Sem</span> 5</button>
+                        
+                        <button class="sem-card" type="button" data-semester="6"><span class="sem-prefix">Sem</span> 6</button>
+                        
+                        <button class="sem-card" type="button" data-semester="7"><span class="sem-prefix">Sem</span> 7</button>
+                        
+                        <button class="sem-card" type="button" data-semester="8"><span class="sem-prefix">Sem</span> 8</button>
+                        
+                    </div>
+                </div>
+
+                <div class="selection-step" style="opacity:1;transform:none" id="step-category">
+                    <h4 class="step-label">What are you looking for?</h4>
+                    <div class="category-squares">
+                        
+                        <div class="category-card" data-category="pyqs" data-url="/pyqs" role="link" tabindex="0">
+                            <img src="/static/images/pyq-icon.svg" class="category-icon" alt="PYQ">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">01</div>
+                                <h3>PYQs</h3>
+                            </div>
+                        </div>
+                        
+                        <div class="category-card" data-category="books" data-url="/books" role="link" tabindex="0">
+                            <img src="/static/images/books-icon.svg" class="category-icon" alt="Books">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">02</div>
+                                <h3>Digital Books</h3>
+                            </div>
+                        </div>
+                        
+                        <div class="category-card" data-category="assignments" data-url="/assignments" role="link" tabindex="0">
+                            <img src="/static/images/assignment-icon.svg" class="category-icon" alt="Assignments">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">03</div>
+                                <h3>Assignments</h3>
+                            </div>
+                        </div>
+                        
+                        <div class="category-card" data-category="notes" data-url="/notes" role="link" tabindex="0">
+                            <img src="/static/images/notes-icon.svg" class="category-icon" alt="Notes">
+                            <div>
+                                <div class="card-badge" style="margin-bottom: 8px;">04</div>
+                                <h3>Notes</h3>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                
+
+            </div>
+        </main>
+
+    </div>
+    
+    <script src="/static/.glass-qa/before-dashboard.js"></script>
+    <script src="/static/.glass-qa/before-notifications.js"></script>
+
+    <script>
+        console.log("1. Script section reached!");
+
+        window.addEventListener("load", () => {
+            console.log("2. Page fully loaded! Starting the 4-second timer...");
+            const loader = document.getElementById("loader");
+            const overlay = document.getElementById("onboardingOverlay");
+            const needsOnboarding = document.body.dataset.profileComplete !== "true";
+            
+            setTimeout(() => {
+                console.log("3. 4 seconds passed! Sliding loader up...");
+                loader.classList.add("hide-loader");
+                if (needsOnboarding) {
+                    overlay.classList.remove("hidden");
+                    overlay.classList.add("show-overlay");
+                    overlay.setAttribute("aria-hidden", "false");
+                }
+                
+                setTimeout(() => {
+                    loader.remove();
+                }, 1200);
+                
+            }, 4000); 
+        });
+    </script>
+
+    
+
+</body>
+</html>

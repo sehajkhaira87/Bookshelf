@@ -265,8 +265,6 @@ async function initBook3D(canvas, container) {
  prepared = true;
  if (renderLoop) renderLoop.request(); else requestAnimationFrame(animate);
 
- await initScrollCueBook(bookGroup);
-
  //  CINEMATIC SEQUENCE 
  if (typeof gsap !== 'undefined') {
  ScrollTrigger.create({
@@ -342,6 +340,15 @@ async function initBook3D(canvas, container) {
  }, '-=0.8');
  }
  });
+ }
+
+ // The cue has its own WebGL context and shader preparation. Register the
+ // main reveal first: a failed or slow optional cue must never leave the
+ // already-prepared main book hidden at scale zero.
+ try {
+ await initScrollCueBook(bookGroup);
+ } catch (error) {
+ console.warn('[Book3D] Scroll cue unavailable:', error);
  }
  })();
 

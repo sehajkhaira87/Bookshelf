@@ -1,6 +1,6 @@
 @font-face {
     font-family: "Canela";
-    src: url("font/Canela-Light-Trial.otf") format("opentype");
+    src: url("/static/font/Canela-Light-Trial.otf") format("opentype");
     font-weight: 300;
     font-display: swap;
 }
@@ -71,6 +71,15 @@ button:focus-visible, a:focus-visible, .book-input:focus-visible {
     font-weight: 500;
     letter-spacing: 0.01em;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.back-btn::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    background: radial-gradient(ellipse at 25% 0%, rgba(255, 255, 255, 0.23), transparent 65%);
+    pointer-events: none;
+    z-index: -1;
 }
 .back-btn svg { width: 17px; height: 17px; }
 .back-btn:hover {

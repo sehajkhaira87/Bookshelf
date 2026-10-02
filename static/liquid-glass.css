@@ -1,0 +1,199 @@
+/*
+ * Bookshelf button surfaces. Opt in with .liquid-glass.
+ * Geometry, typography, and visibility stay in each page's CSS.
+ * The notification selector also covers buttons created by notifications.js.
+ */
+:is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass) {
+    position: relative;
+    isolation: isolate;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.045), transparent 65%),
+        var(--lg-solid, #fffaf2);
+    border-color: var(--lg-border, rgba(255, 255, 255, 0.28));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.42),
+        inset 0 -1px 0 rgba(62, 44, 34, 0.13),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+        0 3px 10px -4px rgba(62, 44, 34, 0.18);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    transition: background-color 260ms ease, color 260ms ease, box-shadow 260ms ease,
+        border-color 260ms ease, transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Opaque fallback above; softly translucent only when backdrop blur is supported. */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass) {
+        background-color: var(--lg-fill, rgba(255, 250, 242, 0.42));
+        -webkit-backdrop-filter: blur(4px) saturate(112%);
+        backdrop-filter: var(--lg-refraction, blur(4px)) saturate(112%);
+    }
+}
+
+/* Light concentrates along the curved rim. Mask only the highlight, never the
+   button/backdrop: a masked ancestor would prevent sampling the scene behind it. */
+@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
+    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass)::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        padding: 1.5px;
+        border-radius: inherit;
+        pointer-events: none;
+        z-index: -1;
+        background: conic-gradient(from var(--lg-light-angle, -35deg) at 50% 50%,
+            rgba(255, 253, 244, .8), rgba(255, 249, 228, .12) 65deg,
+            rgba(81, 54, 34, .24) 145deg, rgba(255, 245, 216, .48) 205deg,
+            rgba(255, 255, 255, .08) 285deg, rgba(255, 253, 244, .8));
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: .62;
+        transition: opacity 260ms ease;
+    }
+}
+
+/* A contained reflection behind the label; no overflow clipping of badges/icons. */
+:is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass)::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: -1;
+    background: radial-gradient(ellipse at var(--lg-light-x, 28%) var(--lg-light-y, 0%),
+        rgba(255, 251, 232, .2), transparent 62%),
+        linear-gradient(110deg, transparent 22%,
+        rgba(255, 255, 255, 0.04) 38%, rgba(255, 255, 255, 0.17) 49%,
+        rgba(255, 255, 255, 0.045) 60%, transparent 78%);
+    background-size: 230% 100%;
+    background-position: 58% 0;
+    opacity: 0.55;
+    transition: background-position 480ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 260ms ease;
+}
+
+/* Prevent a latched hover on touch devices; preserve selected/dimmed state styling. */
+:is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(.dimmed):hover {
+    transform: none;
+}
+@media (hover: hover) and (pointer: fine) {
+    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(:disabled):not([aria-disabled="true"]):not(.dimmed):hover {
+        transform: translateY(-1px);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.55),
+            inset 0 -1px 0 rgba(62, 44, 34, 0.12),
+            inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+            0 5px 14px -5px rgba(62, 44, 34, 0.23);
+    }
+    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(:disabled):not([aria-disabled="true"]):not(.dimmed):hover::after {
+        background-position: 46% 0;
+        opacity: 0.85;
+    }
+    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(:disabled):not([aria-disabled="true"]):not(.dimmed):hover::before {
+        opacity: .9;
+    }
+}
+:is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(:disabled):not([aria-disabled="true"]):not(.dimmed):active {
+    transform: translateY(0) scale(0.995);
+    box-shadow: inset 0 1px 2px rgba(62, 44, 34, 0.11),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.3),
+        0 1px 4px rgba(62, 44, 34, 0.09);
+}
+:is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(:disabled):not([aria-disabled="true"]):not(.dimmed):active::after {
+    background-position: 49% 0;
+    opacity: 0.45;
+}
+:is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(:disabled):not([aria-disabled="true"]):not(.dimmed):active::before {
+    opacity: .5;
+}
+:is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):is(:disabled, [aria-disabled="true"]) {
+    transform: none;
+}
+:is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):focus-visible {
+    outline: 2px solid var(--lg-focus, #795b40);
+    outline-offset: 4px;
+}
+
+/* Preserve the existing cream, mocha, gold, and dark-mode palettes. */
+:is(.big-contribute-btn, .submit-btn).liquid-glass {
+    --lg-solid: #67442f;
+    --lg-fill: rgba(103, 68, 47, 0.92);
+}
+.onboarding-submit.liquid-glass {
+    --lg-solid: #241b12;
+    --lg-fill: rgba(36, 27, 18, 0.93);
+}
+:is(.nav-item, .settings-link).liquid-glass,
+.liquid-glass--dark,
+body.dark-mode .pyq-archive-action.liquid-glass,
+body.dark-mode .sem-card.liquid-glass {
+    --lg-solid: #291f16;
+    --lg-fill: rgba(41, 31, 22, 0.66);
+    --lg-border: rgba(244, 239, 227, 0.16);
+    --lg-focus: #ecd2a6;
+}
+/* Keep the existing cream hue readable over the dark glass highlights. */
+.back-btn.liquid-glass--dark {
+    color: rgba(244, 239, 227, 0.8);
+}
+.library-tabs a.liquid-glass[aria-current],
+.resource-filters button.liquid-glass {
+    --lg-solid: #f2c14e;
+    --lg-fill: rgba(242, 193, 78, 0.9);
+    --lg-border: #f2c14e;
+}
+.notification-bell.liquid-glass[aria-expanded="true"] {
+    --lg-solid: #f9edce;
+    --lg-fill: rgba(249, 237, 206, 0.82);
+}
+.nav-item.liquid-glass.active {
+    --lg-solid: #3b2d19;
+    --lg-fill: var(--site-tint, rgba(242, 193, 78, 0.1));
+}
+.sem-card.liquid-glass.selected {
+    --lg-solid: #fffcf5;
+    --lg-fill: var(--site-tint, rgba(255, 252, 245, 0.82));
+    --lg-border: var(--site-highlight, #f2c14e);
+}
+body.dark-mode .sem-card.liquid-glass.selected {
+    --lg-solid: #2a2118;
+    --lg-fill: rgba(42, 33, 24, 0.88);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass),
+    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass)::before,
+    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass)::after {
+        transition: none !important;
+        animation: none !important;
+    }
+    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(.dimmed):is(:hover, :active) {
+        transform: none !important;
+    }
+    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):is(:hover, :active)::after {
+        background-position: 58% 0 !important;
+        opacity: 0.55 !important;
+    }
+    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass)::before {
+        opacity: .62 !important;
+    }
+}
+@media (prefers-reduced-transparency: reduce) {
+    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass) {
+        background: var(--lg-solid, #fffaf2);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+}
+@media (forced-colors: active) {
+    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass) {
+        background: ButtonFace;
+        color: ButtonText;
+        box-shadow: none;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        outline: 1px solid ButtonText;
+    }
+    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass)::before,
+    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass)::after { content: none; }
+}

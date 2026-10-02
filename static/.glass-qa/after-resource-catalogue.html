@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes · Bookshelf</title>
+    <link rel="stylesheet" href="/static/books.css">
+    <link rel="stylesheet" href="/static/resource-catalogue.css">
+    <link rel="stylesheet" href="/static/contributor-badges.css">
+    <link rel="stylesheet" href="/static/liquid-glass.css">
+</head>
+<body>
+<div class="page-wrapper">
+    <nav class="top-nav"><strong>BOOKSHELF</strong><a href="/dashboard" class="back-btn liquid-glass liquid-glass--dark">← Return to Dashboard</a></nav>
+    <header class="header-section"><div class="page-title"><h1>Notes</h1><p>Browse uploaded study materials for your department and semester.</p></div></header>
+    <nav class="library-tabs" aria-label="Study materials">
+        
+        <a href="/notes?branch=cse&amp;semester=1" aria-current="page" class="liquid-glass liquid-glass--dark">Notes</a>
+        
+        <a href="/assignments?branch=cse&amp;semester=1" class="liquid-glass liquid-glass--dark">Assignments</a>
+        
+        <a href="/books?branch=cse&amp;semester=1" class="liquid-glass liquid-glass--dark">Digital Books</a>
+        
+    </nav>
+    <form class="resource-filters" method="get" role="search">
+        <label class="search-label">Search<input name="q" value="" maxlength="200" placeholder="Title or subject name"></label>
+        <label>Department<select name="branch"><option value="">All departments</option><option value="cse" selected>CSE</option><option value="it">IT</option><option value="ece">ECE</option><option value="ee">EE</option><option value="me">ME</option><option value="ce">CE</option></select></label>
+        <label>Semester<select name="semester"><option value="">All semesters</option><option value="1" selected>Semester 1</option><option value="2">Semester 2</option><option value="3">Semester 3</option><option value="4">Semester 4</option><option value="5">Semester 5</option><option value="6">Semester 6</option><option value="7">Semester 7</option><option value="8">Semester 8</option></select></label>
+        <button type="submit" class="liquid-glass liquid-glass--dark">Search</button>
+        <a href="/notes" class="liquid-glass liquid-glass--dark">Clear filters</a>
+    </form>
+    <p class="result-count">120 resources · CSE · Semester 1</p>
+    <main class="content-grid">
+        
+        <article class="resource-card">
+            <span class="resource-course">CSE · Semester 1</span>
+            
+            
+            
+            <h2>Preview notes</h2>
+            
+            <p class="resource-uploader">Uploaded by <strong>Preview</strong></p>
+            
+            
+            <a class="resource-open liquid-glass liquid-glass--dark" href="#preview" target="_blank" rel="noopener">Open file ↗</a>
+        </article>
+        
+    </main>
+    <nav class="resource-pagination" aria-label="Resource pages"><span>Page 2</span><div>
+        <a href="/notes?branch=cse&amp;semester=1&amp;q=&amp;page=1" class="liquid-glass liquid-glass--dark">← Previous</a>
+        <a href="/notes?branch=cse&amp;semester=1&amp;q=&amp;page=3" class="liquid-glass liquid-glass--dark">Next →</a>
+    </div></nav>
+    
+</div>
+
+</body>
+</html>

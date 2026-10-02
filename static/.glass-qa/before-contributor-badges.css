@@ -1,0 +1,4 @@
+.contributor-badge { display: inline-flex; align-items: center; align-self: flex-start; gap: 6px; max-width: 100%; box-sizing: border-box; padding: 5px 9px; border: 1px solid; border-radius: 999px; font-size: 10px; font-weight: 500; line-height: 1.4; letter-spacing: .01em; }
+.contributor-badge svg { flex-shrink: 0; }
+.contributor-badge-trusted { background: #24292c; border-color: #414b50; color: #abb9c1; }
+.contributor-badge-best { background: #2c271e; border-color: #514735; color: #c1b08c; box-shadow: 0 0 10px rgba(201, 164, 88, .2), inset 0 0 5px rgba(201, 164, 88, .08); }

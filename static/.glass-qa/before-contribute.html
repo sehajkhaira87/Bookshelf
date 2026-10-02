@@ -5,10 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contribute - BOOKSHELF</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='contribute.css') }}">
-    {% include '_site_effects.html' %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='liquid-glass.css') }}">
-    <script defer src="{{ url_for('static', filename='liquid-glass.js') }}"></script>
+    <link rel="stylesheet" href="/static/.glass-qa/before-contribute.css">
 </head>
 <body>
 
@@ -16,10 +13,10 @@
        <!-- Top Navigation -->
         <nav class="top-nav">
             <div class="brand">
-                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="nav-logo">
+                <img src="/static/images/logo.svg" alt="Bookshelf Logo" class="nav-logo">
             </div>
             
-            <a href="{{ url_for('dashboard') }}" class="back-btn liquid-glass">
+            <a href="/dashboard" class="back-btn">
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 5-7 7 7 7M5 12h14"/></svg>
                 <span>Return to Dashboard</span>
             </a>
@@ -59,7 +56,7 @@
                     </div>
                     <h2 class="upload-heading">Make room for a little knowledge.</h2>
                     <p class="state-description">Your notes could make someone's next chapter easier.</p>
-                    <button class="big-contribute-btn liquid-glass">
+                    <button class="big-contribute-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                         <span>Shelf your Notes</span>
                     </button>
@@ -70,18 +67,18 @@
                     <h3 class="step-title">How would you like to add it?</h3>
                     
                     <div class="choice-cards">
-                        <button class="choice-card liquid-glass" id="btn-camera">
+                        <button class="choice-card" id="btn-camera">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
                             <span>Scan with Camera</span>
                         </button>
 
-                        <button class="choice-card liquid-glass" id="btn-upload">
+                        <button class="choice-card" id="btn-upload">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                             <span>Upload a File</span>
                         </button>
                     </div>
 
-                    <button class="cancel-btn liquid-glass" id="btn-cancel-options">Cancel</button>
+                    <button class="cancel-btn" id="btn-cancel-options">Cancel</button>
                 </div>
 
                 <div class="upload-state hidden" id="state-form">
@@ -90,10 +87,10 @@
                     <div class="selected-file-box">
                         <svg class="file-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                         <span id="file-name-display">document.pdf</span>
-                        <button type="button" id="btn-cancel-file" class="remove-btn liquid-glass" aria-label="Remove selected file">✕</button>
+                        <button type="button" id="btn-cancel-file" class="remove-btn" aria-label="Remove selected file">✕</button>
                     </div>
 
-                    <form id="metadata-form" action="{{ url_for('contribute') }}" method="POST" enctype="multipart/form-data">
+                    <form id="metadata-form" action="/contribute" method="POST" enctype="multipart/form-data">
                         
                         <input type="file" id="native-upload" name="file" accept=".pdf, .jpg, .jpeg, .png" class="hidden">
                         <input type="file" id="native-camera" name="file" accept="image/*" capture="environment" class="hidden">
@@ -102,7 +99,12 @@
                             <label class="form-field">Branch
                             <select name="branch" required class="book-input">
                                 <option value="" disabled selected>Select Branch...</option>
-                                {% for department in site_departments() %}<option value="{{ department.code|lower }}">{{ department.name }} ({{ department.code }})</option>{% endfor %}
+                                <option value="cse">Computer Science</option>
+                                <option value="it">Information Tech</option>
+                                <option value="electrical">Electrical</option>
+                                <option value="civil">Civil</option>
+                                <option value="mechanical">Mechanical</option>
+                                <option value="electronics">Electronics</option>
                             </select>
                             </label>
                             <label class="form-field">Category
@@ -134,14 +136,14 @@
                             </label>
                         </div>
 
-                        <button type="submit" class="submit-btn liquid-glass">Place on the Shelf</button>
+                        <button type="submit" class="submit-btn">Place on the Shelf</button>
                     </form>
                 </div>
 
             </section>
         </main>
     </div>
-<script src="{{ url_for('static', filename='contribute.js') }}"></script>
-{% include '_student_activity.html' %}
+<script src="/static/.glass-qa/before-contribute.js"></script>
+
 </body>
 </html>

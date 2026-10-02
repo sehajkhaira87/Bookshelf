@@ -165,7 +165,8 @@ body {
 }
 
 .login-logo {
-    height: 60px;
+    width: 110px;
+    height: auto;
     margin-bottom: 28px;
     display: block;
     opacity: 0;
@@ -349,6 +350,111 @@ body {
 @keyframes fadeIn {
     from { opacity: 0; }
     to   { opacity: 1; }
+}
+
+/* Compact the desktop composition using available height, without scaling
+   the page or changing the separate mobile and portrait layouts. */
+@media (min-width: 821px) and (min-aspect-ratio: 3/2) {
+    body {
+        --login-unit: clamp(.9px, calc(.6px + .028vh), 1px);
+        padding: calc(32 * var(--login-unit));
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    @supports (height: 1svh) {
+        body {
+            --login-unit: clamp(.9px, calc(.6px + .028svh), 1px);
+        }
+    }
+
+    .login-container {
+        max-width: calc(980 * var(--login-unit));
+        min-height: calc(600 * var(--login-unit));
+        border-radius: calc(28 * var(--login-unit));
+    }
+
+    .login-visual {
+        padding: calc(48 * var(--login-unit));
+    }
+
+    .login-visual-glow {
+        width: calc(380 * var(--login-unit));
+        height: calc(380 * var(--login-unit));
+    }
+
+    .login-visual-quote {
+        left: 0;
+        right: 0;
+        padding-inline: calc(24 * var(--login-unit));
+        white-space: normal;
+        bottom: calc(44 * var(--login-unit));
+        font-size: calc(16 * var(--login-unit));
+    }
+
+    .login-formside {
+        padding: calc(56 * var(--login-unit)) calc(60 * var(--login-unit));
+    }
+
+    .login-form-inner {
+        max-width: calc(340 * var(--login-unit));
+    }
+
+    .login-logo {
+        width: calc(110 * var(--login-unit));
+        margin-bottom: calc(28 * var(--login-unit));
+    }
+
+    .login-form-inner--google .login-logo {
+        margin-bottom: calc(32 * var(--login-unit));
+    }
+
+    .login-formside h1 {
+        font-size: calc(32 * var(--login-unit));
+        margin-bottom: calc(8 * var(--login-unit));
+    }
+
+    .login-subtext {
+        font-size: max(14px, calc(14.5 * var(--login-unit)));
+        margin-bottom: calc(24 * var(--login-unit));
+    }
+
+    .login-form-inner--google .login-subtext {
+        max-width: calc(300 * var(--login-unit));
+    }
+
+    .login-custom-form {
+        gap: calc(16 * var(--login-unit));
+        margin-top: calc(8 * var(--login-unit));
+    }
+
+    .login-input {
+        min-height: 44px;
+        padding: calc(16 * var(--login-unit)) calc(20 * var(--login-unit));
+        border-radius: calc(12 * var(--login-unit));
+        font-size: max(14px, calc(15 * var(--login-unit)));
+    }
+
+    .login-submit-hero {
+        min-height: 44px;
+        margin-top: calc(8 * var(--login-unit));
+        padding: calc(17 * var(--login-unit)) calc(24 * var(--login-unit));
+        gap: calc(12 * var(--login-unit));
+    }
+
+    .login-google-label {
+        font-size: max(14px, calc(15.5 * var(--login-unit)));
+    }
+
+    .login-google-arrow {
+        font-size: calc(16 * var(--login-unit));
+    }
+
+    .login-terms {
+        margin-top: calc(40 * var(--login-unit));
+        max-width: calc(280 * var(--login-unit));
+        font-size: max(11.5px, calc(12 * var(--login-unit)));
+    }
 }
 
 @media (max-width: 820px) {

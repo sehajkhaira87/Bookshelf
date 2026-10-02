@@ -1,0 +1,93 @@
+--- a/static/liquid-glass.css
++++ b/static/liquid-glass.css
+@@ -24,8 +24,32 @@
+ @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+     :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass) {
+         background-color: var(--lg-fill, rgba(255, 250, 242, 0.42));
+-        -webkit-backdrop-filter: blur(8px) saturate(115%);
+-        backdrop-filter: blur(8px) saturate(115%);
++        -webkit-backdrop-filter: blur(4px) saturate(112%);
++        backdrop-filter: var(--lg-refraction, blur(4px)) saturate(112%);
++    }
++}
++
++/* Light concentrates along the curved rim. Mask only the highlight, never the
++   button/backdrop: a masked ancestor would prevent sampling the scene behind it. */
++@supports ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
++    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass)::before {
++        content: "";
++        position: absolute;
++        inset: 0;
++        padding: 1.5px;
++        border-radius: inherit;
++        pointer-events: none;
++        z-index: -1;
++        background: conic-gradient(from var(--lg-light-angle, -35deg) at 50% 50%,
++            rgba(255, 253, 244, .8), rgba(255, 249, 228, .12) 65deg,
++            rgba(81, 54, 34, .24) 145deg, rgba(255, 245, 216, .48) 205deg,
++            rgba(255, 255, 255, .08) 285deg, rgba(255, 253, 244, .8));
++        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
++        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
++        -webkit-mask-composite: xor;
++        mask-composite: exclude;
++        opacity: .62;
++        transition: opacity 260ms ease;
+     }
+ }
+ 
+@@ -37,7 +61,9 @@
+     border-radius: inherit;
+     pointer-events: none;
+     z-index: -1;
+-    background: linear-gradient(110deg, transparent 22%,
++    background: radial-gradient(ellipse at var(--lg-light-x, 28%) var(--lg-light-y, 0%),
++        rgba(255, 251, 232, .2), transparent 62%),
++        linear-gradient(110deg, transparent 22%,
+         rgba(255, 255, 255, 0.04) 38%, rgba(255, 255, 255, 0.17) 49%,
+         rgba(255, 255, 255, 0.045) 60%, transparent 78%);
+     background-size: 230% 100%;
+@@ -63,6 +89,9 @@
+         background-position: 46% 0;
+         opacity: 0.85;
+     }
++    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(:disabled):not([aria-disabled="true"]):not(.dimmed):hover::before {
++        opacity: .9;
++    }
+ }
+ :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(:disabled):not([aria-disabled="true"]):not(.dimmed):active {
+     transform: translateY(0) scale(0.995);
+@@ -73,6 +102,9 @@
+ :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(:disabled):not([aria-disabled="true"]):not(.dimmed):active::after {
+     background-position: 49% 0;
+     opacity: 0.45;
++}
++:is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(:disabled):not([aria-disabled="true"]):not(.dimmed):active::before {
++    opacity: .5;
+ }
+ :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):is(:disabled, [aria-disabled="true"]) {
+     transform: none;
+@@ -130,6 +162,7 @@
+ 
+ @media (prefers-reduced-motion: reduce) {
+     :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass),
++    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass)::before,
+     :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass)::after {
+         transition: none !important;
+         animation: none !important;
+@@ -140,6 +173,9 @@
+     :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):is(:hover, :active)::after {
+         background-position: 58% 0 !important;
+         opacity: 0.55 !important;
++    }
++    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass)::before {
++        opacity: .62 !important;
+     }
+ }
+ @media (prefers-reduced-transparency: reduce) {
+@@ -158,5 +194,6 @@
+         backdrop-filter: none;
+         outline: 1px solid ButtonText;
+     }
++    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass)::before,
+     :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass)::after { content: none; }
+ }

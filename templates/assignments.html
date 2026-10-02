@@ -7,6 +7,8 @@
     <title>Assignment - BOOKSHELF</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='pyqs.css') }}">
     {% include '_site_effects.html' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='liquid-glass.css') }}">
+    <script defer src="{{ url_for('static', filename='liquid-glass.js') }}"></script>
 </head>
 <body>
 
@@ -16,7 +18,7 @@
                 <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="nav-logo">
             </div>
             
-            <a href="{{ url_for('dashboard') }}" class="back-btn">
+            <a href="{{ url_for('dashboard') }}" class="back-btn liquid-glass">
                 <span>←</span> Return to Dashboard
             </a>
         </nav>
