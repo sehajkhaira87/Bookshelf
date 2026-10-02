@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Library - BOOKSHELF</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='books.css') }}">
+    {% include '_site_effects.html' %}
     <link rel="stylesheet" href="{{ url_for('static', filename='liquid-glass.css') }}">
+    <script defer src="{{ url_for('static', filename='liquid-glass.js') }}"></script>
 </head>
 <body>
     <div class="page-wrapper">

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Access | Bookshelf</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+    {% include '_site_effects.html' %}
 </head>
 <body>
 
@@ -13,7 +14,7 @@
         <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="admin-logo">
 
         <h1>Welcome back, Mr. Khaira and Mr. Mangat.</h1>
-        <p>The bookshelf awaits your command. Sign in with an authorized Google account.</p>
+        <p>The bookshelf awaits your command. Sign in with your approved administrator Google account.</p>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% for category, message in messages %}
@@ -32,6 +33,7 @@
         </a>
 
         <span class="access-note">Only approved administrator accounts can continue.</span>
+        <a class="student-sign-in" href="{{ url_for('login') }}">Student sign-in</a>
     </div>
     <div class="guardian-combo">
         <img src="{{ url_for('static', filename='images/stool.svg') }}" alt="Library Stool" class="admin-stool">

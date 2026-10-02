@@ -20,17 +20,16 @@ username = os.getenv("DB_USER")
 password = os.getenv("DB_PASSWORD")
 database = os.getenv("DB_NAME")
 
-ALLOWED_DEPARTMENTS = frozenset({"CSE", "IT", "ECE", "EE", "ME", "CE"})
 STUDENT_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9/-]{2,49}$")
 
 USER_SELECT_COLUMNS = """
     id, email, name, google_name, preferred_name, department, urn, crn,
-    semester_no, profile_completed, is_banned, banned_at, created_at, updated_at, contributor_badge
+    semester_no, profile_completed, is_banned, banned_at, created_at, updated_at, contributor_badge, role, roles
 """
 USER_RESULT_COLUMNS = (
     "id", "email", "name", "google_name", "preferred_name", "department",
     "urn", "crn", "semester_no", "profile_completed", "is_banned",
-    "banned_at", "created_at", "updated_at", "contributor_badge",
+    "banned_at", "created_at", "updated_at", "contributor_badge", "role", "roles",
 )
 
 
@@ -93,6 +92,28 @@ def create_tables():
             );
 
             ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(32) NOT NULL
+                DEFAULT 'student' CHECK (role IN ('student', 'notification_head', 'user_manager', 'ui_editor'));
+            -- NULL distinguishes accounts not yet migrated from an intentional
+            -- empty selection. Never restore old privileges into an empty array.
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS roles TEXT[];
+            UPDATE users SET roles = CASE
+                WHEN role IN ('notification_head', 'user_manager', 'ui_editor') THEN ARRAY[role]::TEXT[]
+                ELSE ARRAY[]::TEXT[] END
+                WHERE roles IS NULL;
+            ALTER TABLE users ALTER COLUMN roles SET DEFAULT ARRAY[]::TEXT[];
+            ALTER TABLE users ALTER COLUMN roles SET NOT NULL;
+            DO $$ BEGIN
+                IF NOT EXISTS (SELECT 1 FROM pg_constraint
+                    WHERE conname = 'users_roles_valid' AND conrelid = 'users'::regclass) THEN
+                    ALTER TABLE users ADD CONSTRAINT users_roles_valid CHECK (
+                        roles <@ ARRAY['notification_head', 'user_manager', 'ui_editor']::TEXT[]
+                        AND array_position(roles, NULL) IS NULL
+                    );
+                END IF;
+            END; $$;
+            UPDATE users SET role = COALESCE(roles[1], 'student')
+                WHERE role IS DISTINCT FROM COALESCE(roles[1], 'student');
             ALTER TABLE users ADD COLUMN IF NOT EXISTS google_name VARCHAR(255);
             ALTER TABLE users ADD COLUMN IF NOT EXISTS preferred_name VARCHAR(255);
             ALTER TABLE users ADD COLUMN IF NOT EXISTS crn VARCHAR(50);
@@ -278,7 +299,8 @@ def update_user_profile(email, preferred_name, department, urn, crn, semester_no
     normalized_email = _normalize_email(email)
     normalized_name = _normalize_name(preferred_name, "Full name")
     normalized_department = str(department or "").strip().upper()
-    if normalized_department not in ALLOWED_DEPARTMENTS:
+    from department_service import is_valid_department
+    if not is_valid_department(normalized_department):
         raise ValueError("Please select a valid department.")
 
     normalized_urn = _normalize_student_id(urn, "URN")

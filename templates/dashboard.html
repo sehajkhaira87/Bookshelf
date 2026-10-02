@@ -11,13 +11,16 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='contributor-badges.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='notifications.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='liquid-glass.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='roles.css') }}">
+    {% include '_site_appearance.html' %}
+    {% include '_site_effects.html' %}
 </head>
 
     {% set dashboard_user = profile if profile is defined and profile else user %}
     {% set display_name = dashboard_user.preferred_name or dashboard_user.display_name or dashboard_user.google_name or dashboard_user.name or 'Student' %}
     {% set profile_is_complete = dashboard_user.profile_completed|default(false) %}
-<body data-profile-complete="{{ 'true' if profile_is_complete else 'false' }}">
+    {% set dashboard_roles = dashboard_roles|default([]) %}
+<body class="dashboard-page{% if dashboard_roles %} expanded-mobile-nav{% endif %}" data-profile-complete="{{ 'true' if profile_is_complete else 'false' }}">
     
     
     <div id="loader">
@@ -70,12 +73,7 @@
                         <label for="branch">Branch</label>
                         <select id="branch" name="department" required>
                             <option value="" disabled{% if not dashboard_user.department %} selected{% endif %}>Select Branch</option>
-                            <option value="CSE"{% if dashboard_user.department == 'CSE' %} selected{% endif %}>Computer Science (CSE)</option>
-                            <option value="IT"{% if dashboard_user.department == 'IT' %} selected{% endif %}>Information Technology (IT)</option>
-                            <option value="ECE"{% if dashboard_user.department == 'ECE' %} selected{% endif %}>Electronics (ECE)</option>
-                            <option value="EE"{% if dashboard_user.department == 'EE' %} selected{% endif %}>Electrical (EE)</option>
-                            <option value="ME"{% if dashboard_user.department == 'ME' %} selected{% endif %}>Mechanical (ME)</option>
-                            <option value="CE"{% if dashboard_user.department == 'CE' %} selected{% endif %}>Civil (CE)</option>
+                            {% for department in site_departments() %}<option value="{{ department.code }}"{% if dashboard_user.department == department.code %} selected{% endif %}>{{ department.name }} ({{ department.code }})</option>{% endfor %}
                         </select>
                     </div>
                     
@@ -95,7 +93,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="onboarding-submit liquid-glass">Access Dashboard</button>
+                <button type="submit" class="onboarding-submit">Access Dashboard</button>
             </form>
         </div>
     </div>
@@ -110,52 +108,58 @@
             </div>
             
             <nav class="sidebar-nav" aria-label="Dashboard navigation">
-                <a href="#" class="nav-item active liquid-glass">
+                <a href="#" class="nav-item active">
                     <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3V10Zm6 10v-7h6v7"/></svg>
                     <span>Overview</span>
                 </a>
-                <a href="{{ url_for('pyqs') }}" class="nav-item liquid-glass" aria-label="PYQ archive">
+                <a href="{{ url_for('pyqs') }}" class="nav-item" aria-label="PYQ archive">
                     <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v16M3 3c4 0 7 1 9 3 2-2 5-3 9-3v15c-4 0-7 1-9 3-2-2-5-3-9-3V3Z"/></svg>
                     <span class="nav-label-desktop">PYQ archive</span><span class="nav-label-mobile" aria-hidden="true">PYQs</span>
                 </a>
-                <a href="{{ url_for('contribute') }}" class="nav-item liquid-glass" aria-label="Contribution">
+                <a href="{{ url_for('contribute') }}" class="nav-item" aria-label="Contribution">
                     <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M12 7v10M7 12h10"/></svg>
                     <span class="nav-label-desktop">Contribution</span><span class="nav-label-mobile" aria-hidden="true">Contribute</span>
                 </a>
 
 
-                <a href="#" class="nav-item liquid-glass" id="navNotifications" aria-label="Notification head">
+                {% if 'notification_head' in dashboard_roles %}
+                <a href="{{ url_for('notification_head_dashboard') }}" class="nav-item" id="navNotifications" aria-label="Notification head">
                     <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
                     <span class="nav-label-desktop">Notification head</span><span class="nav-label-mobile" aria-hidden="true">Alerts</span>
                 </a>
+                {% endif %}
 
 
-                <a href="#" class="nav-item liquid-glass" id="navUserManager" aria-label="User Manager">
+                {% if 'user_manager' in dashboard_roles %}
+                <a href="{{ url_for('user_manager_dashboard') }}" class="nav-item" id="navUserManager" aria-label="User manager">
                     <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     <span class="nav-label-desktop">User manager</span><span class="nav-label-mobile" aria-hidden="true">Users</span>
                 </a>
+                {% endif %}
 
 
-                <a href="#" class="nav-item liquid-glass" id="navUiEditor" aria-label="UI Editor">
+                {% if 'ui_editor' in dashboard_roles %}
+                <a href="{{ url_for('ui_editor_dashboard') }}" class="nav-item" id="navUiEditor" aria-label="UI editor">
                     <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
                     <span class="nav-label-desktop">UI editor</span><span class="nav-label-mobile" aria-hidden="true">UI Edit</span>
                 </a>
+                {% endif %}
             </nav>
 
             <div class="sidebar-footer">
                 <div style="position: relative;">
-                    <a href="#" class="nav-item liquid-glass" id="settingsBtn" aria-expanded="false" aria-controls="settingsPopup">
+                    <a href="#" class="nav-item" id="settingsBtn" aria-expanded="false" aria-controls="settingsPopup">
                         <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 3 4 0 1 3 3 1 3 3v4l-3 3-3 1-1 3h-4l-1-3-3-1-3-3v-4l3-3 3-1 1-3Z"/><circle cx="12" cy="12" r="3"/></svg>
                         <span>Settings</span>
                     </a>
                     
                     <div id="settingsPopup" class="settings-popup hidden">
-    <a href="mailto:support@bookshelf.com" class="settings-link liquid-glass">
+    <a href="mailto:support@bookshelf.com" class="settings-link">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
         Report an Issue
     </a>
     
-    <a href="#" class="settings-link liquid-glass">
+    <a href="#" class="settings-link">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         Update Profile
     </a>
@@ -163,14 +167,14 @@
 
     <div class="settings-divider"></div>
 
-    <a href="{{ url_for('contribute') }}" class="settings-link liquid-glass" style="margin-bottom: 0;">
+    <a href="{{ url_for('contribute') }}" class="settings-link" style="margin-bottom: 0;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
         My Contributions
     </a>
 </div>
                 </div>
                 
-                <a href="/logout" class="nav-item text-danger liquid-glass">
+                <a href="/logout" class="nav-item text-danger">
                     <svg class="dashboard-nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3H3v18h6M9 12h12m-5-5 5 5-5 5"/></svg>
                     <span>Log Out</span>
                 </a>
@@ -181,22 +185,22 @@
             
             <header class="top-header">
                 <div>
-                    <h1>Welcome back, {{ display_name.split(' ')[0] }}</h1>
-                    <p class="subtitle" id="instruction-text">Select your department to continue.</p>
+                    <h1>{{ site_appearance.dashboard_title or ('Welcome back, ' ~ display_name.split(' ')[0]) }}</h1>
+                    <p class="subtitle" id="instruction-text">{{ site_appearance.dashboard_subtitle }}</p>
                 </div>
                 <div class="user-profile">
                     <div class="notification-center" data-endpoint="{{ url_for('student_notifications') }}" data-csrf="{{ csrf_token() }}">
-                        <button type="button" id="notificationBell" class="notification-bell liquid-glass" aria-label="Notifications" aria-expanded="false" aria-controls="notificationPanel">
+                        <button type="button" id="notificationBell" class="notification-bell" aria-label="Notifications" aria-expanded="false" aria-controls="notificationPanel">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
                             <span id="notificationCount" class="notification-count" hidden></span>
                         </button>
                         <section id="notificationPanel" class="notification-panel" aria-label="Notifications" hidden>
-                            <div class="notification-heading"><h2>Notifications</h2><button type="button" id="closeNotifications" aria-label="Close notifications" class="liquid-glass">×</button></div>
-                            <div class="notification-toolbar"><span>Official updates</span><button type="button" id="readAllNotifications" disabled class="liquid-glass">Mark all read</button></div>
+                            <div class="notification-heading"><h2>Notifications</h2><button type="button" id="closeNotifications" aria-label="Close notifications">×</button></div>
+                            <div class="notification-toolbar"><span>Official updates</span><button type="button" id="readAllNotifications" disabled>Mark all read</button></div>
                             <p id="notificationStatus" role="status">Loading notifications…</p>
-                            <button type="button" id="retryNotifications" hidden class="liquid-glass">Try again</button>
+                            <button type="button" id="retryNotifications" hidden>Try again</button>
                             <ul id="notificationList"></ul>
-                            <button type="button" id="moreNotifications" hidden class="liquid-glass">Load older notifications</button>
+                            <button type="button" id="moreNotifications" hidden>Load older notifications</button>
                         </section>
                     </div>
                     <div class="avatar" aria-label="{{ display_name }}">
@@ -206,6 +210,24 @@
                     {{ contributor_badge(profile.contributor_badge if profile is defined and profile else '', 'profile-contributor-badge') }}
                 </div>
             </header>
+
+            {% if site_appearance.banner_text %}
+            <section class="site-welcome-banner" aria-label="Welcome message">{{ site_appearance.banner_text }}</section>
+            {% endif %}
+
+            {% if dashboard_roles %}
+            {% set workspaces = {
+                'notification_head': ('notification_head_dashboard', 'Publish announcements and send updates to students.'),
+                'user_manager': ('user_manager_dashboard', 'Manage student accounts and review their contributions.'),
+                'ui_editor': ('ui_editor_dashboard', 'Customize the dashboard appearance and welcome messages.')
+            } %}
+            {% for assigned_role in dashboard_roles %}
+            <section class="role-workspace-card" aria-labelledby="roleWorkspaceTitle-{{ assigned_role }}">
+                <div><span class="role-eyebrow">Your workspace</span><h2 id="roleWorkspaceTitle-{{ assigned_role }}">{{ role_labels[assigned_role] }}</h2><p>{{ workspaces[assigned_role][1] }}</p></div>
+                <a href="{{ url_for(workspaces[assigned_role][0]) }}" aria-label="Open {{ role_labels[assigned_role] }} workspace">Open workspace <span aria-hidden="true">→</span></a>
+            </section>
+            {% endfor %}
+            {% endif %}
 
             {% if user_warnings|default([], true) %}
             <section class="account-warnings" aria-labelledby="accountWarningsTitle">
@@ -236,7 +258,7 @@
                     <h2 id="officialAnnouncementTitle">{{ announcement.title }}</h2>
                     <p>{{ announcement.body }}</p>
                 </div>
-                {% if announcement.link_url %}<a class="pyq-archive-action liquid-glass" href="{{ announcement.link_url }}">View notice <span aria-hidden="true">→</span></a>{% endif %}
+                {% if announcement.link_url %}<a class="pyq-archive-action" href="{{ announcement.link_url }}">View notice <span aria-hidden="true">→</span></a>{% endif %}
             </section>
             {% endif %}
 
@@ -245,45 +267,15 @@
                 <div class="selection-step" id="step-dept">
                     <div class="dept-squares">
                         
-                        <div class="dept-card" data-dept="cse" role="button" tabindex="0">
-                            <img src="{{ url_for('static', filename='images/cse-icon.svg') }}" class="dept-icon" alt="CSE Icon">
+                        {% for department in site_departments() %}
+                        <div class="dept-card" data-dept="{{ department.code|lower }}" role="button" tabindex="0">
+                            <img src="{{ url_for('department_icon', code=department.code) if department.has_custom_icon else url_for('static', filename=department.icon_path) }}" class="dept-icon" alt="">
                             <div>
-                                <div class="card-badge" style="margin-bottom: 8px;">CSE</div>
-                                <h3>Computer Science</h3>
+                                <div class="card-badge" style="margin-bottom: 8px;">{{ department.code }}</div>
+                                <h3>{{ department.name }}</h3>
                             </div>
                         </div>
-                        
-                        <div class="dept-card" data-dept="it" role="button" tabindex="0">
-                            <img src="{{ url_for('static', filename='images/it-icon.svg') }}" class="dept-icon" alt="IT Icon">
-                            <div>
-                                <div class="card-badge" style="margin-bottom: 8px;">IT</div>
-                                <h3>Information Technology</h3>
-                            </div>
-                        </div>
-
-<div class="dept-card" data-dept="ece" role="button" tabindex="0">
-                            <img src="{{ url_for('static', filename='images/electronics.svg') }}" class="dept-icon" alt="ECE Icon">
-                            <div>
-                                <div class="card-badge" style="margin-bottom: 8px;">ECE</div>
-                                <h3>Electronics</h3>
-                            </div>
-                        </div>
-
-                        <div class="dept-card" data-dept="ee" role="button" tabindex="0">
-                            <img src="{{ url_for('static', filename='images/electrical.svg') }}" class="dept-icon" alt="EE Icon">
-                            <div>
-                                <div class="card-badge" style="margin-bottom: 8px;">EE</div>
-                                <h3>Electrical Engg</h3>
-                            </div>
-                        </div>
-
-                        <div class="dept-card" data-dept="ce" role="button" tabindex="0">
-                            <img src="{{ url_for('static', filename='images/civil.svg') }}" class="dept-icon" alt="CE Icon">
-                            <div>
-                                <div class="card-badge" style="margin-bottom: 8px;">CE</div>
-                                <h3>Civil</h3>
-                            </div>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
                 
@@ -291,7 +283,7 @@
                     <h4 class="step-label">Select Semester</h4>
                     <div class="semester-grid">
                         {% for value in range(1, 9) %}
-                        <button class="sem-card liquid-glass" type="button" data-semester="{{ value }}"><span class="sem-prefix">Sem</span> {{ value }}</button>
+                        <button class="sem-card" type="button" data-semester="{{ value }}"><span class="sem-prefix">Sem</span> {{ value }}</button>
                         {% endfor %}
                     </div>
                 </div>

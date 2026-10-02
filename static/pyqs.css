@@ -16,6 +16,16 @@ body {
     min-height: 100vh;
 }
 
+/* Coordinated cream surfaces with a darker warm-brown card outline. */
+body.pyqs-page {
+    background: #EFE6D6;
+}
+
+.pyqs-page .paper-card {
+    background: #E2D2B9;
+    border-color: #795B40;
+}
+
 .page-wrapper {
     max-width: 1200px;
     margin: 0 auto;
@@ -232,6 +242,14 @@ body {
 :is(a, button, input, select):focus-visible {
     outline: 2px solid #795b40;
     outline-offset: 4px;
+}
+/* Preserve the existing form preference; button fallbacks live in liquid-glass.css. */
+@media (prefers-reduced-transparency: reduce) {
+    .paper-form input, .minimal-search-box input, .minimal-search-box select {
+        background: #FFFAF2;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
 }
 @media (max-width: 400px) {
     .content-grid { grid-template-columns: minmax(0, 1fr); }

@@ -978,6 +978,18 @@ body.dark-mode .category-card.selected {
 
     .sidebar-footer > div { min-width: 0; }
 
+    /* Keep every granted workspace within a readable two-row mobile dock. */
+    .expanded-mobile-nav .sidebar {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 4px;
+        border-radius: 28px !important;
+    }
+    .expanded-mobile-nav .main-content {
+        padding-bottom: calc(180px + env(safe-area-inset-bottom)) !important;
+    }
+    .expanded-mobile-nav .sidebar .nav-item { min-height: 52px; }
+    .expanded-mobile-nav .sidebar-footer > div { position: static !important; }
+
     .sidebar .nav-item {
         display: flex !important;
         flex-direction: column;

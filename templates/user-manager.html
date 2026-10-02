@@ -1,0 +1,70 @@
+{% extends 'role-workspace.html' %}
+{% set workspace_role = 'user_manager' %}
+{% set workspace_title = 'User manager' %}
+{% set workspace_subtitle = 'Help students thrive. Keep shared study materials useful and trustworthy.' %}
+{% block role_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='user-manager.css') }}">
+{% endblock %}
+{% macro form_context() -%}
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="q" value="{{ search }}">
+    <input type="hidden" name="resource_q" value="{{ resource_search }}">
+    <input type="hidden" name="status_filter" value="{{ status }}">
+{%- endmacro %}
+{% block role_content %}
+<div class="user-manager-workspace">
+        <div class="workspace-guide"><a href="#students">01 <strong>Students</strong><span>Access, warnings & recognition</span></a><a href="#contributions">02 <strong>Contributions</strong><span>Review & moderate uploads</span></a></div>
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+        <p class="flash {{ category }}" role="{{ 'alert' if category == 'error' else 'status' }}">{{ message }}</p>
+        {% endfor %}
+
+        <section class="workspace-section" id="students" aria-labelledby="studentsTitle">
+            <div class="section-heading"><div><p class="eyebrow">01 / COMMUNITY</p><h2 id="studentsTitle">Students</h2><p class="muted">Find students, review warnings and manage their access.</p></div><span class="count-label">{{ students|length }} on this page</span></div>
+            <form class="filter-form" method="get" action="{{ url_for('user_manager_dashboard') }}#students">
+                <input type="hidden" name="resource_q" value="{{ resource_search }}"><input type="hidden" name="status" value="{{ status }}">
+                <label>Find a student<input type="search" name="q" value="{{ search }}" maxlength="200" placeholder="Name, email, URN or CRN"></label>
+                <button class="primary" type="submit">Search students</button>
+                {% if search %}<a class="text-link" href="{{ url_for('user_manager_dashboard', resource_q=resource_search, status=status) }}#students">Clear search</a>{% endif %}
+            </form>
+            <div class="student-grid">
+                {% for student in students %}
+                <article class="student-card role-panel">
+                    <div class="student-card-header"><div class="student-avatar" aria-hidden="true">{{ (student.preferred_name or student.google_name or student.name or 'S')[:1]|upper }}</div><div class="student-identity"><h3>{{ student.preferred_name or student.google_name or student.name or 'Student' }}</h3><p>{{ student.email }}</p></div><span class="status-chip {{ 'restricted' if student.is_banned else 'active' }}">{{ 'Suspended' if student.is_banned else 'Active' }}</span></div>
+                    <dl class="student-details"><div><dt>Branch / semester</dt><dd>{{ student.department or 'Not set' }} / {{ student.semester_no or '—' }}</dd></div><div><dt>CRN</dt><dd>{{ student.crn or 'Not set' }}</dd></div><div><dt>URN</dt><dd>{{ student.urn or 'Not set' }}</dd></div><div><dt>Warnings</dt><dd>{{ student.warning_count or 0 }}</dd></div></dl>
+                    <div class="student-access"><p>{{ 'Sign-in access is suspended.' if student.is_banned else 'Can sign in and use the library.' }}</p><form method="post" action="{{ url_for('user_manager_unban' if student.is_banned else 'user_manager_ban', user_id=student.id) }}">{{ form_context() }}<button class="{{ 'secondary' if student.is_banned else 'danger-outline' }}" type="submit">{{ 'Restore access' if student.is_banned else 'Suspend access' }}</button></form></div>
+                    <form class="badge-form" method="post" action="{{ url_for('user_manager_badge', user_id=student.id) }}">{{ form_context() }}<label>Contributor badge<select name="badge"><option value="" {% if not student.contributor_badge %}selected{% endif %}>No badge</option><option value="trusted" {% if student.contributor_badge == 'trusted' %}selected{% endif %}>Trusted</option><option value="best_contributor" {% if student.contributor_badge == 'best_contributor' %}selected{% endif %}>Best Contributor</option></select></label><button class="secondary" type="submit">Save badge</button></form>
+                    <details class="warning-details"><summary>Warnings & history <span>{{ student.warning_count or 0 }}</span></summary>
+                        <form class="warning-form" method="post" action="{{ url_for('user_manager_warn', user_id=student.id) }}">{{ form_context() }}<label>New warning<textarea name="message" rows="3" maxlength="2000" required placeholder="Explain the concern and what the student should do next."></textarea></label><p class="muted">This warning appears on the student’s dashboard.</p><button class="secondary" type="submit">Send warning</button></form>
+                        <ul class="warning-history">{% for warning in warnings_by_user.get(student.id, []) %}<li><p>{{ warning.message }}</p><small>{{ warning.created_at.strftime('%d %b %Y, %H:%M') if warning.created_at and warning.created_at.strftime is defined else warning.created_at or '' }}</small><form method="post" action="{{ url_for('user_manager_delete_warning', user_id=student.id, warning_id=warning.id) }}">{{ form_context() }}<button class="text-button" type="submit">Remove warning</button></form></li>{% else %}<li class="muted">No recent warnings.</li>{% endfor %}</ul>
+                        {% if (student.warning_count or 0) > 5 %}<p class="muted">Showing the latest five warnings.</p>{% endif %}
+                    </details>
+                </article>
+                {% else %}<div class="empty-state"><h3>{{ 'No matching students' if search else 'No students to manage yet' }}</h3><p>{{ 'Try a different name, email or student number.' if search else 'Registered students will appear here. Staff accounts are managed by an administrator.' }}</p></div>{% endfor %}
+            </div>
+            {% if page > 1 or more_students %}<nav class="pagination" aria-label="Student pages">{% if page > 1 %}<a href="{{ url_for('user_manager_dashboard', q=search, page=page-1, resource_q=resource_search, status=status, resource_page=resource_page) }}#students">← Previous</a>{% endif %}<span>Page {{ page }}</span>{% if more_students %}<a href="{{ url_for('user_manager_dashboard', q=search, page=page+1, resource_q=resource_search, status=status, resource_page=resource_page) }}#students">Next →</a>{% endif %}</nav>{% endif %}
+        </section>
+
+        <section class="workspace-section" id="contributions" aria-labelledby="contributionsTitle">
+            <div class="section-heading"><div><p class="eyebrow">02 / SHARED LIBRARY</p><h2 id="contributionsTitle">Student contributions</h2><p class="muted">Verified materials appear in the library. Return a contribution to review to hide it.</p></div><span class="count-label">{{ resources|length }} on this page</span></div>
+            <form class="filter-form" method="get" action="{{ url_for('user_manager_dashboard') }}#contributions">
+                <input type="hidden" name="q" value="{{ search }}">
+                <label>Find a contribution<input type="search" name="resource_q" maxlength="200" value="{{ resource_search }}" placeholder="Title, subject or student email"></label>
+                <label class="status-filter">Status<select name="status"><option value="">All contributions</option><option value="unverified" {% if status == 'unverified' %}selected{% endif %}>Needs review</option><option value="verified" {% if status == 'verified' %}selected{% endif %}>Verified</option></select></label>
+                <button class="primary" type="submit">Filter contributions</button>
+            </form>
+            <div class="resource-list">{% for resource in resources %}
+                <article class="resource-card role-panel">
+                    <div class="resource-main"><p class="eyebrow">{{ resource.category|capitalize }} · {{ resource.branch|upper }} · Semester {{ resource.semester }}</p><h3>{{ resource.title }}</h3><p class="muted">{{ resource.subject_name or 'General resource' }}</p><p class="contributor">{{ resource.contributor_name or 'Student' }} <span>· {{ resource.uploaded_by }}</span></p></div>
+                    <div class="resource-actions"><span class="status-chip {{ 'active' if resource.status == 'verified' else 'review' }}">{{ 'Verified' if resource.status == 'verified' else 'Needs review' }}</span>
+                        {% if resource.preview_url %}<a class="text-link" href="{{ resource.preview_url }}" target="_blank" rel="noopener noreferrer">Open file ↗</a>{% endif %}
+                        <form method="post" action="{{ url_for('user_manager_resource_status', resource_id=resource.id) }}">{{ form_context() }}<input type="hidden" name="status" value="{{ 'unverified' if resource.status == 'verified' else 'verified' }}"><button class="{{ 'secondary' if resource.status == 'verified' else 'primary' }}" type="submit">{{ 'Return to review' if resource.status == 'verified' else 'Verify contribution' }}</button></form>
+                    </div>
+                    <details class="delete-details"><summary>Delete contribution</summary><form method="post" action="{{ url_for('user_manager_resource_delete', resource_id=resource.id) }}">{{ form_context() }}<p>This permanently removes the file and its library entry.</p><label class="confirm-label"><input type="checkbox" name="confirm_delete" value="yes" required> I confirm permanent deletion of this contribution.</label><button class="danger-outline" type="submit">Permanently delete</button></form></details>
+                </article>
+                {% else %}<div class="empty-state"><h3>No contributions found</h3><p>{{ 'Try a different search or status filter.' if resource_search or status else 'Uploads from registered students will appear here for review.' }}</p></div>{% endfor %}
+            </div>
+            {% if resource_page > 1 or more_resources %}<nav class="pagination" aria-label="Contribution pages">{% if resource_page > 1 %}<a href="{{ url_for('user_manager_dashboard', q=search, page=page, resource_q=resource_search, status=status, resource_page=resource_page-1) }}#contributions">← Previous</a>{% endif %}<span>Page {{ resource_page }}</span>{% if more_resources %}<a href="{{ url_for('user_manager_dashboard', q=search, page=page, resource_q=resource_search, status=status, resource_page=resource_page+1) }}#contributions">Next →</a>{% endif %}</nav>{% endif %}
+        </section>
+        <footer class="manager-footer">Bookshelf · A better library starts with a thoughtful community.</footer>
+</div>
+{% endblock %}

@@ -98,6 +98,9 @@ p {
     letter-spacing: 0.25px;
 }
 
+.student-sign-in { display: inline-block; margin-top: 20px; color: #d4c5b0; font: 13px Arial, sans-serif; text-underline-offset: 4px; }
+.student-sign-in:focus-visible { outline: 2px solid #d4c5b0; outline-offset: 4px; }
+
 .admin-alert {
     width: min(420px, calc(100vw - 80px));
     margin: -20px auto 24px;

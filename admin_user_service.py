@@ -163,6 +163,8 @@ def search_users(search_term: str | None = None, limit: int = DEFAULT_USER_LIMIT
                 COALESCE(u.is_banned, FALSE) AS is_banned,
                 u.banned_at,
                 u.contributor_badge,
+                u.role,
+                u.roles,
                 COUNT(w.id)::INTEGER AS warning_count,
                 MAX(w.created_at) AS latest_warning_at
             FROM users AS u

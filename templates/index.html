@@ -7,8 +7,13 @@
     <title>BOOKSHELF</title>
     <link rel="preconnect" href="https://unpkg.com" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preload" href="{{ url_for('static', filename='font/Canela-Light-Trial.otf') }}" as="font" type="font/otf" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='static.css') }}">
     <meta name="view-transition" content="same-origin">
+    {% include '_site_effects.html' %}
 </head>
 
 <body>
@@ -53,9 +58,9 @@
 
             <canvas id="rope-canvas"></canvas>
             
-            <div class="bulb-wrapper">
+            <div class="bulb-wrapper" role="button" tabindex="0" aria-label="Toggle hanging light; drag to swing" aria-pressed="true">
                 <div class="bulb">
-                    <img src="{{ url_for('static', filename='images/bulb.svg') }}" alt="Bulb">
+                    <img src="{{ url_for('static', filename='images/bulb.svg') }}" alt="Bulb" draggable="false">
                 </div>
             </div>
         
@@ -225,11 +230,9 @@
     }
     </script>
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+    <script src="{{ url_for('static', filename='hero-intro.js') }}"></script>
     <script type="module" src="{{ url_for('static', filename='three.js') }}"></script>
+    <script src="{{ url_for('static', filename='bulb-physics.js') }}"></script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <script src="{{ url_for('static', filename='grid-bg.js') }}"></script>
     <script src="{{ url_for('static', filename='page-wheel.js') }}"></script>

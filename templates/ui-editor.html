@@ -1,0 +1,96 @@
+{% extends 'role-workspace.html' %}
+{% set workspace_role = 'ui_editor' %}
+{% set workspace_title = 'UI editor' %}
+{% set workspace_subtitle = 'Shape the dashboard’s words, colors, and cards. Preview your changes before publishing.' %}
+
+{% block role_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='ui-editor.css') }}">
+{% endblock %}
+
+{% block role_content %}
+            {% if error %}<div class="editor-message error" role="alert">{{ error }} <a href="{{ url_for('ui_editor_dashboard') }}">Reload editor</a></div>{% endif %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}<div class="editor-message {{ category }}" role="status">{{ message }}</div>{% endfor %}
+            {% endwith %}
+            <div class="editor-layout">
+                <section class="role-panel editor-panel" aria-labelledby="appearanceHeading">
+                    <div class="panel-heading"><h2 id="appearanceHeading">Appearance controls</h2><p>Published changes apply to everyone’s main dashboard.</p></div>
+                    <form id="appearanceForm" action="{{ url_for('ui_editor_save') }}" method="post">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="revision" value="{{ draft_revision }}">
+                        <fieldset{% if unavailable %} disabled{% endif %}>
+                            <legend class="sr-only">Dashboard appearance</legend>
+                            <div class="editor-field"><label for="dashboardTitle">Dashboard title</label><input id="dashboardTitle" name="dashboard_title" maxlength="100" value="{{ draft.dashboard_title }}" placeholder="Welcome back, Alex" aria-describedby="titleHelp"><p id="titleHelp" class="field-help">Leave blank to greet each student by name.</p></div>
+                            <div class="editor-field"><label for="dashboardSubtitle">Starting instruction</label><input id="dashboardSubtitle" name="dashboard_subtitle" maxlength="180" value="{{ draft.dashboard_subtitle }}" required><p class="field-help">Shown before a student selects their department.</p></div>
+                            <div class="editor-field"><label for="bannerText">Welcome banner <span class="optional">Optional</span></label><input id="bannerText" name="banner_text" maxlength="300" value="{{ draft.banner_text }}" placeholder="A little encouragement for the semester"><p class="field-help">A short note beneath the greeting. Leave blank to hide it.</p></div>
+                            <div class="editor-field"><label for="palette">Accent palette</label><select id="palette" name="palette">
+                                {% for key, item in palettes.items() %}<option value="{{ key }}"{% if draft.palette == key %} selected{% endif %}>{{ item.label }}</option>{% endfor %}
+                            </select></div>
+                            <div class="editor-field-row">
+                                <div class="editor-field"><label for="cardShape">Card shape</label><select id="cardShape" name="card_shape"><option value="rounded"{% if draft.card_shape == 'rounded' %} selected{% endif %}>Rounded</option><option value="soft"{% if draft.card_shape == 'soft' %} selected{% endif %}>Soft corners</option><option value="square"{% if draft.card_shape == 'square' %} selected{% endif %}>Almost square</option></select></div>
+                                <div class="editor-field"><label for="density">Card spacing</label><select id="density" name="density"><option value="comfortable"{% if draft.density == 'comfortable' %} selected{% endif %}>Comfortable</option><option value="compact"{% if draft.density == 'compact' %} selected{% endif %}>Compact</option></select></div>
+                            </div>
+                            <div class="editor-field"><label for="snowfallEnabled">Website snowfall</label><select id="snowfallEnabled" name="snowfall_enabled"><option value="off"{% if draft.snowfall_enabled not in (true, 'on') %} selected{% endif %}>Off</option><option value="on"{% if draft.snowfall_enabled in (true, 'on') %} selected{% endif %}>On — gentle snowfall</option></select><p class="field-help">Adds a light snowfall across the website. Visitors who prefer reduced motion won’t see animation.</p></div>
+                            <button type="submit" class="primary-button">Publish appearance <span aria-hidden="true">↗</span></button>
+                        </fieldset>
+                    </form>
+                </section>
+                <aside class="preview-column" aria-labelledby="previewHeading">
+                    <section class="role-panel preview-panel">
+                        <div class="preview-heading"><h2 id="previewHeading">Live preview</h2><span id="previewStatus">Current appearance</span></div>
+                        <div id="appearancePreview" class="appearance-preview" data-palette="{{ settings.palette }}" data-shape="{{ settings.card_shape }}" data-density="{{ settings.density }}">
+                            <div class="preview-topline"><span class="preview-wordmark">Your dashboard</span><span class="preview-avatar" aria-hidden="true">A</span></div>
+                            <h3 id="previewTitle">{{ settings.dashboard_title or 'Welcome back, Alex' }}</h3>
+                            <p id="previewSubtitle">{{ settings.dashboard_subtitle }}</p>
+                            <div id="previewBanner" class="preview-banner"{% if not settings.banner_text %} hidden{% endif %}>{{ settings.banner_text }}</div>
+                            <div class="preview-cards">
+                                <div class="preview-card selected"><img class="preview-dept-icon" src="{{ url_for('static', filename='images/cse-icon.svg') }}" alt=""><div><span class="preview-badge">CSE</span><strong>Computer Science</strong></div></div>
+                                <div class="preview-card"><img class="preview-dept-icon" src="{{ url_for('static', filename='images/it-icon.svg') }}" alt=""><div><span class="preview-badge">IT</span><strong>Information Technology</strong></div></div>
+                            </div>
+                            <p class="preview-footnote">A sample of the student dashboard</p>
+                        </div>
+                        <p class="preview-help">Changes in this preview stay here until you publish.</p>
+                        <noscript><p class="preview-help">Enable JavaScript to preview changes as you type. Publishing still works.</p></noscript>
+                    </section>
+                    <section class="role-panel reset-panel" aria-labelledby="resetHeading">
+                        <h2 id="resetHeading">A fresh start</h2><p>Restore the original greeting, gold palette, rounded cards, and comfortable spacing. Turn snowfall off. Your departments stay saved.</p>
+                        <form action="{{ url_for('ui_editor_reset') }}" method="post"><input type="hidden" name="_csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="revision" value="{{ settings.revision }}"><button type="submit" class="secondary-button"{% if unavailable %} disabled{% endif %}>Restore defaults</button></form>
+                        {% if settings.updated_at %}<p class="save-time">Last published {{ settings.updated_at.strftime('%d %b %Y at %H:%M %Z') }}</p>{% endif %}
+                    </section>
+                </aside>
+            </div>
+            <section class="role-panel department-panel" aria-labelledby="departmentsHeading">
+                <div class="panel-heading"><h2 id="departmentsHeading">Departments</h2><p>Add a department to the dashboard, profile setup, upload forms, and library filters.</p></div>
+                {% if departments_unavailable %}<p class="editor-message error" role="alert">Departments are temporarily unavailable. Reload before adding a department.</p>{% endif %}
+                <div class="department-panel-body">
+                    <ul class="department-list" aria-label="Current departments">
+                        {% for department in departments %}<li><img src="{{ url_for('department_icon', code=department.code) if department.has_custom_icon else url_for('static', filename=department.icon_path) }}" alt=""><div><strong>{{ department.code }}</strong><span>{{ department.name }}</span></div></li>{% endfor %}
+                    </ul>
+                    <form id="departmentForm" method="post" enctype="multipart/form-data" action="{{ url_for('ui_editor_add_department') }}">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                        <fieldset{% if departments_unavailable %} disabled{% endif %}>
+                            <legend>Add a department</legend>
+                            <div class="editor-field-row">
+                                <div class="editor-field"><label for="departmentCode">Short code</label><input id="departmentCode" name="code" minlength="2" maxlength="12" pattern="[A-Za-z][A-Za-z0-9]{1,11}" value="{{ department_draft.get('code', '') }}" placeholder="e.g. AI" required aria-describedby="departmentCodeHelp"><p class="field-help" id="departmentCodeHelp">2–12 letters or numbers. Each code must be unique.</p></div>
+                                <div class="editor-field"><label for="departmentIcon">Card icon</label><select id="departmentIcon" name="icon">{% for key, item in department_icons.items() %}<option value="{{ key }}" data-icon-url="{{ url_for('static', filename=item[1]) }}"{% if department_draft.get('icon', 'books') == key %} selected{% endif %}>{{ item[0] }}</option>{% endfor %}</select></div>
+                            </div>
+                            <div class="editor-field"><label for="departmentName">Department name</label><input id="departmentName" name="name" minlength="2" maxlength="80" value="{{ department_draft.get('name', '') }}" placeholder="e.g. Artificial Intelligence" required></div>
+                            <div class="editor-field department-upload">
+                                <label for="departmentIconFile">Upload your own icon <span class="optional">Optional</span></label>
+                                <input id="departmentIconFile" name="icon_file" type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp" aria-describedby="departmentIconHelp departmentIconStatus">
+                                <p id="departmentIconHelp" class="field-help">PNG, JPG, or WebP · up to 2 MB and 2048 × 2048 pixels. Your upload replaces the built-in icon.</p>
+                                <p id="departmentIconStatus" class="field-help" aria-live="polite">{% if department_draft %}Choose the image again if you want to upload a custom icon.{% endif %}</p>
+                                <button id="clearDepartmentIcon" type="button" class="secondary-button" hidden>Use built-in icon</button>
+                            </div>
+                            <div class="department-card-preview" aria-label="New department card preview"><img id="departmentPreviewIcon" src="{{ url_for('static', filename='images/books-icon.svg') }}" alt=""><div><span id="departmentPreviewCode">AI</span><strong id="departmentPreviewName">Artificial Intelligence</strong></div></div>
+                            <p class="field-help">Adding a department publishes it immediately. Existing departments and uploaded materials stay available.</p>
+                            <button type="submit" class="primary-button">Add department <span aria-hidden="true">＋</span></button>
+                        </fieldset>
+                    </form>
+                </div>
+            </section>
+{% endblock %}
+
+{% block role_scripts %}
+<script src="{{ url_for('static', filename='ui-editor.js') }}" defer></script>
+{% endblock %}

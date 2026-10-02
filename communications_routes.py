@@ -1,4 +1,4 @@
-"""Authenticated admin publishing and student inbox endpoints."""
+"""Role-protected notification publishing and private student inbox endpoints."""
 from uuid import uuid4
 from functools import wraps
 
@@ -6,6 +6,7 @@ from flask import abort, flash, jsonify, render_template, redirect, request, ses
 from database import get_user_by_email
 import communications_service as service
 import presence_service
+from role_access import current_actor_email, current_roles, role_required
 
 
 def register_routes(app, admin_required, csrf_protected, admin_emails):
@@ -34,12 +35,23 @@ def register_routes(app, admin_required, csrf_protected, admin_emails):
             app.logger.exception('Could not load communications workspace')
             error, status = 'Communications are temporarily unavailable. Please try again.', 503
             unavailable = True
-        return render_template('admin-communications.html', announcement=notice, sent=sent,
+        response = app.make_response((render_template('admin-communications.html', announcement=notice, sent=sent,
             error=error, request_key=request.form.get('request_key') or str(uuid4()),
-            submitted=request.form, unavailable=unavailable), status
+            submitted=request.form, unavailable=unavailable,
+            is_notification_head='notification_head' in current_roles()), status))
+        response.headers['Cache-Control'] = 'no-store'
+        return response
+
+    def workspace_endpoint():
+        return 'notification_head_dashboard' if 'notification_head' in current_roles() else 'admin_communications'
+
+    @app.get('/dashboard/notifications')
+    @role_required('notification_head', allow_admin=False)
+    def notification_head_dashboard():
+        return admin_page()
 
     @app.get('/admin/communications')
-    @admin_required
+    @role_required('notification_head')
     def admin_communications():
         return admin_page()
 
@@ -66,11 +78,11 @@ def register_routes(app, admin_required, csrf_protected, admin_emails):
             return jsonify(error='Active student information is temporarily unavailable.'), 503
 
     @app.post('/admin/communications/announcement')
-    @admin_required
+    @role_required('notification_head')
     @csrf_protected
     def admin_announcement():
         try:
-            actor = session.get('admin_user', {}).get('email', 'admin')
+            actor = current_actor_email()
             revision = request.form.get('revision', '')
             if request.form.get('action') == 'remove':
                 service.remove_announcement(actor, revision)
@@ -83,10 +95,15 @@ def register_routes(app, admin_required, csrf_protected, admin_emails):
             app.logger.exception('Could not update official announcement')
             return admin_page('The announcement could not be saved. Please try again.', 503)
         flash('Announcement removed.' if request.form.get('action') == 'remove' else 'Official announcement published.', 'success')
-        return redirect(url_for('admin_communications'))
+        return redirect(url_for(workspace_endpoint()))
+
+    @app.post('/dashboard/notifications/announcement')
+    @role_required('notification_head', allow_admin=False)
+    def notification_head_announcement():
+        return admin_announcement()
 
     @app.get('/admin/communications/students')
-    @admin_required
+    @role_required('notification_head')
     def notification_students():
         try:
             response = jsonify(items=service.find_students(request.args.get('q'), admin_emails))
@@ -96,21 +113,31 @@ def register_routes(app, admin_required, csrf_protected, admin_emails):
             app.logger.exception('Could not search notification recipients')
             return jsonify(error='Student search is temporarily unavailable.'), 503
 
+    @app.get('/dashboard/notifications/students')
+    @role_required('notification_head', allow_admin=False)
+    def notification_head_students():
+        return notification_students()
+
     @app.post('/admin/communications/send')
-    @admin_required
+    @role_required('notification_head')
     @csrf_protected
     def admin_send_notification():
         try:
             count = service.send_notification(request.form.get('title'), request.form.get('body'),
                 request.form.get('link_url'), request.form.get('audience'), request.form.getlist('recipients'),
-                session.get('admin_user', {}).get('email', 'admin'), request.form.get('request_key'), admin_emails)
+                current_actor_email(), request.form.get('request_key'), admin_emails)
         except (ValueError, TypeError) as exc:
             return admin_page(str(exc), 400)
         except Exception:
             app.logger.exception('Could not send student notifications')
             return admin_page('The send could not be confirmed. Retry this form safely; it will not send twice.', 503)
         flash(f'Notification sent to {count} student(s).', 'success')
-        return redirect(url_for('admin_communications'))
+        return redirect(url_for(workspace_endpoint()))
+
+    @app.post('/dashboard/notifications/send')
+    @role_required('notification_head', allow_admin=False)
+    def notification_head_send():
+        return admin_send_notification()
 
     @app.get('/api/notifications')
     @student_required

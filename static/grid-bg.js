@@ -14,18 +14,21 @@
     let mx = -9999, my = -9999, cmx = -9999, cmy = -9999;
     let drawLoop = null;
     let size = { width: 0, height: 0 };
+    let pixelRatio = 1;
     let segments = null;
     let dirty = true;
 
     function resize() {
         const r = page2.getBoundingClientRect();
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        if (r.width === size.width && r.height === size.height && dpr === pixelRatio) return;
+        pixelRatio = dpr;
         canvas.width = r.width * dpr;
         canvas.height = r.height * dpr;
         canvas.style.width = r.width + 'px';
         canvas.style.height = r.height + 'px';
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        size = { width: canvas.clientWidth, height: canvas.clientHeight };
+        size = { width: r.width, height: r.height };
         segments = null;
         dirty = true;
         if (drawLoop) drawLoop.request();
@@ -94,7 +97,28 @@
         if (desktop && !dirty && unchanged) return;
         const cw = desktop ? size.width : canvas.clientWidth;
         const ch = desktop ? size.height : canvas.clientHeight;
-        ctx.clearRect(0, 0, cw, ch);
+        let damage = null;
+        if (desktop && !dirty) {
+            // Only the old and new distortion neighbourhoods can have changed.
+            // Include whole segments (their alpha is shared by all 22 points),
+            // displaced points and antialiasing. Align the clip to device pixels
+            // so repeated partial redraws never soften the unchanged grid.
+            const padding = RADIUS * MAXSCALE + SPACING + 2;
+            const regions = [[previousX, previousY], [cmx, cmy]]
+                .filter(([x, y]) => x >= 0 && x + padding >= 0 && y + padding >= 0 && x - padding <= cw && y - padding <= ch);
+            if (regions.length) {
+                const left = Math.max(0, Math.floor((Math.min(...regions.map(p => p[0])) - padding) * pixelRatio) / pixelRatio);
+                const top = Math.max(0, Math.floor((Math.min(...regions.map(p => p[1])) - padding) * pixelRatio) / pixelRatio);
+                const right = Math.min(cw, Math.ceil((Math.max(...regions.map(p => p[0])) + padding) * pixelRatio) / pixelRatio);
+                const bottom = Math.min(ch, Math.ceil((Math.max(...regions.map(p => p[1])) + padding) * pixelRatio) / pixelRatio);
+                damage = { left, top, right, bottom };
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(left, top, right - left, bottom - top);
+                ctx.clip();
+                ctx.clearRect(left, top, right - left, bottom - top);
+            }
+        } else ctx.clearRect(0, 0, cw, ch);
         ctx.lineWidth = 0.75;
 
         const cols = Math.ceil(cw / SPACING) + 1;
@@ -119,7 +143,15 @@
                     for (let r = 0; r < rows; r++) cache(c * SPACING, r * SPACING, c * SPACING, (r + 1) * SPACING);
                 }
             }
-            segments.forEach(segment => drawSmoothLine(...segment));
+            if (dirty || damage) {
+                const margin = RADIUS * (MAXSCALE - 1) + 2;
+                for (const segment of segments) {
+                    // Keep the original horizontal-then-vertical draw order and
+                    // individual strokes: batching changes alpha at crossings.
+                    if (damage && (segment[2] < damage.left - margin || segment[0] > damage.right + margin || segment[3] < damage.top - margin || segment[1] > damage.bottom + margin)) continue;
+                    drawSmoothLine(...segment);
+                }
+            }
         } else {
         for (let r = 0; r <= rows; r++) {
             for (let c = 0; c < cols; c++) {
@@ -132,6 +164,8 @@
             }
         }
         }
+
+        if (damage) ctx.restore();
 
         dirty = false;
         // Stop only on exact convergence: no changed easing, thresholds or snapping.

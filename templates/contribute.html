@@ -6,7 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contribute - BOOKSHELF</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='contribute.css') }}">
+    {% include '_site_effects.html' %}
     <link rel="stylesheet" href="{{ url_for('static', filename='liquid-glass.css') }}">
+    <script defer src="{{ url_for('static', filename='liquid-glass.js') }}"></script>
 </head>
 <body>
 
@@ -100,12 +102,7 @@
                             <label class="form-field">Branch
                             <select name="branch" required class="book-input">
                                 <option value="" disabled selected>Select Branch...</option>
-                                <option value="cse">Computer Science</option>
-                                <option value="it">Information Tech</option>
-                                <option value="electrical">Electrical</option>
-                                <option value="civil">Civil</option>
-                                <option value="mechanical">Mechanical</option>
-                                <option value="electronics">Electronics</option>
+                                {% for department in site_departments() %}<option value="{{ department.code|lower }}">{{ department.name }} ({{ department.code }})</option>{% endfor %}
                             </select>
                             </label>
                             <label class="form-field">Category

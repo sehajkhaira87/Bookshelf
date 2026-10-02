@@ -21,6 +21,7 @@
         })();
     </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='admin-dashboard.css') }}">
+    {% include '_site_effects.html' %}
 </head>
 <body>
     <button class="mobile-nav-toggle" id="mobileNavToggle" type="button" aria-label="Open navigation" aria-expanded="false">
@@ -54,6 +55,9 @@
             </button>
             <a class="nav-btn pyq-nav-link" href="{{ url_for('admin_communications') }}">
                 <span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></span><span>Notices & notifications</span>
+            </a>
+            <a class="nav-btn pyq-nav-link" href="{{ url_for('admin_roles') }}">
+                <span class="nav-icon" aria-hidden="true">⚿</span><span>Role assignments</span>
             </a>
             <button class="nav-btn nav-btn-disabled" type="button" disabled>
                 <span class="nav-icon" aria-hidden="true">↗</span><span>Contributions</span><span class="badge">Soon</span>
@@ -176,12 +180,7 @@
                             <label>Branch</label>
                             <select name="branch" required>
                                 <option value="" disabled selected>Select Branch...</option>
-                                <option value="cse">Computer Science (CSE)</option>
-                                <option value="it">Information Technology (IT)</option>
-                                <option value="ece">Electronics (ECE)</option>
-                                <option value="ee">Electrical (EE)</option>
-                                <option value="me">Mechanical (ME)</option>
-                                <option value="ce">Civil (CE)</option>
+                                {% for department in site_departments() %}<option value="{{ department.code|lower }}">{{ department.name }} ({{ department.code }})</option>{% endfor %}
                             </select>
                         </div>
                     </div>
@@ -256,12 +255,7 @@
                 </select>
                 <select id="filterBranch" onchange="filterTable()">
                     <option value="">All Branches</option>
-                    <option value="cse">CSE</option>
-                    <option value="it">IT</option>
-                    <option value="ece">ECE</option>
-                    <option value="ee">EE</option>
-                    <option value="me">ME</option>
-                    <option value="ce">CE</option>
+                    {% for department in site_departments() %}<option value="{{ department.code|lower }}">{{ department.code }}</option>{% endfor %}
                 </select>
                 <select id="filterStatus" onchange="filterTable()">
                     <option value="">All Status</option>

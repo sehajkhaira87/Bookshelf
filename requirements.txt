@@ -5,3 +5,4 @@ gunicorn
 authlib
 requests
 azure-storage-blob
+Pillow>=12.1,<13

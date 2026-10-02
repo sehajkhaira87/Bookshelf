@@ -1,0 +1,311 @@
+--- a/static/contribute.css
++++ b/static/contribute.css
+@@ -1,6 +1,6 @@
+ @font-face {
+     font-family: "Canela";
+-    src: url("/static/font/Canela-Light-Trial.otf") format("opentype");
++    src: url("font/Canela-Light-Trial.otf") format("opentype");
+     font-weight: 300;
+     font-display: swap;
+ }
+@@ -71,15 +71,6 @@
+     font-weight: 500;
+     letter-spacing: 0.01em;
+     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+-}
+-.back-btn::before {
+-    content: "";
+-    position: absolute;
+-    inset: 1px;
+-    border-radius: inherit;
+-    background: radial-gradient(ellipse at 25% 0%, rgba(255, 255, 255, 0.23), transparent 65%);
+-    pointer-events: none;
+-    z-index: -1;
+ }
+ .back-btn svg { width: 17px; height: 17px; }
+ .back-btn:hover {
+--- a/static/pyqs.css
++++ b/static/pyqs.css
+@@ -16,6 +16,16 @@
+     min-height: 100vh;
+ }
+ 
++/* Coordinated cream surfaces with a darker warm-brown card outline. */
++body.pyqs-page {
++    background: #EFE6D6;
++}
++
++.pyqs-page .paper-card {
++    background: #E2D2B9;
++    border-color: #795B40;
++}
++
+ .page-wrapper {
+     max-width: 1200px;
+     margin: 0 auto;
+@@ -208,10 +218,8 @@
+ .minimal-search-box input[name="year"] { width: 110px; }
+ .paper-card button, .paper-form button, .minimal-search-box button { cursor: pointer; }
+ 
+-/* Clear lens, beveled rim, and moving specular highlights. */
++/* Existing PYQ action geometry; visual glass styling is shared. */
+ :is(.back-btn, .paper-card a, .pagination a, .clear-search, .minimal-search-box button, .paper-form button, .paper-card button) {
+-    --glass-x: 24%;
+-    --glass-y: 12%;
+     position: relative;
+     isolation: isolate;
+     box-sizing: border-box;
+@@ -224,86 +232,24 @@
+     border: 1px solid rgba(255, 255, 255, 0.32);
+     border-radius: 999px;
+     color: #35251d;
+-    background: rgba(255, 250, 242, 0.09);
+-    box-shadow:
+-        0 8px 20px -8px rgba(55, 35, 23, 0.38),
+-        0 2px 4px rgba(55, 35, 23, 0.07),
+-        inset 0 1.5px 1px rgba(255, 255, 255, 0.85),
+-        inset 0 -1px 1px rgba(94, 62, 42, 0.22),
+-        inset 1.5px 0 2px rgba(255, 255, 255, 0.46),
+-        inset -1px 0 2px rgba(255, 255, 255, 0.38);
+     text-decoration: none;
+     font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+     font-size: 13px;
+     font-weight: 500;
+     letter-spacing: 0.01em;
+     touch-action: manipulation;
+-    transition: transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.24s ease, background 0.24s ease;
+-}
+-:is(.back-btn, .paper-card a, .pagination a, .clear-search, .minimal-search-box button, .paper-form button, .paper-card button)::before {
+-    content: "";
+-    position: absolute;
+-    inset: 0;
+-    border-radius: inherit;
+-    background:
+-        radial-gradient(ellipse at var(--glass-x) var(--glass-y), rgba(255, 255, 255, 0.48), transparent 58%),
+-        linear-gradient(175deg, rgba(255, 255, 255, 0.18), transparent 42%, rgba(255, 250, 242, 0.04) 68%, rgba(255, 255, 255, 0.2));
+-    -webkit-backdrop-filter: blur(3px) saturate(145%);
+-    backdrop-filter: blur(3px) saturate(145%);
+-    pointer-events: none;
+-    z-index: -1;
+-}
+-:is(.back-btn, .paper-card a, .pagination a, .clear-search, .minimal-search-box button, .paper-form button, .paper-card button)::after {
+-    content: "";
+-    position: absolute;
+-    inset: 0;
+-    padding: 1.5px;
+-    border-radius: inherit;
+-    background: conic-gradient(from 130deg at 50% 50%,
+-        rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.08) 12%,
+-        rgba(98, 68, 47, 0.12) 24%, rgba(255, 255, 255, 0.95) 43%,
+-        rgba(255, 255, 255, 0.1) 60%, rgba(98, 68, 47, 0.15) 76%,
+-        rgba(255, 255, 255, 0.92));
+-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+-    -webkit-mask-composite: xor;
+-    mask-composite: exclude;
+-    pointer-events: none;
+-}
+-:is(.back-btn, .paper-card a, .pagination a, .clear-search, .minimal-search-box button, .paper-form button, .paper-card button):hover {
+-    transform: translateY(-2px);
+-    background: rgba(255, 250, 242, 0.16);
+-    box-shadow: 0 12px 24px -9px rgba(55, 35, 23, 0.4),
+-        inset 0 2px 2px rgba(255, 255, 255, 0.95),
+-        inset 0 -1px 2px rgba(94, 62, 42, 0.18),
+-        inset 2px 0 3px rgba(255, 255, 255, 0.48);
+-}
+-:is(.back-btn, .paper-card a, .pagination a, .clear-search, .minimal-search-box button, .paper-form button, .paper-card button):active { transform: translateY(0) scale(0.97); }
+-/* Lens distortion is isolated behind the label, which stays crisp. */
+-:is(.back-btn, .minimal-search-box button).liquid-lens::before {
+-    -webkit-backdrop-filter: var(--liquid-filter) saturate(145%);
+-    backdrop-filter: var(--liquid-filter) saturate(145%);
+ }
+ :is(a, button, input, select):focus-visible {
+     outline: 2px solid #795b40;
+     outline-offset: 4px;
+ }
+-@media (prefers-reduced-motion: reduce) {
+-    *, *::before { transition: none !important; }
+-    :is(.back-btn, .paper-card a, .pagination a, .clear-search, button):is(:hover, :active) { transform: none; }
+-}
++/* Preserve the existing form preference; button fallbacks live in liquid-glass.css. */
+ @media (prefers-reduced-transparency: reduce) {
+-    :is(.back-btn, .paper-card a, .pagination a, .clear-search, .minimal-search-box button, .paper-form button, .paper-card button, .paper-form input, .minimal-search-box input, .minimal-search-box select) {
++    .paper-form input, .minimal-search-box input, .minimal-search-box select {
+         background: #FFFAF2;
+         -webkit-backdrop-filter: none;
+         backdrop-filter: none;
+     }
+-    :is(.back-btn, .paper-card a, .pagination a, .clear-search, button)::before,
+-    :is(.back-btn, .minimal-search-box button).liquid-lens::before {
+-        -webkit-backdrop-filter: none;
+-        backdrop-filter: none;
+-        background: none;
+-    }
+ }
+ @media (max-width: 400px) {
+     .content-grid { grid-template-columns: minmax(0, 1fr); }
+--- /dev/null
++++ b/static/liquid-glass.css
+@@ -0,0 +1,162 @@
++/*
++ * Bookshelf button surfaces. Opt in with .liquid-glass.
++ * Geometry, typography, and visibility stay in each page's CSS.
++ * The notification selector also covers buttons created by notifications.js.
++ */
++:is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass) {
++    position: relative;
++    isolation: isolate;
++    background: linear-gradient(160deg, rgba(255, 255, 255, 0.045), transparent 65%),
++        var(--lg-solid, #fffaf2);
++    border-color: var(--lg-border, rgba(255, 255, 255, 0.28));
++    box-shadow:
++        inset 0 1px 0 rgba(255, 255, 255, 0.42),
++        inset 0 -1px 0 rgba(62, 44, 34, 0.13),
++        inset 0 0 0 1px rgba(255, 255, 255, 0.07),
++        0 3px 10px -4px rgba(62, 44, 34, 0.18);
++    -webkit-backdrop-filter: none;
++    backdrop-filter: none;
++    transition: background-color 260ms ease, color 260ms ease, box-shadow 260ms ease,
++        border-color 260ms ease, transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
++}
++
++/* Opaque fallback above; softly translucent only when backdrop blur is supported. */
++@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
++    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass) {
++        background-color: var(--lg-fill, rgba(255, 250, 242, 0.42));
++        -webkit-backdrop-filter: blur(8px) saturate(115%);
++        backdrop-filter: blur(8px) saturate(115%);
++    }
++}
++
++/* A contained reflection behind the label; no overflow clipping of badges/icons. */
++:is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass)::after {
++    content: "";
++    position: absolute;
++    inset: 1px;
++    border-radius: inherit;
++    pointer-events: none;
++    z-index: -1;
++    background: linear-gradient(110deg, transparent 22%,
++        rgba(255, 255, 255, 0.04) 38%, rgba(255, 255, 255, 0.17) 49%,
++        rgba(255, 255, 255, 0.045) 60%, transparent 78%);
++    background-size: 230% 100%;
++    background-position: 58% 0;
++    opacity: 0.55;
++    transition: background-position 480ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 260ms ease;
++}
++
++/* Prevent a latched hover on touch devices; preserve selected/dimmed state styling. */
++:is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(.dimmed):hover {
++    transform: none;
++}
++@media (hover: hover) and (pointer: fine) {
++    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(:disabled):not([aria-disabled="true"]):not(.dimmed):hover {
++        transform: translateY(-1px);
++        box-shadow:
++            inset 0 1px 0 rgba(255, 255, 255, 0.55),
++            inset 0 -1px 0 rgba(62, 44, 34, 0.12),
++            inset 0 0 0 1px rgba(255, 255, 255, 0.09),
++            0 5px 14px -5px rgba(62, 44, 34, 0.23);
++    }
++    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(:disabled):not([aria-disabled="true"]):not(.dimmed):hover::after {
++        background-position: 46% 0;
++        opacity: 0.85;
++    }
++}
++:is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(:disabled):not([aria-disabled="true"]):not(.dimmed):active {
++    transform: translateY(0) scale(0.995);
++    box-shadow: inset 0 1px 2px rgba(62, 44, 34, 0.11),
++        inset 0 -1px 0 rgba(255, 255, 255, 0.3),
++        0 1px 4px rgba(62, 44, 34, 0.09);
++}
++:is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(:disabled):not([aria-disabled="true"]):not(.dimmed):active::after {
++    background-position: 49% 0;
++    opacity: 0.45;
++}
++:is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):is(:disabled, [aria-disabled="true"]) {
++    transform: none;
++}
++:is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):focus-visible {
++    outline: 2px solid var(--lg-focus, #795b40);
++    outline-offset: 4px;
++}
++
++/* Preserve the existing cream, mocha, gold, and dark-mode palettes. */
++:is(.big-contribute-btn, .submit-btn).liquid-glass {
++    --lg-solid: #67442f;
++    --lg-fill: rgba(103, 68, 47, 0.92);
++}
++.onboarding-submit.liquid-glass {
++    --lg-solid: #241b12;
++    --lg-fill: rgba(36, 27, 18, 0.93);
++}
++:is(.nav-item, .settings-link).liquid-glass,
++.liquid-glass--dark,
++body.dark-mode .pyq-archive-action.liquid-glass,
++body.dark-mode .sem-card.liquid-glass {
++    --lg-solid: #291f16;
++    --lg-fill: rgba(41, 31, 22, 0.66);
++    --lg-border: rgba(244, 239, 227, 0.16);
++    --lg-focus: #ecd2a6;
++}
++/* Keep the existing cream hue readable over the dark glass highlights. */
++.back-btn.liquid-glass--dark {
++    color: rgba(244, 239, 227, 0.8);
++}
++.library-tabs a.liquid-glass[aria-current],
++.resource-filters button.liquid-glass {
++    --lg-solid: #f2c14e;
++    --lg-fill: rgba(242, 193, 78, 0.9);
++    --lg-border: #f2c14e;
++}
++.notification-bell.liquid-glass[aria-expanded="true"] {
++    --lg-solid: #f9edce;
++    --lg-fill: rgba(249, 237, 206, 0.82);
++}
++.nav-item.liquid-glass.active {
++    --lg-solid: #3b2d19;
++    --lg-fill: var(--site-tint, rgba(242, 193, 78, 0.1));
++}
++.sem-card.liquid-glass.selected {
++    --lg-solid: #fffcf5;
++    --lg-fill: var(--site-tint, rgba(255, 252, 245, 0.82));
++    --lg-border: var(--site-highlight, #f2c14e);
++}
++body.dark-mode .sem-card.liquid-glass.selected {
++    --lg-solid: #2a2118;
++    --lg-fill: rgba(42, 33, 24, 0.88);
++}
++
++@media (prefers-reduced-motion: reduce) {
++    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass),
++    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass)::after {
++        transition: none !important;
++        animation: none !important;
++    }
++    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):not(.dimmed):is(:hover, :active) {
++        transform: none !important;
++    }
++    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass):is(:hover, :active)::after {
++        background-position: 58% 0 !important;
++        opacity: 0.55 !important;
++    }
++}
++@media (prefers-reduced-transparency: reduce) {
++    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass) {
++        background: var(--lg-solid, #fffaf2);
++        -webkit-backdrop-filter: none;
++        backdrop-filter: none;
++    }
++}
++@media (forced-colors: active) {
++    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass) {
++        background: ButtonFace;
++        color: ButtonText;
++        box-shadow: none;
++        -webkit-backdrop-filter: none;
++        backdrop-filter: none;
++        outline: 1px solid ButtonText;
++    }
++    :is(.liquid-glass.liquid-glass, .notification-panel button, body.dark-mode .sem-card.liquid-glass)::after { content: none; }
++}
