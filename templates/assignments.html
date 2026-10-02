@@ -5,10 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Assignment - BOOKSHELF</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='pyqs.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assignments.css') }}">
     {% include '_site_effects.html' %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='liquid-glass.css') }}">
-    <script defer src="{{ url_for('static', filename='liquid-glass.js') }}"></script>
 </head>
 <body>
 
@@ -18,7 +16,7 @@
                 <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="nav-logo">
             </div>
             
-            <a href="{{ url_for('dashboard') }}" class="back-btn liquid-glass">
+            <a href="{{ url_for('dashboard') }}" class="back-btn">
                 <span>←</span> Return to Dashboard
             </a>
         </nav>
