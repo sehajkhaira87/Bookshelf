@@ -71,65 +71,97 @@ const ropeCtx = ropeCanvas.getContext('2d');
 const reducedBulbMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const ROPE_LENGTH = 50;
 const SOCKET_Y = 44;
-const pendulum = new BulbPendulum({ angle: reducedBulbMotion.matches ? 0 : 0.1 });
-let bulbRunning = true;
+const bulbPhysics = new BulbCord();
+bulbWrapper.setAttribute('aria-label', 'Toggle hanging light; grab to lift or swing; arrow keys to swing');
+let bulbRunning = true, bulbAvailable = false;
 let isLightOn = true;
 let bulbParallaxY = 0;
-let anchorX = 0;
+let anchorX = 0, geometryKey = '';
 let ropeSize = { width: 0, height: 0 };
 let bulbLoop = null, bulbFrame = null, lastBulbTime = null;
-let activePointer = null, grabOffset = 0, dragDistance = 0;
+let activePointer = null, dragDistance = 0;
 let pointerStart = { x: 0, y: 0, time: 0 };
 
-function computeAnchor() {
- anchorX = heroEl.clientWidth * 0.60;
- // The bulb's centre of mass is below the cord/socket attachment.
- const bodyBelowSocket = Math.max(15, bulbEl.offsetHeight * 0.78 - SOCKET_Y);
- pendulum.length = ROPE_LENGTH + bodyBelowSocket;
-}
-
-function sizeRopeCanvas() {
- const dpr = Math.min(window.devicePixelRatio || 1, 2);
- ropeSize = { width: ropeCanvas.clientWidth, height: ropeCanvas.clientHeight };
- ropeCanvas.width = Math.round(ropeSize.width * dpr);
- ropeCanvas.height = Math.round(ropeSize.height * dpr);
- ropeCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-}
-
-function pointerAngle(event) {
+function bulbPoint(event) {
  const rect = heroEl.getBoundingClientRect();
- return Math.atan2(event.clientX - rect.left - anchorX,
-     Math.max(10, event.clientY - rect.top - bulbParallaxY));
+ return { x: event.clientX - rect.left, y: event.clientY - rect.top - bulbParallaxY };
+}
+
+function renderBulb() {
+ if (!bulbAvailable) return;
+ const socket = bulbPhysics.getSocket(), body = bulbPhysics.body;
+ bulbWrapper.style.transform = `translateX(calc(-50% + ${socket.x - anchorX}px)) translateY(${bulbParallaxY}px)`;
+ bulbWrapper.style.top = `${socket.y - SOCKET_Y}px`;
+ bulbEl.style.transform = `rotate(${body.a}rad)`;
+ ropeCtx.clearRect(0, 0, ropeSize.width, ropeSize.height);
+ const points = [...bulbPhysics.nodes, socket];
+ ropeCtx.beginPath();
+ ropeCtx.moveTo(points[0].x, points[0].y);
+ for (let i = 1; i < points.length - 1; i++) {
+  ropeCtx.quadraticCurveTo(points[i].x, points[i].y,
+   (points[i].x + points[i + 1].x) / 2, (points[i].y + points[i + 1].y) / 2);
+ }
+ ropeCtx.lineTo(socket.x, socket.y);
+ ropeCtx.strokeStyle = '#1a1a1a';
+ ropeCtx.lineWidth = 2.5;
+ ropeCtx.lineCap = 'round';
+ ropeCtx.lineJoin = 'round';
+ ropeCtx.stroke();
+ ropeCanvas.style.transform = `translateY(${bulbParallaxY}px)`;
 }
 
 function stopBulb() {
+ finishBulbDrag(null, true);
  if (bulbLoop) bulbLoop.cancel();
  if (bulbFrame !== null) cancelAnimationFrame(bulbFrame);
  bulbFrame = lastBulbTime = null;
- pendulum.resetClock();
- finishBulbDrag(null, true);
+ bulbPhysics.freeze();
 }
 
 function startBulb() {
- if (!bulbRunning || document.hidden) return;
+ if (!bulbRunning || !bulbAvailable || document.hidden) return;
  if (bulbLoop) bulbLoop.request();
  else if (bulbFrame === null) bulbFrame = requestAnimationFrame(animateBulb);
 }
 
 function refreshBulbGeometry() {
- computeAnchor();
- sizeRopeCanvas();
+ const image = bulbEl.querySelector('img');
+ const imageHeight = image.clientHeight, imageWidth = image.clientWidth;
+ const width = ropeCanvas.clientWidth, height = ropeCanvas.clientHeight;
+ // Respect the existing mobile layout, where the hanging bulb is hidden.
+ bulbAvailable = imageHeight > SOCKET_Y && width > 0 && height > 0;
+ if (!bulbAvailable) { stopBulb(); return; }
+ anchorX = heroEl.clientWidth * 0.60;
+ const dpr = Math.min(window.devicePixelRatio || 1, 2);
+ const nextKey = [width, height, imageWidth, imageHeight, anchorX, dpr].join(':');
+ if (nextKey !== geometryKey) {
+  finishBulbDrag(null, true);
+  geometryKey = nextKey;
+  const centreY = imageHeight * 0.78;
+  bulbPhysics.configure({
+   anchorX, anchorY: 0, length: ROPE_LENGTH,
+   socketDistance: Math.max(15, centreY - SOCKET_Y),
+   halfWidth: imageWidth / 2,
+   bodyTop: centreY - imageHeight * 0.35,
+   bodyBottom: imageHeight - centreY, width, height
+  });
+  lastBulbTime = null;
+  ropeSize = { width, height };
+  ropeCanvas.width = Math.round(width * dpr);
+  ropeCanvas.height = Math.round(height * dpr);
+  ropeCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+ }
+ renderBulb();
  startBulb();
 }
 
 bulbWrapper.addEventListener('pointerdown', event => {
- if (event.button !== 0 || activePointer !== null || !event.isPrimary) return;
+ if (event.button !== 0 || activePointer !== null || !event.isPrimary || !bulbAvailable) return;
  activePointer = event.pointerId;
  pointerStart = { x: event.clientX, y: event.clientY, time: performance.now() };
  dragDistance = 0;
- // Preserve the grabbed point: pressing the side of the bulb must not teleport it.
- grabOffset = pointerAngle(event) - pendulum.angle;
- pendulum.beginDrag();
+ // The hand holds the exact point clicked, including while the bulb rotates.
+ bulbPhysics.beginDrag(bulbPoint(event), pointerStart.time);
  bulbWrapper.setPointerCapture(event.pointerId);
  event.preventDefault();
  startBulb();
@@ -138,8 +170,9 @@ bulbWrapper.addEventListener('pointerdown', event => {
 bulbWrapper.addEventListener('pointermove', event => {
  if (event.pointerId !== activePointer) return;
  dragDistance = Math.max(dragDistance, Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y));
- pendulum.moveDrag(pointerAngle(event) - grabOffset);
- if (reducedBulbMotion.matches) { pendulum.angle = pendulum.target; pendulum.velocity = 0; }
+ bulbPhysics.moveDrag(bulbPoint(event), performance.now(), reducedBulbMotion.matches);
+ if (reducedBulbMotion.matches) renderBulb();
+ event.preventDefault();
  startBulb();
 });
 
@@ -147,11 +180,10 @@ function finishBulbDrag(event, cancelled = false) {
  if (activePointer === null || (event && event.pointerId !== activePointer)) return;
  const pointer = activePointer;
  activePointer = null;
- pendulum.endDrag();
- if (bulbWrapper.hasPointerCapture(pointer)) bulbWrapper.releasePointerCapture(pointer);
  if (event) dragDistance = Math.max(dragDistance, Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y));
- if (cancelled) pendulum.velocity = 0;
- if (reducedBulbMotion.matches) { pendulum.angle = 0; pendulum.velocity = 0; }
+ bulbPhysics.endDrag(performance.now(), cancelled);
+ if (bulbWrapper.hasPointerCapture(pointer)) bulbWrapper.releasePointerCapture(pointer);
+ if (reducedBulbMotion.matches) { bulbPhysics.reset(); renderBulb(); }
  if (!cancelled && dragDistance < 8 && performance.now() - pointerStart.time < 300) toggleLight();
  if (!cancelled) startBulb();
  return true;
@@ -167,6 +199,12 @@ bulbWrapper.addEventListener('keydown', event => {
  if (event.key === 'Enter' || event.key === ' ') {
   event.preventDefault();
   if (!event.repeat) toggleLight();
+ } else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+  event.preventDefault();
+  if (!reducedBulbMotion.matches && activePointer === null) {
+   bulbPhysics.nudge(event.key === 'ArrowRight' ? 1 : -1);
+   startBulb();
+  }
  }
 });
 
@@ -183,41 +221,25 @@ function toggleLight() {
 
 function animateBulb(time) {
  bulbFrame = null;
- if (!bulbRunning || document.hidden) { lastBulbTime = null; return; }
- // Reset after offscreen/hidden intervals; never inject a large resume impulse.
+ if (!bulbRunning || !bulbAvailable || document.hidden) { lastBulbTime = null; return; }
+ // Hidden/offscreen time cannot become a large impulse on returning.
  const elapsed = lastBulbTime === null || time - lastBulbTime > 250 ? 0 : (time - lastBulbTime) / 1000;
  lastBulbTime = time;
- if (!reducedBulbMotion.matches) pendulum.advance(elapsed);
- const angle = pendulum.angle;
- const x = anchorX + Math.sin(angle) * ROPE_LENGTH;
- const y = Math.cos(angle) * ROPE_LENGTH;
- bulbWrapper.style.transform = `translateX(calc(-50% + ${x - anchorX}px)) translateY(${bulbParallaxY}px)`;
- bulbWrapper.style.top = `${y - SOCKET_Y}px`;
- // Positive displacement is rightward: CSS rotation must be negative to keep
- // the bulb's body aligned with the downward cord rather than leaning inward.
- bulbEl.style.transform = `rotate(${-angle * 180 / Math.PI}deg)`;
- ropeCtx.clearRect(0, 0, ropeSize.width, ropeSize.height);
- const bow = Math.max(-1.2, Math.min(1.2, -pendulum.velocity * 0.25));
- ropeCtx.beginPath();
- ropeCtx.moveTo(anchorX, 0);
- ropeCtx.quadraticCurveTo((anchorX + x) / 2 + Math.cos(angle) * bow,
-     y / 2 - Math.sin(angle) * bow, x, y);
- ropeCtx.strokeStyle = '#1a1a1a';
- ropeCtx.lineWidth = 2.5;
- ropeCtx.lineCap = 'round';
- ropeCtx.stroke();
- ropeCanvas.style.transform = `translateY(${bulbParallaxY}px)`;
- if (!reducedBulbMotion.matches && (pendulum.dragging || pendulum.angle !== 0 || pendulum.velocity !== 0)) startBulb();
+ if (!reducedBulbMotion.matches) bulbPhysics.advance(elapsed, time);
+ renderBulb();
+ if (!reducedBulbMotion.matches && bulbPhysics.awake) startBulb();
+ else lastBulbTime = null;
 }
 
-bulbLoop = window.createDesktopAnimationLoop(heroEl, animateBulb, () => bulbRunning);
+bulbLoop = window.createDesktopAnimationLoop(heroEl, animateBulb, () => bulbRunning && bulbAvailable);
 new ResizeObserver(refreshBulbGeometry).observe(heroEl);
 new ResizeObserver(refreshBulbGeometry).observe(bulbEl);
 window.addEventListener('resize', refreshBulbGeometry, { passive: true });
 ScrollTrigger.addEventListener('refresh', refreshBulbGeometry);
 reducedBulbMotion.addEventListener('change', () => {
- pendulum.angle = pendulum.velocity = 0;
- pendulum.resetClock();
+ stopBulb();
+ bulbPhysics.reset();
+ renderBulb();
  startBulb();
 });
 refreshBulbGeometry();

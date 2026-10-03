@@ -17,3 +17,4 @@ output/
 tmp/
 tests/*
 !tests/test_*.py
+!tests/bulb-physics.test.cjs
