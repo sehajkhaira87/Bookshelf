@@ -16,6 +16,16 @@
 /*  1. FONTS & RESETS */
 
 @font-face {
+    font-family: "Inter";
+    src: url("font/inter-latin-variable.woff2") format("woff2");
+    font-weight: 400 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+.bulb picture, .hero-image picture, .gndec-logo-wrap picture { display: contents; }
+
+@font-face {
     font-family: "Canela";
     src: url("/static/font/Canela-Light-Trial.otf") format("opentype");
     font-weight: 300;
@@ -1264,7 +1274,7 @@ body.mobile-exit {
         left: 0; 
         width: 100%; 
         margin-bottom: 15px; 
-        animation: heroFadeUp .7s ease both; 
+        animation: none;
     }
     
     .tag-line { width: 36px; }
@@ -1280,7 +1290,7 @@ body.mobile-exit {
     .hero-title span { white-space: normal !important; }
     .hero-title .char {
         display: inline-block;
-        /* hero-intro.js owns the reveal; CSS and GSAP must not fight it. */
+        /* The startup script owns the reveal; keep CSS animation off these letters. */
     }
 
     /*  4. HERO VISUAL (BOOKSHELF & CAT) */
@@ -1291,7 +1301,7 @@ body.mobile-exit {
         width: 85%; 
         margin-left: auto;   
         margin-right: -20px; 
-        animation: heroFadeUp .8s ease 1.0s both; 
+        animation: none;
     }    
     
     .hero-image { position: static; width: 100%; }

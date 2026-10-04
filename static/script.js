@@ -28,12 +28,18 @@ window.createDesktopAnimationLoop = function (element, render, isEnabled = () =>
  return { request, cancel, get desktop() { return desktop.matches; } };
 };
 
+// This script is now loaded on demand; it may arrive after window.load.
+function whenHomeLoaded(callback) {
+ if (document.readyState === 'complete') callback();
+ else window.addEventListener('load', callback, { once: true });
+}
+
 gsap.registerPlugin(ScrollTrigger);
 if ("scrollRestoration" in history) {
  history.scrollRestoration = "manual";
 }
 
-window.addEventListener("load", () => {
+whenHomeLoaded(() => {
 
  requestAnimationFrame(() => {
  window.scrollTo(0, 0);
@@ -272,6 +278,7 @@ ScrollTrigger.create({
 
 // FEATURES TIMELINE 
 
+gsap.matchMedia().add('(min-width: 821px)', () => {
 const featuresTl = gsap.timeline({
 
  scrollTrigger: {
@@ -351,6 +358,8 @@ featuresTl.from(".features-container", {
  ease: "power2.out"
 
 }, "-=0.3");
+
+});
 
 //  FRAME SEQUENCE (OPTIMIZED) 
 
@@ -530,7 +539,7 @@ ScrollTrigger.create({
 
 //  PAGE 2 LOADER/CURTAIN EFFECT //
 
-window.addEventListener('load', () => {
+whenHomeLoaded(() => {
 
     if (window.innerWidth > 820) {
         ScrollTrigger.create({
@@ -632,53 +641,7 @@ if (scrollCue) {
 
 
 
-window.addEventListener('load', () => {
+whenHomeLoaded(() => {
     ScrollTrigger.refresh();
     setTimeout(() => ScrollTrigger.refresh(), 300);
 });
-
-
-
-// ==========================================
-// MOBILE LOGIC SANDBOX
-// ==========================================
-const isMobileDevice = window.matchMedia("(max-width: 820px)").matches;
-
-if (isMobileDevice) {
-    console.log("Mobile layout initialized");
-
-    // 2. Feature Card Swiping Logic
-    const fcTrack = document.getElementById('featuresTrack');
-    const fcItems = fcTrack ? Array.from(fcTrack.querySelectorAll('.feature-item')) : [];
-    const fcDots  = document.querySelectorAll('.f-dot');
-    let fcIndex = 0;
-
-    function fcRender() {
-        fcItems.forEach((item, i) => {
-            item.classList.remove('card-active', 'card-next', 'card-hidden');
-            if (i === fcIndex) item.classList.add('card-active');
-            else if (i === (fcIndex + 1) % fcItems.length) item.classList.add('card-next');
-            else item.classList.add('card-hidden');
-        });
-        fcDots.forEach((d, i) => d.classList.toggle('is-active', i === fcIndex));
-    }
-
-    if (fcTrack && fcItems.length) {
-        fcRender();
-        fcDots.forEach((d, i) => d.addEventListener('click', () => { fcIndex = i; fcRender(); }));
-
-        let touchStartX = 0, touchStartY = 0;
-        fcTrack.addEventListener('touchstart', e => {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-
-        fcTrack.addEventListener('touchend', e => {
-            const dx = e.changedTouches[0].clientX - touchStartX;
-            const dy = e.changedTouches[0].clientY - touchStartY;
-            if (Math.abs(dx) < 30 || Math.abs(dx) < Math.abs(dy)) return;
-            fcIndex = dx < 0 ? (fcIndex + 1) % fcItems.length : (fcIndex - 1 + fcItems.length) % fcItems.length;
-            fcRender();
-        }, { passive: true });
-    }
-}
