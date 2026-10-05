@@ -36,6 +36,11 @@ body.pyqs-page {
 
 /* The only liquid-glass control on this page. Its surface/interaction comes from the shared stylesheet. */
 .pyqs-page .back-btn {
+    /* Match the Contribution return button's 200ms lift and soft press. */
+    --lg-hover-lift: -2px;
+    --lg-press-scale: 0.98;
+    --lg-motion-duration: 200ms;
+    --lg-motion-easing: ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -50,6 +55,7 @@ body.pyqs-page {
     text-decoration: none;
     white-space: nowrap;
     touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 .pyqs-page .back-btn > span { font-size: 18px; line-height: 1; }
 .pyqs-page .header-section {

@@ -19,3 +19,4 @@ tests/*
 !tests/test_*.py
 !tests/bulb-physics.test.cjs
 !tests/home-startup.test.cjs
+!tests/mobile-dashboard-dock.test.cjs

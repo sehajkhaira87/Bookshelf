@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='roles.css') }}">
     {% include '_site_appearance.html' %}
     {% include '_site_effects.html' %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='mobile-dashboard-dock.css') }}">
 </head>
 
     {% set dashboard_user = profile if profile is defined and profile else user %}
@@ -106,6 +107,9 @@
            <div class="sidebar-header">
                 <img src="{{ url_for('static', filename='images/logo.svg') }}" class="brand-logo" alt="Bookshelf Logo">
             </div>
+            <div class="mobile-dock-indicator" aria-hidden="true"></div>
+            <div class="mobile-dock-destination" aria-hidden="true"><span>Overview</span></div>
+            <span class="mobile-dock-status" role="status" aria-live="polite"></span>
             
             <nav class="sidebar-nav" aria-label="Dashboard navigation">
                 <a href="#" class="nav-item active">
@@ -334,6 +338,7 @@
     </div>
     
     <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='mobile-dashboard-dock.js') }}"></script>
     <script src="{{ url_for('static', filename='notifications.js') }}"></script>
 
     <script>
