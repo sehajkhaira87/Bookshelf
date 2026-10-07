@@ -23,8 +23,8 @@
 .library-message { padding: 24px; background: #332318; border-radius: 12px; }
 @media (max-width: 420px) { .content-grid { grid-template-columns: minmax(0, 1fr); } .resource-filters label { width: 100%; } }
 
-/* Digital Books and Assignments share the PYQ cream palette. */
-body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"])) {
+/* Notes, Assignments, and Digital Books share the PYQ cream palette. */
+body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"], [href^="/notes"])) {
     --book-ink: #3E2C22;
     --book-muted: #756454;
     --book-line: #DFD3C3;
@@ -34,14 +34,14 @@ body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments
     background-image: radial-gradient(ellipse at 48% 16%, #F8F3E9 0%, #F1E9DC 60%, #E9DECE 100%);
     color: var(--book-ink);
 }
-body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"])) .nav-logo { filter: none; }
-body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"])) :is(.back-btn, .page-title h1, .resource-uploader strong) { color: var(--book-ink); }
-body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"])) :is(.page-title p, .resource-filters label, .result-count, .resource-uploader, .resource-course, .resource-size, .resource-filename, .placeholder-card) { color: var(--book-muted); }
-body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"])) :is(.header-section, .placeholder-card, .resource-card) { border-color: var(--book-line); }
-body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"])) :is(.resource-card, .placeholder-card, .library-message) { background: var(--book-paper); }
-body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"])) :is(.library-tabs a, .resource-pagination a) { color: var(--book-ink); border-color: var(--book-line); }
-body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"])) :is(.library-tabs a[aria-current], .resource-filters button) { background: var(--book-mocha); color: #FFF9F0; border-color: var(--book-mocha); }
-body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"])) :is(.resource-filters input, .resource-filters select) { background: var(--book-paper); color: var(--book-ink); border-color: var(--book-line); }
-body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"])) .resource-filters input::placeholder { color: var(--book-muted); opacity: 1; }
-body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"])) :is(.resource-open, .resource-filters a, .back-btn:hover) { color: var(--book-mocha); }
-body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"])) :is(a, button, input, select):focus-visible { outline: 2px solid var(--book-mocha); outline-offset: 4px; }
+body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"], [href^="/notes"])) .nav-logo { filter: none; }
+body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"], [href^="/notes"])) :is(.back-btn, .page-title h1, .resource-uploader strong) { color: var(--book-ink); }
+body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"], [href^="/notes"])) :is(.page-title p, .resource-filters label, .result-count, .resource-uploader, .resource-course, .resource-size, .resource-filename, .placeholder-card) { color: var(--book-muted); }
+body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"], [href^="/notes"])) :is(.header-section, .placeholder-card, .resource-card) { border-color: var(--book-line); }
+body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"], [href^="/notes"])) :is(.resource-card, .placeholder-card, .library-message) { background: var(--book-paper); }
+body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"], [href^="/notes"])) :is(.library-tabs a, .resource-pagination a) { color: var(--book-ink); border-color: var(--book-line); }
+body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"], [href^="/notes"])) :is(.library-tabs a[aria-current], .resource-filters button) { background: var(--book-mocha); color: #FFF9F0; border-color: var(--book-mocha); }
+body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"], [href^="/notes"])) :is(.resource-filters input, .resource-filters select) { background: var(--book-paper); color: var(--book-ink); border-color: var(--book-line); }
+body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"], [href^="/notes"])) .resource-filters input::placeholder { color: var(--book-muted); opacity: 1; }
+body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"], [href^="/notes"])) :is(.resource-open, .resource-filters a, .back-btn:hover) { color: var(--book-mocha); }
+body:has(.library-tabs a[aria-current]:is([href^="/books"], [href^="/assignments"], [href^="/notes"])) :is(a, button, input, select):focus-visible { outline: 2px solid var(--book-mocha); outline-offset: 4px; }
