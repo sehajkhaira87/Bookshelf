@@ -26,7 +26,8 @@ def get_connection():
             port=port,
             user=username,
             password=password,
-            dbname=database
+            dbname=database,
+            connect_timeout=5,
         )
         return conn
     except Exception as e:

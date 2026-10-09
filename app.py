@@ -20,6 +20,7 @@ from flask import (
 )
 from authlib.integrations.flask_client import OAuth
 from database import (
+    LoginUnavailableError,
     add_or_update_user,
     check_connection,
     create_tables,
@@ -142,9 +143,9 @@ google = oauth.register(
 )
 
 
-# Verify database connection and initialize tables on startup
-check_connection()
-if create_tables():
+# Limit startup to one availability check before attempting migrations.
+# Public pages can still load when the database is temporarily unreachable.
+if check_connection() and create_tables():
     try:
         department_service.create_schema()
     except Exception:
@@ -154,7 +155,10 @@ if create_tables():
         ui_settings_service.create_schema()
     except Exception:
         app.logger.exception('Could not initialize role assignments and dashboard appearance')
-    create_pyq_schema()
+    try:
+        create_pyq_schema()
+    except Exception:
+        app.logger.exception('Could not initialize the PYQ catalogue')
     try:
         communications_service.create_schema()
     except Exception:
@@ -163,8 +167,22 @@ if create_tables():
         create_admin_user_schema()
     except AdminUserServiceError:
         app.logger.exception("Could not initialize user moderation tables")
+else:
+    app.logger.warning(
+        'Database unavailable: starting Bookshelf with database features temporarily unavailable.'
+    )
 
 # PUBLIC ROUTES
+
+@app.errorhandler(LoginUnavailableError)
+def account_service_unavailable(error):
+    """Fail closed during outages while preserving an existing signed-in session."""
+    message = 'Your account is temporarily unavailable. Please try again shortly.'
+    if request.path.startswith('/api/') or request.is_json:
+        return jsonify(error=message), 503
+    flash(message, 'error')
+    return render_template('login.html'), 503
+
 
 @app.route('/')
 def home():
@@ -186,7 +204,11 @@ def login():
         return redirect(url_for('login'))
 
     # Ping the database to securely verify the CRN and hashed password
-    user = verify_student_login(crn, password)
+    try:
+        user = verify_student_login(crn, password)
+    except LoginUnavailableError:
+        flash("Sign-in is temporarily unavailable. Please try again shortly.", "error")
+        return redirect(url_for('login'))
     
     if not user:
         flash("Incorrect CRN or password. Please try again.", "error")

@@ -56,6 +56,34 @@ body {
     padding: 48px;
     overflow: hidden;
     cursor: none;
+    --library-reveal: 0;
+    --library-light-radius: 170px;
+}
+
+@font-face {
+    font-family: "Bookshelf Library Sign";
+    src: url("font/Canela-Light-Trial.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Lettering is positioned in the photograph's recessed doorway panel. */
+.login-library-sign {
+    position: absolute;
+    z-index: 1;
+    transform: translate(-50%, -50%);
+    font-family: "Bookshelf Library Sign", Georgia, serif;
+    font-size: 11px;
+    line-height: 1;
+    font-weight: 500;
+    white-space: nowrap;
+    color: #DAC69A;
+    -webkit-text-stroke: .16px #48301B96;
+    text-shadow: 0 -.65px .3px #21150DE8, 0 .6px .2px #F2DDA266;
+    opacity: var(--library-reveal);
+    pointer-events: none;
+    user-select: none;
 }
 
 .login-visual::before {
@@ -73,7 +101,7 @@ body {
     position: absolute;
     inset: 0;
     background: radial-gradient(
-        circle 200px at var(--x, 50%) var(--y, 50%), 
+        circle var(--library-light-radius) at var(--x, 50%) var(--y, 50%),
         transparent 0%, 
         rgba(24, 18, 12, 0.3) 40%, 
         rgba(15, 11, 8, 0.85) 85% 
@@ -90,6 +118,11 @@ body {
 
 .login-visual:hover::after {
     opacity: 1; 
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .login-visual::before,
+    .login-visual::after { transition: none; }
 }
 
 .login-visual-glow {

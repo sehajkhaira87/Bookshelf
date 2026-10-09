@@ -33,6 +33,10 @@ USER_RESULT_COLUMNS = (
 )
 
 
+class LoginUnavailableError(RuntimeError):
+    """The sign-in service could not verify credentials."""
+
+
 def get_connection():
     """Return a new connection to the configured PostgreSQL database."""
     try:
@@ -42,6 +46,7 @@ def get_connection():
             user=username,
             password=password,
             dbname=database,
+            connect_timeout=5,
         )
     except Exception:
         logger.exception("Could not connect to the database")
@@ -263,7 +268,7 @@ def add_or_update_user(email, name, department=None, urn=None, semester_no=None,
 
 
 def get_user_by_email(email):
-    """Return one user profile, or None when it is absent/unavailable."""
+    """Return a profile or None if absent; distinguish service unavailability."""
     try:
         normalized_email = _normalize_email(email)
     except ValueError:
@@ -271,7 +276,7 @@ def get_user_by_email(email):
 
     conn = get_connection()
     if not conn:
-        return None
+        raise LoginUnavailableError('Your account is temporarily unavailable.')
 
     cur = None
     try:
@@ -281,9 +286,9 @@ def get_user_by_email(email):
             (normalized_email,),
         )
         return _user_from_row(cur.fetchone())
-    except Exception:
+    except Exception as error:
         logger.exception("Could not load user profile for %s", normalized_email)
-        return None
+        raise LoginUnavailableError('Your account is temporarily unavailable.') from error
     finally:
         if cur:
             cur.close()
@@ -359,7 +364,7 @@ def verify_student_login(crn, password):
     crn_normalized = str(crn or "").strip().upper()
     conn = get_connection()
     if not conn:
-        return None
+        raise LoginUnavailableError('Sign-in is temporarily unavailable.')
 
     cur = None
     try:
@@ -382,9 +387,9 @@ def verify_student_login(crn, password):
             return user_data
             
         return None
-    except Exception:
+    except Exception as error:
         logger.exception("Could not verify login for CRN %s", crn_normalized)
-        return None
+        raise LoginUnavailableError('Sign-in is temporarily unavailable.') from error
     finally:
         if cur:
             cur.close()
