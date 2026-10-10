@@ -8,6 +8,7 @@
     <link rel="preload" href="{{ url_for('static', filename='font/Canela-Light-Trial.otf') }}" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="{{ url_for('static', filename='font/inter-latin-variable.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ url_for('static', filename='static.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='home-after-hours.css') }}">
     <meta name="view-transition" content="same-origin">
     {% include '_site_effects.html' %}
     <script src="{{ url_for('static', filename='home-bootstrap.js') }}" data-static-base="{{ url_for('static', filename='') }}" defer></script>
@@ -62,6 +63,13 @@
                     </picture>
                 </div>
             </div>
+
+            <div class="hero-after-hours" aria-hidden="true">
+                <div class="after-hours-veil"></div>
+                <div class="after-hours-glow"></div>
+                <p class="after-hours-message">Some things are only found<br>after dark.</p>
+            </div>
+            <span id="after-hours-status" class="after-hours-status" role="status" aria-live="polite" aria-atomic="true"></span>
         
             <div class="hero-text">
                 <p class="hero-tag">

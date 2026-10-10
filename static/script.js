@@ -81,6 +81,8 @@ const bulbPhysics = new BulbCord();
 bulbWrapper.setAttribute('aria-label', 'Toggle hanging light; grab to lift or swing; arrow keys to swing');
 let bulbRunning = true, bulbAvailable = false;
 let isLightOn = true;
+const afterHoursStatus = document.getElementById('after-hours-status');
+let afterHoursAnnouncement = null;
 let bulbParallaxY = 0;
 let anchorX = 0, geometryKey = '';
 let ropeSize = { width: 0, height: 0 };
@@ -136,7 +138,12 @@ function refreshBulbGeometry() {
  const width = ropeCanvas.clientWidth, height = ropeCanvas.clientHeight;
  // Respect the existing mobile layout, where the hanging bulb is hidden.
  bulbAvailable = imageHeight > SOCKET_Y && width > 0 && height > 0;
- if (!bulbAvailable) { stopBulb(); return; }
+ if (!bulbAvailable) {
+  clearTimeout(afterHoursAnnouncement);
+  if (afterHoursStatus) afterHoursStatus.textContent = '';
+  stopBulb();
+  return;
+ }
  anchorX = heroEl.clientWidth * 0.60;
  const dpr = Math.min(window.devicePixelRatio || 1, 2);
  const nextKey = [width, height, imageWidth, imageHeight, anchorX, dpr].join(':');
@@ -219,6 +226,17 @@ function toggleLight() {
  bulbWrapper.setAttribute('aria-pressed', String(isLightOn));
  heroEl.classList.toggle('lights-off', !isLightOn);
  bulbEl.classList.toggle('on', isLightOn);
+ clearTimeout(afterHoursAnnouncement);
+ if (afterHoursStatus) {
+  afterHoursStatus.textContent = '';
+  if (!isLightOn) {
+   afterHoursAnnouncement = setTimeout(() => {
+    if (!isLightOn && bulbAvailable) {
+     afterHoursStatus.textContent = 'Some things are only found after dark.';
+    }
+   }, reducedBulbMotion.matches ? 0 : 900);
+  }
+ }
  if (isLightOn && !reducedBulbMotion.matches) {
   bulbEl.classList.add('flicker');
   setTimeout(() => bulbEl.classList.remove('flicker'), 700);
