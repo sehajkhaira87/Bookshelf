@@ -175,6 +175,14 @@ test('crossing the breakpoint does not download or initialize the same runtime t
     assert.equal(home.scripts.filter(s => s.src === '/static/script.js').length, 1);
 });
 
+test('a missing optional creators script does not stop the remaining desktop effects', async () => {
+    const home = startup(false, 'creators-shelf.js');
+    await flush();
+    for (const filename of ['grid-bg.js', 'page-wheel.js', 'page2-narrative.js']) {
+        assert.ok(home.scripts.some(script => script.src === '/static/' + filename), filename);
+    }
+});
+
 test('a failed optional desktop library cannot leave the page trapped in a loader', async () => {
     const home = startup(false, 'gsap.min');
     await flush();

@@ -125,6 +125,7 @@
             load(base + 'three.js', 'module').catch(error => console.error('[Book3D]', error));
             await load(base + 'bulb-physics.js');
             await load(base + 'script.js');
+            await load(base + 'creators-shelf.js').catch(error => console.error('[CreatorsBook]', error));
             await load(base + 'grid-bg.js');
             await load(base + 'page-wheel.js');
             await load(base + 'page2-narrative.js');

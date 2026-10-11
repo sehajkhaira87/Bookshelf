@@ -82,7 +82,6 @@ bulbWrapper.setAttribute('aria-label', 'Toggle hanging light; grab to lift or sw
 let bulbRunning = true, bulbAvailable = false;
 let isLightOn = true;
 const afterHoursStatus = document.getElementById('after-hours-status');
-let afterHoursAnnouncement = null;
 let bulbParallaxY = 0;
 let anchorX = 0, geometryKey = '';
 let ropeSize = { width: 0, height: 0 };
@@ -139,7 +138,6 @@ function refreshBulbGeometry() {
  // Respect the existing mobile layout, where the hanging bulb is hidden.
  bulbAvailable = imageHeight > SOCKET_Y && width > 0 && height > 0;
  if (!bulbAvailable) {
-  clearTimeout(afterHoursAnnouncement);
   if (afterHoursStatus) afterHoursStatus.textContent = '';
   stopBulb();
   return;
@@ -226,17 +224,10 @@ function toggleLight() {
  bulbWrapper.setAttribute('aria-pressed', String(isLightOn));
  heroEl.classList.toggle('lights-off', !isLightOn);
  bulbEl.classList.toggle('on', isLightOn);
- clearTimeout(afterHoursAnnouncement);
  if (afterHoursStatus) {
   afterHoursStatus.textContent = '';
-  if (!isLightOn) {
-   afterHoursAnnouncement = setTimeout(() => {
-    if (!isLightOn && bulbAvailable) {
-     afterHoursStatus.textContent = 'Some things are only found after dark.';
-    }
-   }, reducedBulbMotion.matches ? 0 : 900);
-  }
  }
+ window.dispatchEvent(new CustomEvent('bookshelf:lightchange', { detail: { on: isLightOn } }));
  if (isLightOn && !reducedBulbMotion.matches) {
   bulbEl.classList.add('flicker');
   setTimeout(() => bulbEl.classList.remove('flicker'), 700);
@@ -268,6 +259,13 @@ reducedBulbMotion.addEventListener('change', () => {
 });
 refreshBulbGeometry();
 bulbEl.classList.add('on');
+
+// Keep the home scene still and prevent wheel scrolling during the book reveal.
+window.addEventListener('bookshelf:creatorschange', event => {
+ bulbRunning = !event.detail.active;
+ if (event.detail.active) { stopBulb(); lenis.stop(); }
+ else { startBulb(); lenis.start(); }
+});
 
 //SCROLL PARALLAX 
 

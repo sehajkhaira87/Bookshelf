@@ -1,0 +1,135 @@
+{# Inert until the desktop bulb is switched off; assets are loaded on demand. #}
+<script type="application/json" id="bookshelf-creators-assets">
+{
+    "engine": "{{ url_for('static', filename='creators-book.js') }}",
+    "cover": "{{ url_for('static', filename='images/creators/cover.webp') }}",
+    "background": "{{ url_for('static', filename='images/creators/paper.jpg') }}",
+    "frontendPortrait": "{{ url_for('static', filename='images/creators/sehaj.jpg') }}",
+    "portrait": "{{ url_for('static', filename='images/creators/santa.jpg') }}",
+    "blenderPoster": "{{ url_for('static', filename='images/creators/blender-poster.jpg') }}",
+    "blenderVideo": "{{ url_for('static', filename='videos/creators-blender-loop.mp4') }}"
+}
+</script>
+<template id="creators-reader-template">
+  <div id="bookshelf-creators" class="creators-reader" data-phase="night" role="dialog" aria-label="Bookshelf — The Creators" aria-hidden="true" hidden inert>
+    <div class="creators-cinema-shade"></div>
+    <div class="creators-cinema-world">
+      <div class="creators-focus-glow"></div>
+      <div class="creators-flight-carrier">
+<div id="bookshelf-authors-spread">
+  <div class="authors-screen" aria-label="Bookshelf authors spread with Sehaj Khaira on the left and Santa Singh on the right" data-view="cover">
+    <div class="authors-world">
+      <div class="authors-camera">
+        <div class="authors-book">
+          <div class="authors-board" aria-hidden="true"></div>
+          <div class="authors-stack" aria-hidden="true"></div>
+          <div class="authors-leaves" aria-hidden="true">
+            <div class="authors-leaf"><img class="authors-texture" data-authors-asset="background" alt=""></div>
+            <div class="authors-leaf"><img class="authors-texture" data-authors-asset="background" alt=""></div>
+            <div class="authors-leaf"><img class="authors-texture" data-authors-asset="background" alt=""></div>
+            <div class="authors-leaf"><img class="authors-texture" data-authors-asset="background" alt=""></div>
+          </div>
+          <div class="authors-cover-leaf">
+            <button type="button" class="authors-cover-front" aria-label="Open Bookshelf — The Creators">
+              <img class="authors-cover-image" data-authors-asset="cover" alt="Bookshelf’s leather cover with subtle foil branding" aria-hidden="true">
+              <span class="authors-cover-subtitle" aria-hidden="true">THE CREATORS</span>
+            </button>
+            <div class="authors-cover-back">
+              <img class="authors-texture" data-authors-asset="background" alt="">
+              <section class="authors-page authors-engine-page" aria-labelledby="authors-engine-title" aria-hidden="true" inert>
+                <img class="authors-texture" data-authors-asset="background" alt="">
+                <div class="authors-engine-content">
+                  <p class="authors-chapter" data-engine-reveal>BACKEND · ARCHITECTURE</p>
+                  <h2 class="authors-engine-title" id="authors-engine-title" data-engine-reveal>The invisible<br>foundation.</h2>
+                  <figure class="authors-engine-diagram" data-engine-reveal aria-label="Three connected layers represent Santa’s backend expertise: Python and Flask application logic, authentication and access control, and data and cloud infrastructure.">
+                    <div class="authors-engine-stack" aria-hidden="true">
+                      <div class="authors-engine-plane"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="6" rx="2"/><rect x="3" y="15" width="18" height="6" rx="2"/><path d="M7 6h.01M7 18h.01"/></svg></div>
+                      <div class="authors-engine-plane"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg></div>
+                      <div class="authors-engine-plane"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5M3 12a9 3 0 0 0 18 0"/></svg></div>
+                    </div>
+                    <figcaption>
+                      <div class="authors-engine-layer"><strong>Application</strong><span>Python · Flask<br>REST APIs</span></div>
+                      <div class="authors-engine-layer"><strong>Security</strong><span>Authentication<br>Access control</span></div>
+                      <div class="authors-engine-layer"><strong>Infrastructure</strong><span>PostgreSQL<br>Cloud &amp; deployment</span></div>
+                    </figcaption>
+                  </figure>
+                  <p class="authors-engine-caption" data-engine-reveal>Behind every seamless experience.</p>
+                  <p class="authors-engine-copy" data-engine-reveal>Server-side logic, structured data and dependable infrastructure — the foundations of Santa’s backend engineering.</p>
+                </div>
+              </section>
+              <section class="authors-page authors-left-page" data-author="frontend" aria-labelledby="authors-sehaj-name" aria-hidden="true" inert>
+                <img class="authors-texture" data-authors-asset="background" alt="">
+                <div class="authors-content">
+                  <p class="authors-chapter">FRONTEND</p>
+                  <figure class="authors-portrait">
+                    <span class="authors-clip" aria-hidden="true"></span>
+                    <img data-authors-asset="frontendPortrait" alt="Sehaj Khaira’s supplied portrait">
+                    <figcaption class="authors-caption"><h2 id="authors-sehaj-name">Sehaj Khaira</h2></figcaption>
+                  </figure>
+                  <div class="authors-badge-row"><span class="authors-badge">CONVENOR, CSI</span></div>
+                  <p class="authors-role"><span class="authors-role-word">FRONTEND</span> <span class="authors-role-word">DEVELOPER,</span> <span class="authors-role-word">BOOKSHELF</span></p>
+                  <div class="authors-bio authors-expertise" aria-hidden="true" hidden>
+                    <p><strong>Frontend:</strong> HTML5, CSS3, JavaScript, Responsive Design.</p>
+                    <p><strong>Web Technologies:</strong> Three.js, GSAP, ScrollTrigger, Lenis, SplitType, Canvas.</p>
+                    <p><strong>3D &amp; VFX:</strong> Blender, Motion Graphics, Masking, Cloning &amp; Visual Effects.</p>
+                    <p><strong>UI/UX:</strong> Interface Design, Interactive Animations &amp; UX Optimization.</p>
+                    <p><strong>Creative Direction:</strong> Complete ownership of BOOKSHELF's visual identity, interface aesthetics, branding, and overall digital experience.</p>
+                    <p><strong>Integration:</strong> Flask, Jinja2 &amp; Backend Collaboration.</p>
+                  </div>
+                </div>
+                <button type="button" class="authors-read" aria-label="Read Sehaj Khaira’s introduction — Frontend developer and Convenor, CSI" hidden disabled><span>Read introduction →</span></button>
+              </section>
+            </div>
+          </div>
+          <section class="authors-page authors-work-page" aria-labelledby="authors-work-title" aria-hidden="true" inert>
+            <img class="authors-texture" data-authors-asset="background" alt="">
+            <div class="authors-work-content">
+              <p class="authors-chapter">BLENDER · 3D DESIGN</p>
+              <div class="authors-video-frame">
+                <img class="authors-video-poster" data-authors-asset="blenderPoster" alt="" aria-hidden="true">
+                <video data-authors-video muted loop playsinline preload="auto" disablepictureinpicture disableremoteplayback aria-label="Sehaj’s Blender book-model recording, playing silently in a loop"></video>
+              </div>
+              <h2 class="authors-work-title" id="authors-work-title">FROM MODEL TO MOTION</h2>
+              <div class="authors-work-copy">
+                <p>Designed in <strong>Blender</strong>, this 3D book symbolizes BOOKSHELF's vision of creating a shared academic platform for the entire college.</p>
+                <p>The project incorporates <strong>3D modeling, material design, texture mapping, lighting, keyframe animation, and rendering</strong>, combining technical precision with visual storytelling to represent the identity and purpose of BOOKSHELF.</p>
+              </div>
+            </div>
+          </section>
+          <section class="authors-page authors-right-page" data-author="backend" aria-labelledby="authors-santa-name" aria-hidden="true" inert>
+            <img class="authors-texture" data-authors-asset="background" alt="">
+            <div class="authors-content">
+              <p class="authors-chapter">BACKEND</p>
+              <figure class="authors-portrait">
+                <span class="authors-clip" aria-hidden="true"></span>
+                <img data-authors-asset="portrait" alt="Santa Singh’s supplied portrait">
+                <figcaption class="authors-caption"><h2 id="authors-santa-name">Santa Singh</h2></figcaption>
+              </figure>
+              <div class="authors-badge-row"><span class="authors-badge">CO-CONVENOR, CSI</span></div>
+              <p class="authors-role"><span class="authors-role-word">BACKEND</span> <span class="authors-role-word">DEVELOPER,</span> <span class="authors-role-word">BOOKSHELF</span></p>
+              <div class="authors-bio authors-expertise" aria-hidden="true" hidden>
+                <p><strong>Backend Development:</strong> Python, Flask, REST APIs &amp; Server-Side Architecture.</p>
+                <p><strong>Cloud &amp; Deployment:</strong> AWS, Microsoft Azure, DigitalOcean &amp; Server Management.</p>
+                <p><strong>Database Management:</strong> PostgreSQL, Database Design &amp; Optimization.</p>
+                <p><strong>Security &amp; Authentication:</strong> User Authentication, Secure Login Systems &amp; Access Control.</p>
+                <p><strong>Infrastructure:</strong> Custom Domain Configuration, Web Hosting &amp; Professional Email Setup.</p>
+                <p><strong>System Integration:</strong> Payment Gateway Integration, API Connectivity &amp; Backend Optimization.</p>
+              </div>
+            </div>
+            <button type="button" class="authors-read" aria-label="Read Santa Singh’s introduction — Backend developer and Co-Convenor, CSI" hidden disabled><span>Read introduction →</span></button>
+          </section>
+          <div class="authors-hinge-paper" aria-hidden="true"><img class="authors-texture" data-authors-asset="background" alt=""></div>
+          <div class="authors-gutter" aria-hidden="true"></div>
+        </div>
+      </div>
+      <button type="button" class="authors-back" aria-label="Back to the authors spread" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7M5 12h14"/></svg>Back</button>
+    </div>
+    <span class="authors-status" aria-live="polite">Click the book to meet its creators.</span>
+  </div>
+</div>
+      </div>
+    </div>
+    <button type="button" class="creators-return" aria-label="Return the creators book to the shelf" hidden><span aria-hidden="true">×</span>Return to shelf</button>
+    <span class="creators-status" role="status" aria-live="polite" aria-atomic="true"></span>
+  </div>
+</template>

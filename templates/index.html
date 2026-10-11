@@ -9,6 +9,8 @@
     <link rel="preload" href="{{ url_for('static', filename='font/inter-latin-variable.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ url_for('static', filename='static.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='home-after-hours.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='creators-book.css') }}" media="(min-width: 821px)">
+    <link rel="stylesheet" href="{{ url_for('static', filename='creators-shelf.css') }}" media="(min-width: 821px)">
     <meta name="view-transition" content="same-origin">
     {% include '_site_effects.html' %}
     <script src="{{ url_for('static', filename='home-bootstrap.js') }}" data-static-base="{{ url_for('static', filename='') }}" defer></script>
@@ -67,7 +69,6 @@
             <div class="hero-after-hours" aria-hidden="true">
                 <div class="after-hours-veil"></div>
                 <div class="after-hours-glow"></div>
-                <p class="after-hours-message">Some things are only found<br>after dark.</p>
             </div>
             <span id="after-hours-status" class="after-hours-status" role="status" aria-live="polite" aria-atomic="true"></span>
         
@@ -86,6 +87,7 @@
             <!-- MOBILE WRAPPER FOR IMAGE & CAT -->
             <div class="hero-visual">
                 <div class="hero-image">
+                    <button type="button" id="creators-shelf-trigger" class="creators-shelf-trigger" aria-label="Bring The Creators book out of the shelf" aria-hidden="true" hidden disabled><span class="creators-shelf-label" aria-hidden="true">THE CREATORS</span></button>
                     <picture>
                         <source media="(max-width: 820px)" type="image/webp"
                             srcset="{{ url_for('static', filename='images/bookshelf-mobile-640.webp') }} 640w, {{ url_for('static', filename='images/bookshelf-mobile-960.webp') }} 960w, {{ url_for('static', filename='images/bookshelf-mobile-1280.webp') }} 1280w"
@@ -226,6 +228,8 @@
         <canvas id="book-canvas"></canvas>
         <svg id="trail-svg"></svg>
     </section>
+
+    {% include '_creators_book.html' %}
 
     <script type="importmap">
     {
