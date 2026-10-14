@@ -3,7 +3,7 @@
     position: absolute;
     z-index: 40;
     left: 20.934%;
-    top: 13.291%;
+    bottom: 75.3%;
     width: 7.612%;
     height: 10.759%;
     padding: 0;
@@ -149,6 +149,8 @@
 #bookshelf-creators #bookshelf-authors-spread .authors-screen {
     background: transparent;
     pointer-events: none;
+    overflow: visible;
+    contain: layout;
 }
 #bookshelf-creators .authors-back,
 #bookshelf-creators .authors-read,

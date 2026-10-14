@@ -12,7 +12,7 @@
     const homeStatus = document.getElementById('after-hours-status');
     const flightMs = 3300;
     let reader, world, carrier, pivot, shade, glow, status, returnButton, authorRoot, authorScreen, engine;
-    let loading, ticket = 0, phaseName = 'day', returning = false, geometry, coverGeometry, viewportScale = 1;
+    let loading, ticket = 0, phaseName = 'day', returning = false, geometry, coverGeometry, shelfProjection, viewportScale = 1;
     let animations = [], unlockPage = null, lastFocused = null;
     let positionFrame = null;
     let homeZoom = 1, homeTransform = '';
@@ -30,10 +30,20 @@
 
     function resizeWorld() {
         if (!world) return;
-        viewportScale = Math.min(innerWidth / 1376, innerHeight / 768);
-        world.style.left = `${(innerWidth - 1376 * viewportScale) / 2}px`;
-        world.style.top = `${(innerHeight - 768 * viewportScale) / 2}px`;
+        // Reserve room for the reader controls even at the closest author view.
+        viewportScale = Math.min(innerWidth / 1376, Math.max(1, innerHeight - 144) / 704);
+        const left = (innerWidth - 1376 * viewportScale) / 2;
+        const top = (innerHeight - 768 * viewportScale) / 2;
+        world.style.left = `${left}px`;
+        world.style.top = `${top}px`;
         world.style.transform = `scale(${viewportScale})`;
+        // Keep both navigation controls on the same screen line; only the book
+        // scales with the reading area.
+        const back = reader.querySelector('.authors-back');
+        back.style.left = `${(28 - left) / viewportScale}px`;
+        back.style.top = `${(23 - top) / viewportScale}px`;
+        back.style.transformOrigin = '0 0';
+        back.style.transform = `scale(${1 / viewportScale})`;
     }
 
     async function loadBook() {
@@ -99,18 +109,46 @@
         const source = trigger.getBoundingClientRect();
         const destination = reader.querySelector('.authors-cover-front').getBoundingClientRect();
         const frame = world.getBoundingClientRect();
+        const camera = new DOMMatrixReadOnly(getComputedStyle(reader.querySelector('.authors-camera')).transform);
         coverGeometry = {
             dx: (destination.left + destination.width / 2 - frame.left) / viewportScale,
             dy: (destination.top + destination.height / 2 - frame.top) / viewportScale,
-            height: destination.height / viewportScale
+            height: destination.height / viewportScale,
+            pivotX: (destination.left + destination.width / 2 - frame.left) / viewportScale - camera.m41,
+            pivotY: (destination.top + destination.height / 2 - frame.top) / viewportScale - camera.m42
         };
+        return sourceGeometry(source, frame);
+    }
+
+    function sourceGeometry(source, frame) {
+        const start = source.height / homeZoom / ((shelfProjection?.height ?? coverGeometry.height) * viewportScale);
         return {
-            sx: (source.left + source.width / 2 - frame.left) / viewportScale,
-            sy: (source.top + source.height / 2 - frame.top) / viewportScale,
-            dx: (destination.left + destination.width / 2 - frame.left) / viewportScale,
-            dy: (destination.top + destination.height / 2 - frame.top) / viewportScale,
-            start: source.height / homeZoom / destination.height
+            sx: (source.left + source.width / 2 - frame.left) / viewportScale - start * (shelfProjection?.offsetX ?? 0),
+            sy: (source.top + source.height / 2 - frame.top) / viewportScale - start * (shelfProjection?.offsetY ?? 0),
+            dx: coverGeometry.dx, dy: coverGeometry.dy, start
         };
+    }
+
+    function placeShelf() {
+        pivot.style.transformOrigin = `${coverGeometry.pivotX}px ${coverGeometry.pivotY}px`;
+        carrier.style.transform = flightFrames()[0].transform;
+        pivot.style.transform = turnFrames()[0].transform;
+    }
+
+    function calibrateShelf() {
+        // Measure the visible spine after perspective, rather than fitting the
+        // unturned cover. Its lower edge then meets the actual shelf surface.
+        if (shelfProjection) return;
+        const spine = reader.querySelector('.creators-film-spine').getBoundingClientRect();
+        const frame = world.getBoundingClientRect();
+        if (!spine.height || !geometry.start) return;
+        shelfProjection = {
+            height: spine.height / (geometry.start * viewportScale),
+            offsetX: ((spine.left + spine.width / 2 - frame.left) / viewportScale - geometry.sx) / geometry.start,
+            offsetY: ((spine.top + spine.height / 2 - frame.top) / viewportScale - geometry.sy) / geometry.start
+        };
+        geometry = sourceGeometry(trigger.getBoundingClientRect(), frame);
+        placeShelf();
     }
 
     function flightFrames(reverse = false) {
@@ -160,9 +198,8 @@
         await nextFrame();
         if (currentTicket !== ticket || !isNight()) return;
         geometry = measureFlight();
-        pivot.style.transformOrigin = `${geometry.dx}px ${geometry.dy}px`;
-        carrier.style.transform = flightFrames()[0].transform;
-        pivot.style.transform = turnFrames()[0].transform;
+        placeShelf();
+        calibrateShelf();
         reader.style.visibility = 'visible';
     }
 
@@ -237,9 +274,7 @@
         carrier.style.transform = pivot.style.transform = 'none';
         resizeWorld();
         geometry = measureFlight();
-        pivot.style.transformOrigin = `${geometry.dx}px ${geometry.dy}px`;
-        carrier.style.transform = flightFrames()[0].transform;
-        pivot.style.transform = turnFrames()[0].transform;
+        placeShelf();
         setPhase('flying');
         status.textContent = 'The creators’ book is coming forward.';
         await Promise.all([
@@ -283,7 +318,7 @@
         carrier.style.transform = pivot.style.transform = 'none';
         resizeWorld();
         geometry = measureFlight();
-        pivot.style.transformOrigin = `${geometry.dx}px ${geometry.dy}px`;
+        pivot.style.transformOrigin = `${coverGeometry.pivotX}px ${coverGeometry.pivotY}px`;
         status.textContent = 'Returning the creators’ book to the shelf.';
         await Promise.all([
             animate(carrier, flightFrames(true), {duration:flightMs,easing:'linear'}),
@@ -342,15 +377,8 @@
         // Follow the shelf's existing scroll/parallax transform without hiding,
         // remeasuring or rebuilding the visible book between animation frames.
         const source = trigger.getBoundingClientRect(), frame = world.getBoundingClientRect();
-        geometry = {
-            sx: (source.left + source.width / 2 - frame.left) / viewportScale,
-            sy: (source.top + source.height / 2 - frame.top) / viewportScale,
-            dx: coverGeometry.dx, dy: coverGeometry.dy,
-            start: source.height / (coverGeometry.height * viewportScale)
-        };
-        pivot.style.transformOrigin = `${geometry.dx}px ${geometry.dy}px`;
-        carrier.style.transform = flightFrames()[0].transform;
-        pivot.style.transform = turnFrames()[0].transform;
+        geometry = sourceGeometry(source, frame);
+        placeShelf();
     }
     function queuePosition() {
         resizeWorld();

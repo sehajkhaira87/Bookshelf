@@ -156,7 +156,8 @@ export function createCreatorsBook(root, assets) {
     const copy=workParagraphs.map((_,index)=>minimumJerk(phase(showcase,.65+index*.07,.96+index*.04)));
     const engineProgress=reveal*(1+side)/2;
     return {
-      camera:`translate3d(${-side*85*zoom*focus}px,${-12*focus}px,0) scale(${zoom})`,
+      // Keep the complete spread centered as either author's details come forward.
+      camera:`translate3d(${-4*(1-open)}px,${-31-5*open}px,0) scale(${zoom})`,
       paper:`translate3d(${425*backFocus}px,${5*backFocus}px,${.4+26*front-14*backFocus}px) rotateY(-180deg)`,
       binding:`translate3d(0,0,${4.7+22*front+26*backFocus}px)`,
       backend:`translate3d(${-425*withdraw}px,${5*withdraw-8*retreat}px,${.5+4*open+26*backFocus-3*withdraw}px) rotateY(${-2*retreat}deg) rotateZ(${-0.85*withdraw-.6*retreat}deg)`,
