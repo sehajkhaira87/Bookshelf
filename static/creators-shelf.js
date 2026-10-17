@@ -11,6 +11,7 @@
     const home = document.querySelector('.page1');
     const homeStatus = document.getElementById('after-hours-status');
     const flightMs = 3300;
+    const shelfTilt = -14;
     let reader, world, carrier, pivot, shade, glow, status, returnButton, authorRoot, authorScreen, engine;
     let loading, ticket = 0, phaseName = 'day', returning = false, geometry, coverGeometry, shelfProjection, viewportScale = 1;
     let animations = [], unlockPage = null, lastFocused = null;
@@ -130,6 +131,9 @@
     }
 
     function placeShelf() {
+        const source = trigger.getBoundingClientRect();
+        const artwork = trigger.closest('.hero-image').getBoundingClientRect();
+        reader.style.setProperty('--creators-shelf-floor', `${source.bottom + .3 * artwork.height / 1100}px`);
         pivot.style.transformOrigin = `${coverGeometry.pivotX}px ${coverGeometry.pivotY}px`;
         carrier.style.transform = flightFrames()[0].transform;
         pivot.style.transform = turnFrames()[0].transform;
@@ -167,7 +171,9 @@
         return Array.from({ length: 121 }, (_, index) => {
             const offset = index/120, t = reverse ? 1-offset : offset;
             const turn = smooth(phase(t,.18,.96)), lift = Math.sin(Math.PI*smooth(t));
-            return { offset, transform: `rotateY(${86*(1-turn)}deg) rotateX(${-3.2*(1-turn)-4*lift}deg) rotateZ(${.6*(1-turn)-1.8*lift}deg)` };
+            // Match the shelf's receding depth, then gently level the book as it
+            // comes forward. The return uses the exact same pose in reverse.
+            return { offset, transform: `rotateX(${shelfTilt*(1-turn)}deg) rotateY(${86*(1-turn)}deg) rotateX(${-3.2*(1-turn)-4*lift}deg) rotateZ(${.6*(1-turn)-1.8*lift}deg)` };
         });
     }
 
