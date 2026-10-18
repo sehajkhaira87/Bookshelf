@@ -1460,31 +1460,71 @@ body.mobile-exit {
         margin: 0 !important;
     }
 
-    /*  8. NAVIGATION DOTS                        */
-    
-    .feature-dots { 
-        position: relative; 
-        margin-top: 22px !important; 
-        display: flex !important; 
-        justify-content: center; 
-        align-items: center;
-        gap: 8px; 
+    /*  8. SLIDING FEATURE BAR                    */
+
+    .feature-dots {
+        position: relative;
+        width: 88px;
+        height: 44px;
+        margin: 3px auto 0 !important;
+        display: block !important;
+        touch-action: none;
     }
-    
-    .f-dot { 
-        width: 6px; 
-        height: 6px; 
-        border-radius: 50%; 
-        background: rgba(30,26,23,.18); 
-        transition: all .4s cubic-bezier(0.2, 0.8, 0.2, 1) !important; 
-        cursor: pointer;
+
+    .f-dot {
+        position: absolute;
+        top: 19px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: rgba(30,26,23,.18);
+        transform: translateX(-50%);
+        pointer-events: none;
     }
-    
-    .f-dot.is-active { 
-        width: 22px; 
-        border-radius: 99px; 
-        background: #1E1A17; 
+
+    .f-dot:nth-child(1) { left: 11px; }
+    .f-dot:nth-child(2) { left: 33px; }
+    .f-dot:nth-child(3) { left: 55px; }
+    .f-dot:nth-child(4) { left: 77px; }
+
+    .feature-dot-indicator {
+        position: absolute;
+        left: 0;
+        top: 19px;
+        width: 22px;
+        height: 6px;
+        border-radius: 99px;
+        background: #1E1A17;
+        transform: translate3d(var(--feature-bar-x, 0px), 0, 0);
+        pointer-events: none;
     }
+
+    .feature-selector {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 44px;
+        margin: 0;
+        opacity: 0;
+        touch-action: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .feature-dots:has(.feature-selector:focus-visible) {
+        outline: 2px solid #9C7A58;
+        outline-offset: 3px;
+        border-radius: 12px;
+    }
+
+    .feature-dot-status {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
 
     /*  9. KEYFRAMES                              */
     

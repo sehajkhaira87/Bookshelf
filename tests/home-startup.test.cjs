@@ -3,7 +3,6 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const bootstrap = fs.readFileSync(require.resolve('../static/home-bootstrap.js'), 'utf8');
-const mobileScript = fs.readFileSync(require.resolve('../static/mobile-home.js'), 'utf8');
 const flush = () => new Promise(setImmediate);
 
 function mediaQuery(matches) {
@@ -189,31 +188,170 @@ test('a failed optional desktop library cannot leave the page trapped in a loade
     assert.equal(home.loaderRemoved, true);
 });
 
-function element() {
-    const classes = new Set(), listeners = {};
-    return { classes, listeners, classList: { toggle(name, active) { if (active) classes.add(name); else classes.delete(name); } },
-        addEventListener(type, fn) { listeners[type] = fn; }, setPointerCapture() {} };
-}
-test('mobile cards respond to dots and horizontal swipes, ignoring taps, vertical motion and cancellation', () => {
-    const cards = Array.from({ length: 4 }, element), dots = Array.from({ length: 4 }, element);
-    const track = element(), media = mediaQuery(true);
-    track.querySelectorAll = () => cards;
-    vm.runInNewContext(mobileScript, {
-        window: { matchMedia: () => media },
-        document: { getElementById: () => track, querySelectorAll: () => dots }
+const source = fs.readFileSync(require.resolve('../static/mobile-home.js'), 'utf8');
+
+function setup({ reduced = false } = {}) {
+    let now = 0, nextFrame = 0;
+    const frames = new Map();
+    function element() {
+        const classes = new Set(), attributes = {}, events = {}, properties = {};
+        let captured;
+        return {
+            classes, attributes, events, properties, textContent: '',
+            classList: { toggle(name, value) { value ? classes.add(name) : classes.delete(name); } },
+            style: { setProperty(name, value) { properties[name] = value; } },
+            addEventListener(type, fn) { (events[type] ||= []).push(fn); },
+            setAttribute(name, value) { attributes[name] = value; },
+            removeAttribute(name) { delete attributes[name]; },
+            setPointerCapture(id) { captured = id; },
+            hasPointerCapture(id) { return captured === id; },
+            releasePointerCapture() { captured = undefined; },
+            getBoundingClientRect: () => ({ left: 100, width: 88 }),
+            fire(type, values = {}) {
+                const event = { isPrimary: true, button: 0, pointerId: 1, clientX: 111, clientY: 700,
+                    preventDefault() {}, ...values };
+                for (const fn of events[type] || []) fn(event);
+            }
+        };
+    }
+    function media(matches) {
+        return { ...element(), matches, change(matches) { this.matches = matches; this.fire('change'); } };
+    }
+    const mobile = media(true), reducedMotion = media(reduced);
+    const track = element(), rail = element(), selector = element(), status = element();
+    rail.querySelectorAll = () => [];
+    rail.append = () => {};
+    const cards = ['All in One Place', 'Save Your Time', 'Trusted Content', 'Made for You'].map(title => {
+        const card = element(); card.querySelector = () => ({ textContent: title }); return card;
     });
+    track.querySelectorAll = () => cards;
+    const nodes = { featuresTrack: track, featureDots: rail };
+    let spans = 0;
+    const document = { ...element(), hidden: false, getElementById: id => nodes[id],
+        createElement: tag => tag === 'input' ? selector : ++spans === 1 ? element() : status };
+    const window = { ...element(), matchMedia: query => query.includes('reduced-motion') ? reducedMotion : mobile };
+    vm.runInNewContext(source, {
+        document, window,
+        requestAnimationFrame(fn) { const id = ++nextFrame; frames.set(id, fn); return id; },
+        cancelAnimationFrame(id) { frames.delete(id); }
+    });
+    function advance(ms) {
+        const end = now + ms;
+        while (now < end) {
+            now += Math.min(1000 / 60, end - now);
+            const callbacks = [...frames.values()]; frames.clear();
+            callbacks.forEach(fn => fn(now));
+        }
+    }
     const active = () => cards.findIndex(card => card.classes.has('card-active'));
-    const swipe = (dx, dy, cancel = false) => {
-        track.listeners.pointerdown({ isPrimary: true, button: 0, pointerId: 1, clientX: 200, clientY: 500 });
-        if (cancel) track.listeners.pointercancel();
-        track.listeners.pointerup({ pointerId: 1, clientX: 200 + dx, clientY: 500 + dy });
+    const position = () => Number.parseFloat(rail.properties['--feature-bar-x']);
+    const tap = index => {
+        const point = { clientX: 111 + 22 * index };
+        selector.fire('pointerdown', point); selector.fire('pointerup', point);
     };
-    assert.equal(active(), 0);
-    dots[2].listeners.click(); assert.equal(active(), 2);
-    swipe(-100, 0); assert.equal(active(), 3);
-    swipe(-100, 0); assert.equal(active(), 0);
-    swipe(100, 0); assert.equal(active(), 3);
-    swipe(4, 0); swipe(0, 100); swipe(-100, 0, true);
-    assert.equal(active(), 3);
-    media.change(false); swipe(-100, 0); assert.equal(active(), 3);
+    const swipe = (dx, dy = 0, cancel = false) => {
+        track.fire('pointerdown', { clientX: 200, clientY: 500 });
+        if (cancel) track.fire('pointercancel');
+        track.fire('pointerup', { clientX: 200 + dx, clientY: 500 + dy });
+    };
+    return { track, rail, selector, status, cards, document, window, mobile, reducedMotion, frames, active, position, tap, swipe, advance };
+}
+
+test('cards retain horizontal swipe thresholds, wrapping, and cancellation', () => {
+    const ui = setup();
+    assert.equal(ui.active(), 0);
+    ui.swipe(-100); assert.equal(ui.active(), 1);
+    ui.swipe(100); assert.equal(ui.active(), 0);
+    ui.swipe(100); assert.equal(ui.active(), 3);
+    ui.swipe(-100); assert.equal(ui.active(), 0);
+    ui.swipe(4); ui.swipe(0, 100); ui.swipe(-100, 0, true);
+    assert.equal(ui.active(), 0);
+    assert.ok(ui.cards[1].classes.has('card-next'));
+});
+
+test('tapping changes the card as before while the indicator glides and stops at rest', () => {
+    const ui = setup();
+    ui.tap(2);
+    assert.equal(ui.active(), 2);
+    assert.equal(ui.position(), 0, 'the bar must not jump to the destination');
+    ui.advance(220);
+    assert.ok(ui.position() > 0 && ui.position() < 44);
+    ui.advance(1600);
+    assert.equal(ui.position(), 44);
+    assert.equal(ui.status.textContent, 'Trusted Content');
+    assert.equal(ui.frames.size, 0, 'no idle animation loop');
+});
+
+test('dragging moves only the indicator until release and clamps at the ends', () => {
+    const ui = setup();
+    ui.selector.fire('pointerdown');
+    ui.selector.fire('pointermove', { clientX: 159 });
+    ui.advance(200);
+    assert.ok(ui.position() > 0);
+    assert.equal(ui.active(), 0, 'dragging the bar must not move or replace a card');
+    ui.selector.fire('pointerup', { clientX: 159 });
+    assert.equal(ui.active(), 2);
+    ui.advance(1600); assert.equal(ui.position(), 44);
+    ui.selector.fire('pointerdown', { clientX: 155 });
+    ui.selector.fire('pointermove', { clientX: 900 });
+    ui.selector.fire('pointerup', { clientX: 900 });
+    ui.advance(1600);
+    assert.equal(ui.active(), 3); assert.equal(ui.position(), 66);
+});
+
+test('bar cancellation and lost capture restore the selected card and indicator', () => {
+    for (const reason of ['pointercancel', 'lostpointercapture']) {
+        const ui = setup();
+        ui.selector.fire('pointerdown');
+        ui.selector.fire('pointermove', { clientX: 177 });
+        ui.advance(150);
+        ui.selector.fire(reason);
+        ui.advance(1600);
+        assert.equal(ui.active(), 0); assert.equal(ui.position(), 0);
+        assert.equal(ui.frames.size, 0);
+    }
+});
+
+test('a new tap retargets from the current position without jumping', () => {
+    const ui = setup();
+    ui.tap(3); ui.advance(180);
+    const before = ui.position();
+    ui.tap(1); assert.equal(ui.position(), before);
+    ui.advance(1600);
+    assert.equal(ui.active(), 1); assert.equal(ui.position(), 22);
+});
+
+test('keyboard selection stays bounded and reduced motion schedules no animation', () => {
+    const ui = setup({ reduced: true });
+    ui.selector.fire('keydown', { key: 'End' });
+    assert.equal(ui.active(), 3); assert.equal(ui.position(), 66);
+    ui.selector.fire('keydown', { key: 'ArrowRight' });
+    assert.equal(ui.active(), 3);
+    ui.selector.fire('keydown', { key: 'Home' });
+    ui.selector.fire('keydown', { key: 'ArrowRight' });
+    assert.equal(ui.active(), 1); assert.equal(ui.position(), 22);
+    assert.equal(ui.selector.attributes['aria-valuetext'], 'Save Your Time');
+    assert.equal(ui.frames.size, 0);
+});
+
+test('leaving mobile restores all desktop cards and cancels motion', () => {
+    const ui = setup();
+    ui.tap(2); ui.advance(120); ui.mobile.change(false);
+    assert.equal(ui.frames.size, 0);
+    assert.ok(ui.cards.every(card => !('aria-hidden' in card.attributes)));
+    ui.swipe(-100); ui.tap(1); assert.equal(ui.active(), 2);
+    ui.mobile.change(true);
+    assert.equal(ui.position(), 44);
+    assert.equal(ui.cards[2].attributes['aria-hidden'], 'false');
+});
+
+test('backgrounding or enabling reduced motion stops a running glide', () => {
+    for (const reason of ['hidden', 'reduced']) {
+        const ui = setup();
+        ui.tap(3); ui.advance(100);
+        if (reason === 'hidden') { ui.document.hidden = true; ui.document.fire('visibilitychange'); }
+        else ui.reducedMotion.change(true);
+        assert.equal(ui.position(), 66);
+        assert.equal(ui.frames.size, 0);
+    }
 });
