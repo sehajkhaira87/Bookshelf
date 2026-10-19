@@ -849,6 +849,29 @@ body.mobile-exit {
     display: block;
 }
 
+/* Static college branding, scoped to the second-page header. */
+.page2-navbar .p2nav-logo-divider {
+    position: absolute;
+    left: 51px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 30px;
+    background: rgba(36,27,18,.16);
+}
+
+.page2-navbar .p2nav-college-logo {
+    position: absolute;
+    left: 64px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 74px;
+    height: 74px;
+    object-fit: contain;
+    display: block;
+}
+
+
 .p2nav-links {
     display: flex;
     align-items: center;
