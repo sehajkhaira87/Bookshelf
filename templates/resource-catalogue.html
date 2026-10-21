@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from '_contributor_badge.html' import contributor_badge %}
+{% from 'contributor-badge.html' import contributor_badge %}
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='books.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='resource-catalogue.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='contributor-badges.css') }}">
-    {% include '_site_effects.html' %}
+    {% include 'site-effects.html' %}
 </head>
 <body>
 <div class="page-wrapper">
@@ -59,6 +59,6 @@
     </div></nav>
     {% endif %}
 </div>
-{% include '_student_activity.html' %}
+{% include 'student-activity.html' %}
 </body>
 </html>

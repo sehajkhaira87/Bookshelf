@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% from '_contributor_badge.html' import contributor_badge %}
+{% from 'contributor-badge.html' import contributor_badge %}
 <html lang="en">
 <head>
     
@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='contributor-badges.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='notifications.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='roles.css') }}">
-    {% include '_site_appearance.html' %}
-    {% include '_site_effects.html' %}
+    {% include 'site-appearance.html' %}
+    {% include 'site-effects.html' %}
     <link rel="stylesheet" href="{{ url_for('static', filename='mobile-dashboard-dock.css') }}">
 </head>
 
@@ -368,6 +368,6 @@
     </script>
 
     
-{% include '_student_activity.html' %}
+{% include 'student-activity.html' %}
 </body>
 </html>

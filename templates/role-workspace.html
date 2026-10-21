@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
     {% block role_styles %}{% endblock %}
     <link rel="stylesheet" href="{{ url_for('static', filename='role-workspace.css') }}">
-    {% include '_site_effects.html' %}
+    {% include 'site-effects.html' %}
 </head>
 {% set workspace_admin = workspace_admin|default(false) %}
 {% set accessible_workspace_roles = [workspace_role] if workspace_admin else (assigned_workspace_roles|default([workspace_role])) %}
