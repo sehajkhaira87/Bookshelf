@@ -517,6 +517,59 @@ body.dark-mode .pyq-archive-card { background: #30251a; color: #f4efe3; border-c
     transition: opacity 0.3s ease;
 }
 
+/* The artwork inside the existing Bookshelf image is 52px tall. */
+.dashboard-page .sidebar-header {
+    position: relative;
+}
+
+.dashboard-page .dashboard-logo-divider {
+    position: absolute;
+    left: 72px;
+    top: 28px;
+    width: 1px;
+    height: 32px;
+    background: rgba(245, 239, 228, 0.18);
+}
+
+.dashboard-page .dashboard-college-logo {
+    position: absolute;
+    left: 86px;
+    top: 18px;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.dashboard-page .dashboard-college-logo:focus-visible {
+    outline: 2px solid #d6bd91;
+    outline-offset: 7px;
+    border-radius: 50%;
+}
+
+.dashboard-page .college-pencil,
+.dashboard-page .college-canvas {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.dashboard-page .college-canvas,
+.dashboard-page .dashboard-college-logo.is-ready .college-pencil {
+    opacity: 0;
+}
+
+.dashboard-page .dashboard-college-logo.is-ready .college-canvas {
+    opacity: 1;
+}
+
 
 .onboarding-overlay {
     position: fixed;

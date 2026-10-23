@@ -106,6 +106,14 @@
         <aside class="sidebar">
            <div class="sidebar-header">
                 <img src="{{ url_for('static', filename='images/logo.svg') }}" class="brand-logo" alt="Bookshelf Logo">
+                <span class="dashboard-logo-divider" aria-hidden="true"></span>
+                <button class="dashboard-college-logo" type="button"
+                        aria-label="Guru Nanak Dev Engineering College — reveal original colours"
+                        aria-pressed="false" data-state="pencil"
+                        data-colour-src="{{ url_for('static', filename='images/gndec-logo.png') }}">
+                    <img class="college-pencil" src="{{ url_for('static', filename='images/gndec-pencil.png') }}" width="52" height="52" alt="" loading="lazy" decoding="async">
+                    <canvas class="college-canvas" width="256" height="256" aria-hidden="true"></canvas>
+                </button>
             </div>
             <div class="mobile-dock-indicator" aria-hidden="true"></div>
             <div class="mobile-dock-destination" aria-hidden="true"><span>Overview</span></div>
@@ -338,6 +346,7 @@
     </div>
     
     <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+    <script src="{{ url_for('static', filename='dashboard-college-logo.js') }}"></script>
     <script src="{{ url_for('static', filename='mobile-dashboard-dock.js') }}"></script>
     <script src="{{ url_for('static', filename='notifications.js') }}"></script>
 
