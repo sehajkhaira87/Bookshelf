@@ -196,7 +196,20 @@
         <main class="main-content">
             
             <header class="top-header">
-                <div>
+                <div class="mobile-dashboard-branding" aria-label="Bookshelf and GNDEC">
+                    <span class="mobile-bookshelf-frame">
+                        <img class="mobile-bookshelf-logo" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf">
+                    </span>
+                    <span class="mobile-logo-divider" aria-hidden="true"></span>
+                    <button class="dashboard-college-logo" type="button" data-mobile-logo
+                            aria-label="Guru Nanak Dev Engineering College — tap to reveal original colours"
+                            aria-pressed="false" data-state="pencil"
+                            data-colour-src="{{ url_for('static', filename='images/gndec-logo.png') }}">
+                        <img class="college-pencil" src="{{ url_for('static', filename='images/gndec-pencil.png') }}" width="44" height="44" alt="" loading="lazy" decoding="async">
+                        <canvas class="college-canvas" width="256" height="256" aria-hidden="true"></canvas>
+                    </button>
+                </div>
+                <div class="dashboard-greeting">
                     <h1>{{ site_appearance.dashboard_title or ('Welcome back, ' ~ display_name.split(' ')[0]) }}</h1>
                     <p class="subtitle" id="instruction-text">{{ site_appearance.dashboard_subtitle }}</p>
                 </div>

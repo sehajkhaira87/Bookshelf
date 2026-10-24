@@ -1,14 +1,13 @@
 /* Refined pencil artwork with the approved, reversible colour bloom. */
-(() => {
-    const button = document.querySelector('.dashboard-college-logo');
-    if (!button) return;
+document.querySelectorAll('.dashboard-college-logo').forEach(button => {
 
     const canvas = button.querySelector('.college-canvas');
     const pencilImage = button.querySelector('.college-pencil');
     const ctx = canvas.getContext('2d');
     if (!ctx) return; // The static pencil image remains visible without canvas.
 
-    const desktop = window.matchMedia('(min-width: 821px)');
+    const mobile = button.hasAttribute('data-mobile-logo');
+    const viewport = window.matchMedia(mobile ? '(max-width: 820px)' : '(min-width: 821px)');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     const size = canvas.width;
     const durationMs = 2400;
@@ -95,19 +94,30 @@
     }
 
     function update() {
-        target = desktop.matches && (hovered || focused || pinned) ? 1 : 0;
+        target = viewport.matches && (hovered || focused || pinned) ? 1 : 0;
         button.setAttribute('aria-pressed', String(pinned));
         if (!ready) return;
-        if (reduced.matches || document.hidden || !desktop.matches) { stop(); finish(); return; }
+        if (reduced.matches || document.hidden || !viewport.matches) { stop(); finish(); return; }
         if (Math.abs(target - progress) < .0001 && Math.abs(velocity) < .002) { finish(); return; }
         button.dataset.state = target ? 'revealing' : 'restoring';
         if (frame === null) frame = requestAnimationFrame(tick);
     }
 
-    function prepare() {
-        if (ready || !desktop.matches || !pencilImage.naturalWidth || !colourImage.naturalWidth) return;
-        originalCtx.drawImage(colourImage, 0, 0, size, size);
+    function drawPencil() {
+        pencilCtx.clearRect(0, 0, size, size);
         pencilCtx.drawImage(pencilImage, 0, 0, size, size);
+        if (mobile) {
+            pencilCtx.globalCompositeOperation = 'source-in';
+            pencilCtx.fillStyle = getComputedStyle(button).getPropertyValue('--college-pencil-ink').trim() || '#514237';
+            pencilCtx.fillRect(0, 0, size, size);
+            pencilCtx.globalCompositeOperation = 'source-over';
+        }
+    }
+
+    function prepare() {
+        if (ready || !viewport.matches || !pencilImage.naturalWidth || !colourImage.naturalWidth) return;
+        originalCtx.drawImage(colourImage, 0, 0, size, size);
+        drawPencil();
         ready = true;
         paint();
         button.classList.add('is-ready');
@@ -115,7 +125,7 @@
     }
 
     function initialize() {
-        if (!desktop.matches) return;
+        if (!viewport.matches) return;
         if (!requested) {
             requested = true;
             colourImage.src = button.dataset.colourSrc;
@@ -150,13 +160,18 @@
         if (document.hidden) { hovered = focused = false; update(); }
     });
     reduced.addEventListener('change', update);
-    desktop.addEventListener('change', () => {
-        if (desktop.matches) initialize();
+    viewport.addEventListener('change', () => {
+        if (viewport.matches) initialize();
         else hovered = focused = pinned = false;
         update();
     });
     pencilImage.addEventListener('load', prepare);
     colourImage.addEventListener('load', prepare);
     colourImage.addEventListener('error', () => { button.dataset.state = 'unavailable'; });
+    if (mobile) {
+        new MutationObserver(() => {
+            if (ready) { drawPencil(); paint(); }
+        }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
     initialize();
-})();
+});

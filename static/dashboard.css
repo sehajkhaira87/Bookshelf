@@ -570,6 +570,14 @@ body.dark-mode .pyq-archive-card { background: #30251a; color: #f4efe3; border-c
     opacity: 1;
 }
 
+.mobile-dashboard-branding {
+    display: none;
+}
+
+.dashboard-greeting {
+    min-width: 0;
+}
+
 
 .onboarding-overlay {
     position: fixed;
@@ -954,6 +962,100 @@ body.dark-mode .category-card.selected {
 
     .top-header {
         margin-bottom: 32px !important;
+    }
+
+    /* Approved mobile header: paired logos, profile controls, then the greeting. */
+    .dashboard-page .top-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        column-gap: 16px;
+        row-gap: 30px;
+        align-items: center;
+    }
+
+    .dashboard-page .mobile-dashboard-branding {
+        --mobile-brand-size: 44px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        grid-column: 1;
+        grid-row: 1;
+        min-height: 48px;
+    }
+
+    .dashboard-page .mobile-bookshelf-frame {
+        position: relative;
+        display: block;
+        flex: none;
+        width: calc(var(--mobile-brand-size) * .846153846);
+        height: var(--mobile-brand-size);
+        overflow: hidden;
+    }
+
+    .dashboard-page .mobile-bookshelf-logo {
+        position: absolute;
+        display: block;
+        width: calc(var(--mobile-brand-size) * 1.442307692);
+        max-width: none;
+        height: auto;
+        left: calc(var(--mobile-brand-size) * -.269230769);
+        top: calc(var(--mobile-brand-size) * -.346153846);
+        filter: brightness(0);
+        opacity: .85;
+    }
+
+    .dashboard-page .mobile-logo-divider {
+        flex: none;
+        width: 1px;
+        height: 28px;
+        background: rgba(81, 66, 55, .2);
+    }
+
+    .dashboard-page .mobile-dashboard-branding .dashboard-college-logo {
+        position: relative;
+        flex: none;
+        left: auto;
+        top: auto;
+        width: var(--mobile-brand-size);
+        height: var(--mobile-brand-size);
+        --college-pencil-ink: #514237;
+    }
+
+    .dashboard-page .mobile-dashboard-branding .college-pencil {
+        filter: brightness(0);
+        opacity: .72;
+    }
+
+    .dashboard-page .mobile-dashboard-branding .is-ready .college-pencil {
+        opacity: 0;
+    }
+
+    .dashboard-page .mobile-dashboard-branding .dashboard-college-logo:focus-visible {
+        outline-color: #8c654a;
+        outline-offset: 5px;
+    }
+
+    .dashboard-page .top-header .dashboard-greeting {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+
+    .dashboard-page .top-header .user-profile {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    body.dark-mode .mobile-bookshelf-logo,
+    body.dark-mode .mobile-dashboard-branding .college-pencil {
+        filter: brightness(0) invert(1);
+    }
+
+    body.dark-mode .mobile-logo-divider {
+        background: rgba(245, 239, 228, .18);
+    }
+
+    body.dark-mode .mobile-dashboard-branding .dashboard-college-logo {
+        --college-pencil-ink: #fff;
     }
 
     .top-header h1 { font-size: 26px !important; }
