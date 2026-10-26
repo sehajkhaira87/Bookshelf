@@ -54,8 +54,8 @@
         transform: translateY(1px);
     }
 
-    .dashboard-page .sidebar.mobile-dock-ready.dock-holding .dock-candidate {
-        transform: translateY(-2px);
+    .dashboard-page .sidebar.mobile-dock-ready.dock-holding .nav-item:active {
+        transform: none;
     }
 
     .dashboard-page .sidebar.mobile-dock-ready.dock-holding {
@@ -98,7 +98,8 @@
         transform-origin: center;
     }
 
-    .mobile-dock-ready.dock-moving .mobile-dock-indicator {
+    .mobile-dock-ready.dock-moving .mobile-dock-indicator,
+    .mobile-dock-ready.dock-holding .mobile-dock-indicator {
         will-change: transform;
     }
 
@@ -128,13 +129,16 @@
     }
 
     .mobile-dock-ready .mobile-dock-destination {
+        /* Translate uses the bubble's own width, so labels need no JS measurements. */
+        --dock-bubble-shift: clamp(calc(4px - var(--dock-bubble-x, 0px)), -50%, calc(var(--dock-width, 0px) - var(--dock-bubble-x, 0px) - 100% - 4px));
         display: block;
         position: absolute;
         bottom: calc(100% + 13px);
-        left: 0;
+        left: var(--dock-bubble-x, 0px);
         z-index: 3;
-        transform: translateX(-50%) translateY(6px) scale(.97);
-        opacity: 0;
+        /* Share the glass lift's motion clock instead of starting a second easing. */
+        transform: translate3d(var(--dock-bubble-shift), calc((1 - var(--dock-hold-progress, 0)) * 6px), 0);
+        opacity: var(--dock-hold-progress, 0);
         padding: 9px 14px;
         border-radius: 14px;
         border: 1px solid rgba(255, 252, 242, .85);
@@ -144,14 +148,9 @@
         font-weight: 500;
         line-height: 1.2;
         white-space: nowrap;
+        max-width: calc(100% - 8px);
         box-shadow: 0 7px 20px rgba(39, 29, 17, .11), inset 0 1px 0 rgba(255, 254, 247, .9);
         pointer-events: none;
-        transition: opacity 170ms ease, transform 260ms cubic-bezier(.22, .8, .3, 1);
-    }
-
-    .mobile-dock-ready.dock-holding .mobile-dock-destination {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0) scale(1);
     }
 
     .mobile-dock-ready .mobile-dock-status {
@@ -169,12 +168,14 @@
         background: #2a2117;
         border-color: rgba(255, 246, 228, .13);
         box-shadow: 0 12px 30px rgba(26, 19, 13, .22);
-        transition: opacity 220ms ease, visibility 220ms ease;
+        transition: opacity 220ms ease, visibility 220ms ease, transform 220ms cubic-bezier(.22, .8, .3, 1);
+        transform: translateY(0) !important;
         visibility: visible;
     }
 
     .dashboard-page .sidebar.mobile-dock-ready .settings-popup.hidden {
         visibility: hidden;
+        transform: translateY(4px) !important;
     }
 
     @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -185,8 +186,9 @@
         }
         .mobile-dock-ready .mobile-dock-indicator {
             background: linear-gradient(150deg, rgba(249, 242, 228, .97), rgba(235, 221, 196, .88) 70%, rgba(221, 205, 176, .85));
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            /* The dock already frosts the scene; a second moving blur is costly on phones. */
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
         }
     }
 

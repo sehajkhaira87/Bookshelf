@@ -13,27 +13,34 @@
     const mobile = window.matchMedia('(max-width: 820px)');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     const overview = Math.max(0, items.findIndex(item => item.classList.contains('active')));
-    let selected = overview, candidate = overview, enabled = false, points = [];
-    let x = 0, y = 0, vx = 0, vy = 0, targetX = 0, targetY = 0;
-    let width = 0, height = 0, frame = null, lastTime = 0, tapMotion = null;
+    let selected = overview, enabled = false, points = [];
+    let x = 0, y = 0, vx = 0, vy = 0, ax = 0, ay = 0;
+    let lift = 0, liftVelocity = 0, liftAcceleration = 0;
+    let width = 0, height = 0, frame = null, lastTime = 0, motion = null, follow = null;
     let gesture = null, holdTimer = null, holding = false, activation = null;
     let passClick = false, suppressClickUntil = 0, measuredWidth = 0, measuredHeight = 0;
+    let bounds = null, logoutBounds = null, minX = 0, maxX = 0, minY = 0, maxY = 0;
+    let dragCandidate = overview, hinted = -1, colours = [];
+    const inactive = [225, 216, 202], active = [53, 41, 27];
+    const labels = items.map(item => (item.querySelector('.nav-label-mobile') || item.querySelector('span')).textContent.trim());
 
     function label(index) {
-        const item = items[index];
-        return (item.querySelector('.nav-label-mobile') || item.querySelector('span')).textContent.trim();
+        return labels[index];
     }
 
     function paint() {
-        const stretch = holding ? Math.min(.025, Math.hypot(vx, vy) * .00004) : 0;
-        indicator.style.transform = `translate3d(${x}px,${y - (holding ? 2 : 0)}px,0) scale(${1 + stretch},${holding ? 1.02 : 1})`;
-        indicator.style.setProperty('--dock-sheen', Math.max(-16, Math.min(16, vx * .025)) + '%');
+        indicator.style.transform = `translate3d(${x}px,${y - lift}px,0)`;
+        indicator.style.setProperty('--dock-sheen', Math.max(-12, Math.min(12, vx * .012)) + '%');
+        dock.style.setProperty('--dock-hold-progress', Math.max(0, Math.min(1, lift / 2)));
         points.forEach((point, index) => {
             const overlapX = Math.max(0, Math.min(x + width, point.x + point.width) - Math.max(x, point.x));
             const overlapY = Math.max(0, Math.min(y + height, point.y + point.height) - Math.max(y, point.y));
             const coverage = Math.min(1, overlapX * overlapY / (point.width * point.height * .85));
-            const inactive = [225, 216, 202], active = [53, 41, 27];
-            items[index].style.setProperty('--dock-label-color', `rgb(${inactive.map((value, i) => Math.round(value + (active[i] - value) * coverage)).join(',')})`);
+            const colour = `rgb(${inactive.map((value, i) => Math.round(value + (active[i] - value) * coverage)).join(',')})`;
+            if (colours[index] !== colour) {
+                items[index].style.setProperty('--dock-label-color', colour);
+                colours[index] = colour;
+            }
         });
     }
 
@@ -44,67 +51,160 @@
         action?.();
     }
 
+    // One curve controls position, lift and the hint. Glides land with zero
+    // velocity and acceleration; an interrupted glide retains its current motion.
+    function curve(from, velocity, acceleration, to, milliseconds) {
+        const seconds = milliseconds / 1000, distance = to - from;
+        const v = velocity * seconds, a = acceleration * seconds * seconds;
+        return [from, v, a / 2, 10 * distance - 6 * v - 1.5 * a,
+            -15 * distance + 8 * v + 1.5 * a, 6 * distance - 3 * v - .5 * a];
+    }
+
+    function sample(c, t, milliseconds) {
+        const seconds = milliseconds / 1000;
+        return {
+            position: c[0] + t * (c[1] + t * (c[2] + t * (c[3] + t * (c[4] + t * c[5])))),
+            velocity: (c[1] + t * (2 * c[2] + t * (3 * c[3] + t * (4 * c[4] + t * 5 * c[5])))) / seconds,
+            acceleration: (2 * c[2] + t * (6 * c[3] + t * (12 * c[4] + t * 20 * c[5]))) / (seconds * seconds)
+        };
+    }
+
+    function wake() {
+        dock.classList.add('dock-moving');
+        if (frame === null) frame = requestAnimationFrame(tick);
+    }
+
+    function landingVelocity(from, velocity, to, milliseconds) {
+        const distance = to - from, direction = Math.sign(distance);
+        // Keep release momentum directed toward the selected cell, with a
+        // monotonic landing even after a fast flick at the edge of the dock.
+        return direction * Math.min(Math.max(0, direction * velocity), 2.5 * Math.abs(distance) / (milliseconds / 1000));
+    }
+
     function tick(time) {
         frame = null;
-        if (tapMotion) {
-            if (tapMotion.started === null) tapMotion.started = time;
-            const t = Math.min(1, (time - tapMotion.started) / 620);
-            const eased = t * t * t * (10 + t * (-15 + 6 * t));
-            targetX = tapMotion.x + (tapMotion.toX - tapMotion.x) * eased;
-            targetY = tapMotion.y + (tapMotion.toY - tapMotion.y) * eased;
-            if (t === 1) tapMotion = null;
+        if (follow) {
+            const previousX = x, previousY = y;
+            const t = follow.duration ? Math.min(1, (time - follow.started) / follow.duration) : 1;
+            if (t < 1) {
+                const horizontal = sample(follow.x, t, follow.duration);
+                const vertical = sample(follow.y, t, follow.duration);
+                const raised = sample(follow.lift, t, follow.duration);
+                x = follow.targetX + horizontal.position; y = follow.targetY + vertical.position;
+                ax = horizontal.acceleration; ay = vertical.acceleration;
+                lift = raised.position; liftVelocity = raised.velocity; liftAcceleration = raised.acceleration;
+            } else {
+                // After the short handoff, input follows the finger in one frame.
+                x = follow.targetX; y = follow.targetY; lift = 2;
+                ax = ay = liftVelocity = liftAcceleration = 0;
+                follow.duration = 0;
+            }
+            const dt = Math.max(.001, (time - (lastTime || time - 16.7)) / 1000);
+            vx = (x - previousX) / dt; vy = (y - previousY) / dt;
+            lastTime = time;
+            hint(dragCandidate);
+            paint();
+            if (t < 1) wake();
+            else dock.classList.remove('dock-moving');
+            return;
         }
-        const dt = Math.min((time - (lastTime || time - 16.7)) / 1000, .032);
-        lastTime = time;
-        const stiffness = (5.5 / .28) ** 2, damping = 2 * Math.sqrt(stiffness) * .88;
-        const steps = Math.ceil(dt / .008), step = dt / steps;
-        for (let i = 0; i < steps; i++) {
-            vx += (stiffness * (targetX - x) - damping * vx) * step;
-            vy += (stiffness * (targetY - y) - damping * vy) * step;
-            x += vx * step;
-            y += vy * step;
-        }
-        paint();
-        if (tapMotion || Math.hypot(targetX - x, targetY - y) > .15 || Math.hypot(vx, vy) > 2) {
-            frame = requestAnimationFrame(tick);
+        if (!motion) return;
+        const t = Math.min(1, (time - motion.started) / motion.duration);
+        if (t < 1) {
+            const horizontal = sample(motion.x, t, motion.duration);
+            const vertical = sample(motion.y, t, motion.duration);
+            const raised = sample(motion.lift, t, motion.duration);
+            x = horizontal.position; vx = horizontal.velocity; ax = horizontal.acceleration;
+            y = vertical.position; vy = vertical.velocity; ay = vertical.acceleration;
+            lift = raised.position; liftVelocity = raised.velocity; liftAcceleration = raised.acceleration;
+            paint(); wake();
         } else {
-            x = targetX; y = targetY; vx = vy = lastTime = 0;
+            x = motion.toX; y = motion.toY; lift = motion.toLift;
+            motion = null; vx = vy = ax = ay = liftVelocity = liftAcceleration = lastTime = 0;
             paint(); finish();
         }
     }
 
-    function moveTo(point, manual = false, immediate = false) {
-        tapMotion = null;
+    function animate(point, toLift, duration, immediate = false) {
+        // A stopped finger must not leave stale drag velocity on release.
+        if (follow) {
+            if (performance.now() - lastTime > 40) vx = vy = 0;
+            vx = landingVelocity(x, vx, point.x, duration);
+            vy = landingVelocity(y, vy, point.y, duration);
+            liftVelocity = landingVelocity(lift, liftVelocity, toLift, duration);
+            ax = ay = liftAcceleration = 0;
+        }
+        follow = null;
         if (immediate || reduced.matches) {
             if (frame !== null) cancelAnimationFrame(frame);
-            frame = null;
-            x = targetX = point.x; y = targetY = point.y;
-            vx = vy = lastTime = 0;
+            frame = motion = null;
+            x = point.x; y = point.y; lift = toLift;
+            vx = vy = ax = ay = liftVelocity = liftAcceleration = lastTime = 0;
             paint(); finish();
             return;
         }
-        if (manual && Math.hypot(point.x - x, point.y - y) > .1) {
-            // Retarget from the current pose without resetting momentum.
-            tapMotion = { x, y, toX: point.x, toY: point.y, started: null };
-        } else {
-            targetX = point.x; targetY = point.y;
-        }
-        dock.classList.add('dock-moving');
-        if (frame === null) { lastTime = 0; frame = requestAnimationFrame(tick); }
+        motion = {
+            started: performance.now(), duration, toX: point.x, toY: point.y, toLift,
+            x: curve(x, vx, ax, point.x, duration), y: curve(y, vy, ay, point.y, duration),
+            lift: curve(lift, liftVelocity, liftAcceleration, toLift, duration)
+        };
+        wake();
     }
 
-    function hint(index) {
-        candidate = index;
+    function moveTo(point, manual = false, immediate = false) {
+        animate(point, 0, manual ? 620 : 260, immediate);
+    }
+
+    function hint(index, force = false) {
+        if (hinted === index && !force) return;
+        hinted = index;
         items.forEach((item, i) => item.classList.toggle('dock-candidate', i === index));
         bubble.querySelector('span').textContent = label(index);
-        const half = bubble.offsetWidth / 2;
-        bubble.style.left = Math.max(half + 4, Math.min(dock.clientWidth - half - 4, points[index].x + width / 2)) + 'px';
+        // CSS clamps the bubble to the dock without a synchronous width read.
+        bubble.style.setProperty('--dock-bubble-x', points[index].x + points[index].width / 2 + 'px');
     }
 
     function setHolding(value) {
+        if (holding === value) return;
         holding = value;
         dock.classList.toggle('dock-holding', value);
-        paint();
+    }
+
+    function beginHold(found) {
+        setHolding(true);
+        dragCandidate = found.index;
+        const point = points[found.index];
+        const travelling = Math.hypot(point.x - x, point.y - y) > .1;
+        animate(point, 2, travelling ? 520 : 160);
+    }
+
+    function track(found) {
+        setHolding(true);
+        if (!follow) {
+            const origin = points[gesture.index];
+            const catchingUp = Math.hypot(x - origin.x, y - origin.y) > .5 || Math.hypot(vx, vy) > .1;
+            const duration = !reduced.matches && (catchingUp || Math.abs(lift - 2) > .01 || Math.abs(liftVelocity) > .01) ? 160 : 0;
+            follow = {
+                started: performance.now(), duration,
+                x: curve(catchingUp ? x - found.x : 0, vx, ax, 0, 160),
+                y: curve(catchingUp ? y - found.y : 0, vy, ay, 0, 160),
+                lift: curve(lift, liftVelocity, liftAcceleration, 2, 160)
+            };
+            motion = null;
+        }
+        follow.targetX = found.x; follow.targetY = found.y;
+        dragCandidate = found.index;
+        wake();
+    }
+
+    function readBounds() {
+        const rect = dock.getBoundingClientRect();
+        bounds = {
+            left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom,
+            borderLeft: dock.clientLeft, borderTop: dock.clientTop
+        };
+        logoutBounds = logout?.getBoundingClientRect();
+        return rect;
     }
 
     function originalClick(item) {
@@ -121,8 +221,11 @@
         selected = index;
         setHolding(false); hint(index);
         if (items[index] === settings) {
+            // A held selection opens its menu after the glass has landed.
+            // Keyboard and ordinary taps retain the existing immediate toggle.
+            if (manual) originalClick(settings);
+            else activation = () => originalClick(settings);
             moveTo(points[index], manual);
-            originalClick(settings);
         } else {
             if (settings?.getAttribute('aria-expanded') === 'true') originalClick(settings);
             activation = () => originalClick(items[index]);
@@ -135,28 +238,30 @@
         if (!enabled) return;
         // An unchanged observer notification must never interrupt a tap glide.
         if (!force && measuredWidth === dock.clientWidth && measuredHeight === dock.clientHeight) return;
-        const rect = dock.getBoundingClientRect();
+        const rect = readBounds();
         points = items.map(item => {
             const box = item.getBoundingClientRect();
             return { x: box.left - rect.left - dock.clientLeft, y: box.top - rect.top - dock.clientTop, width: box.width, height: box.height };
         });
         measuredWidth = dock.clientWidth; measuredHeight = dock.clientHeight;
+        minX = Math.min(...points.map(point => point.x)); maxX = Math.max(...points.map(point => point.x));
+        minY = Math.min(...points.map(point => point.y)); maxY = Math.max(...points.map(point => point.y));
         width = points[0].width; height = points[0].height;
         indicator.style.width = width + 'px'; indicator.style.height = height + 'px';
-        hint(selected);
+        dock.style.setProperty('--dock-width', measuredWidth + 'px');
+        hint(selected, true);
         moveTo(points[selected], false, true);
     }
 
     function locate(clientX, clientY) {
-        const rect = dock.getBoundingClientRect();
-        const localX = clientX - rect.left - dock.clientLeft;
-        const localY = clientY - rect.top - dock.clientTop;
+        const localX = clientX - bounds.left - bounds.borderLeft;
+        const localY = clientY - bounds.top - bounds.borderTop;
         const distance = point => (point.x + point.width / 2 - localX) ** 2 + (point.y + point.height / 2 - localY) ** 2;
         const index = points.reduce((best, point, i) => distance(point) < distance(points[best]) ? i : best, 0);
         return {
             index,
-            x: Math.max(Math.min(...points.map(point => point.x)), Math.min(Math.max(...points.map(point => point.x)), localX - width / 2)),
-            y: Math.max(Math.min(...points.map(point => point.y)), Math.min(Math.max(...points.map(point => point.y)), localY - height / 2))
+            x: Math.max(minX, Math.min(maxX, localX - width / 2)),
+            y: Math.max(minY, Math.min(maxY, localY - height / 2))
         };
     }
 
@@ -167,7 +272,7 @@
         selected = settings?.getAttribute('aria-expanded') === 'true' ? items.indexOf(settings) : overview;
         if (pointer !== undefined && dock.hasPointerCapture(pointer)) dock.releasePointerCapture(pointer);
         setHolding(false);
-        if (enabled && points.length) { hint(selected); moveTo(points[selected], true); }
+        if (enabled && points.length) { hint(selected); moveTo(points[selected], false, document.hidden); }
     }
 
     function modified(event) {
@@ -178,32 +283,37 @@
         if (!enabled || !event.isPrimary || modified(event) || event.target.closest('.text-danger, .settings-popup')) return;
         activation = null;
         clearTimeout(holdTimer);
+        // Refresh the fixed bar's viewport position once at pickup, not on every move.
+        readBounds();
         const found = locate(event.clientX, event.clientY);
-        gesture = { id: event.pointerId, x: event.clientX, y: event.clientY, moved: false };
+        gesture = { id: event.pointerId, index: found.index, x: event.clientX, y: event.clientY, moved: false };
         dock.setPointerCapture(event.pointerId);
         hint(found.index);
         holdTimer = setTimeout(() => {
-            if (gesture) { setHolding(true); moveTo(points[found.index], true); }
+            if (gesture) beginHold(found);
         }, 140);
     });
 
     dock.addEventListener('pointermove', event => {
         if (event.pointerId !== gesture?.id) return;
-        if (Math.hypot(event.clientX - gesture.x, event.clientY - gesture.y) > 5) gesture.moved = true;
-        if (!gesture.moved && !holding) return;
+        const samples = event.getCoalescedEvents?.();
+        const latest = samples?.length ? samples[samples.length - 1] : event;
+        if (Math.hypot(latest.clientX - gesture.x, latest.clientY - gesture.y) > 5) gesture.moved = true;
+        // Small touch jitter must not interrupt the slow stationary pickup.
+        if (!gesture.moved) return;
         clearTimeout(holdTimer);
-        const found = locate(event.clientX, event.clientY);
-        setHolding(true); hint(found.index); moveTo(found);
-    });
+        // Keep only the newest sample; all visual work happens in the next frame.
+        track(locate(latest.clientX, latest.clientY));
+    }, { passive: true });
 
     dock.addEventListener('pointerup', event => {
         if (event.pointerId !== gesture?.id) return;
         clearTimeout(holdTimer);
-        const rect = dock.getBoundingClientRect();
-        const exit = logout?.getBoundingClientRect();
+        const rect = bounds;
+        const exit = logoutBounds;
         const overLogout = exit && event.clientX >= exit.left && event.clientX <= exit.right && event.clientY >= exit.top && event.clientY <= exit.bottom;
         const valid = !overLogout && event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top - 68 && event.clientY <= rect.bottom + 32;
-        const moved = gesture.moved;
+        const moved = gesture.moved || holding;
         gesture = null;
         suppressClickUntil = performance.now() + 500;
         if (dock.hasPointerCapture(event.pointerId)) dock.releasePointerCapture(event.pointerId);
@@ -213,6 +323,13 @@
 
     dock.addEventListener('pointercancel', cancelGesture);
     dock.addEventListener('lostpointercapture', () => { if (gesture) cancelGesture(); });
+    // A link's native drag/callout must not cancel an active mobile scrub.
+    dock.addEventListener('dragstart', event => {
+        if (enabled && gesture) event.preventDefault();
+    });
+    dock.addEventListener('contextmenu', event => {
+        if (enabled && gesture && holding) event.preventDefault();
+    });
     dock.addEventListener('click', event => {
         if (!enabled || passClick || modified(event)) return;
         const item = event.target.closest('.nav-item');
@@ -249,7 +366,9 @@
         enabled = mobile.matches;
         cancelGesture();
         if (frame !== null) cancelAnimationFrame(frame);
-        frame = null; tapMotion = null; vx = vy = lastTime = 0;
+        frame = motion = follow = null;
+        vx = vy = ax = ay = lift = liftVelocity = liftAcceleration = lastTime = 0;
+        colours = []; hinted = -1;
         selected = settings?.getAttribute('aria-expanded') === 'true' ? items.indexOf(settings) : overview;
         dock.classList.toggle('mobile-dock-ready', enabled);
         dock.classList.remove('dock-moving');
