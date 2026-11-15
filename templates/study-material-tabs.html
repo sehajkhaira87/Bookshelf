@@ -1,0 +1,8 @@
+<nav class="library-tabs" aria-label="Study materials">
+    {% if show_pyqs_tab|default(false) %}
+    <a href="{{ url_for('pyqs', branch=branch, semester=semester) }}"{% if endpoint == 'pyqs' %} aria-current="page"{% endif %}>PYQs</a>
+    {% endif %}
+    {% for target, label in [('notes', 'Notes'), ('assignments', 'Assignments'), ('mst_papers', 'MST Papers'), ('books', 'Digital Books')] %}
+    <a href="{{ url_for(target, branch=branch, semester=semester) }}"{% if endpoint == target %} aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
+</nav>

@@ -37,7 +37,7 @@ def get_connection():
 
 def get_resource_catalogue(category, branch=None, semester=None, search='', page=1):
     """Read a fresh, paginated student catalogue from verified uploads."""
-    if category not in {'notes', 'assignment', 'book'}:
+    if category not in {'notes', 'assignment', 'book', 'mst'}:
         raise ValueError('Invalid resource category.')
     where = ['category = %s', 'status = %s']
     params = [category, 'verified']

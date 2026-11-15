@@ -29,21 +29,14 @@
         <section class="hero">
             <header class="navbar">
                 <div class="logo">
-    <img 
-        src="{{ url_for('static', filename='images/logo.svg') }}" 
-        alt="Bookshelf Logo"
-        class="bookshelf-logo"
-    >
-    
-    
-    
-    <div class="gndec-logo-wrap">
-        <picture>
-            <source media="(max-width: 820px)" type="image/webp" srcset="{{ url_for('static', filename='images/gndec-mobile.webp') }}">
-            <img src="{{ url_for('static', filename='images/gndec-logo.png') }}" alt="GNDEC Logo" class="gndec-logo" width="256" height="256">
-        </picture>
-    </div>
-</div>
+                    <div class="gndec-logo-wrap">
+                        <picture>
+                            <source media="(max-width: 820px)" type="image/webp" srcset="{{ url_for('static', filename='images/gndec-mobile.webp') }}">
+                            <img src="{{ url_for('static', filename='images/gndec-logo.png') }}" alt="GNDEC Logo" class="gndec-logo" width="256" height="256">
+                        </picture>
+                    </div>
+                    <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf Logo" class="bookshelf-logo">
+                </div>
                 <nav class="nav-links">
                     <a href="#">Home</a>
                     <a href="#">About</a>

@@ -5,12 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Previous Papers - BOOKSHELF</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='pyqs.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='pyqs.css', v='2') }}">
     {% include 'site-effects.html' %}
     <link rel="stylesheet" href="{{ url_for('static', filename='liquid-glass.css') }}">
     <script defer src="{{ url_for('static', filename='liquid-glass.js') }}"></script>
 </head>
 <body class="pyqs-page">
+    {% set pyq_context = {} %}
+    {% for key in ['branch', 'semester'] %}
+        {% set value = request.args.get(key, '')|trim|lower %}
+        {% if value %}{% set _ = pyq_context.update({key: value}) %}{% endif %}
+    {% endfor %}
 
     <div class="page-wrapper">
         <nav class="top-nav">
@@ -29,6 +34,7 @@
             </div>
 
             <form method="get" class="minimal-search-box">
+                {% for name, value in pyq_context.items() %}{% if value %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endif %}{% endfor %}
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -42,9 +48,15 @@
                     {% if year and year not in archive.years %}<option value="{{ year }}" selected>{{ year }}</option>{% endif %}
                 </select>
                 <button type="submit">Search</button>
-                {% if search or year %}<a class="clear-search" href="{{ url_for('admin_pyqs' if admin else 'pyqs') }}">Clear</a>{% endif %}
+                {% if search or year %}<a class="clear-search" href="{{ url_for('admin_pyqs' if admin else 'pyqs', **pyq_context) }}">Clear</a>{% endif %}
             </form>
         </header>
+
+        {% if not admin %}
+        {% with endpoint='pyqs', branch=pyq_context.get('branch', ''), semester=pyq_context.get('semester', ''), show_pyqs_tab=true %}
+        {% include 'study-material-tabs.html' %}
+        {% endwith %}
+        {% endif %}
 
         {% for category, message in get_flashed_messages(with_categories=true) %}
         <p role="status">{{ message }}</p>
@@ -87,7 +99,7 @@
                 <h2 id="pyq-empty-title">No papers found</h2>
                 {% if search or year %}
                 <p>Try another subject code or a different exam year.</p>
-                <a class="pyq-empty-reset" href="{{ url_for('admin_pyqs' if admin else 'pyqs') }}">
+                <a class="pyq-empty-reset" href="{{ url_for('admin_pyqs' if admin else 'pyqs', **pyq_context) }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
                         <path d="M3 11a9 9 0 1 1 2.8 6.5M3 4v7h7" />
                     </svg>
@@ -95,7 +107,7 @@
                 </a>
                 {% elif total %}
                 <p>Browse the archive to find another paper.</p>
-                <a class="pyq-empty-reset" href="{{ url_for('admin_pyqs' if admin else 'pyqs') }}">Browse papers</a>
+                <a class="pyq-empty-reset" href="{{ url_for('admin_pyqs' if admin else 'pyqs', **pyq_context) }}">Browse papers</a>
                 {% else %}
                 <p>New papers will appear here as the archive grows.</p>
                 {% endif %}
@@ -103,9 +115,9 @@
             {% endfor %}
         </main>
         <nav class="pagination" aria-label="Paper pages">
-            {% if page > 1 %}<a href="{{ url_for('admin_pyqs' if admin else 'pyqs', page=page-1, q=search, year=year or '') }}">Previous</a>{% endif %}
+            {% if page > 1 %}<a href="{{ url_for('admin_pyqs' if admin else 'pyqs', page=page-1, q=search, year=year or '', **pyq_context) }}">Previous</a>{% endif %}
             <span>Page {{ page }}</span>
-            {% if page * 50 < total %}<a href="{{ url_for('admin_pyqs' if admin else 'pyqs', page=page+1, q=search, year=year or '') }}">Next</a>{% endif %}
+            {% if page * 50 < total %}<a href="{{ url_for('admin_pyqs' if admin else 'pyqs', page=page+1, q=search, year=year or '', **pyq_context) }}">Next</a>{% endif %}
         </nav>
     </div>
 

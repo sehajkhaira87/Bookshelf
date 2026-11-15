@@ -5,11 +5,11 @@
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }} · Bookshelf</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='books.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='resource-catalogue.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='resource-catalogue.css', v='2') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='contributor-badges.css') }}">
     {% include 'site-effects.html' %}
 </head>
-<body>
+<body class="resource-catalogue-page">
 <div class="page-wrapper">
     <nav class="top-nav">
         <div class="brand">
@@ -18,11 +18,7 @@
         <a href="{{ url_for('dashboard') }}" class="back-btn">← Return to Dashboard</a>
     </nav>
     <header class="header-section"><div class="page-title"><h1>{{ title }}</h1><p>Browse uploaded study materials for your department and semester.</p></div></header>
-    <nav class="library-tabs" aria-label="Study materials">
-        {% for target, label in [('notes', 'Notes'), ('assignments', 'Assignments'), ('books', 'Digital Books')] %}
-        <a href="{{ url_for(target, branch=branch, semester=semester) }}"{% if endpoint == target %} aria-current="page"{% endif %}>{{ label }}</a>
-        {% endfor %}
-    </nav>
+    {% include 'study-material-tabs.html' %}
     <form class="resource-filters" method="get" role="search">
         <label class="search-label">Search<input name="q" value="{{ search }}" maxlength="200" placeholder="Title or subject name"></label>
         <label>Department<select name="branch"><option value="">All departments</option>{% for department in site_departments() %}<option value="{{ department.code|lower }}"{% if branch == department.code|lower %} selected{% endif %}>{{ department.name }} ({{ department.code }})</option>{% endfor %}</select></label>

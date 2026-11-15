@@ -79,6 +79,11 @@ body.pyqs-page {
 }
 .pyqs-page .page-title p { margin: 0; color: var(--pyq-muted); font-size: 14px; }
 
+/* Keep the selected course available when browsing MST papers. */
+.pyqs-page .library-tabs { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
+.pyqs-page .library-tabs a { display: inline-flex; align-items: center; min-height: 44px; padding: 10px 15px; border: 1px solid var(--pyq-line); border-radius: 8px; color: var(--pyq-ink); text-decoration: none; }
+.pyqs-page .library-tabs a[aria-current] { background: var(--pyq-mocha); color: #FFF9F0; border-color: var(--pyq-mocha); }
+
 /* Opaque, matte search controls: no backdrop blur or glass highlights. */
 .pyqs-page .minimal-search-box { display: flex; flex-wrap: wrap; gap: 8px; width: 330px; flex-shrink: 0; }
 .pyqs-page .minimal-search-box > svg { display: none; }

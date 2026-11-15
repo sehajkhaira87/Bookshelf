@@ -20,3 +20,4 @@ tests/*
 !tests/bulb-physics.test.cjs
 !tests/home-startup.test.cjs
 !tests/mobile-dashboard-dock.test.cjs
+!tests/dashboard-college-logo.test.cjs

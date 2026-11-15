@@ -118,10 +118,10 @@ categoryCards.forEach(card => {
             instructionText.style.opacity = 1;
         }, 300);
         const target = new URL(card.dataset.url, window.location.href);
-        if (card.dataset.category !== 'pyqs') {
-            if (selectedDepartment) target.searchParams.set('branch', selectedDepartment);
-            if (selectedSemester) target.searchParams.set('semester', selectedSemester);
-        }
+        // Keep the selection available when switching from the shared PYQ
+        // archive to the department's MST papers or other study materials.
+        if (selectedDepartment) target.searchParams.set('branch', selectedDepartment);
+        if (selectedSemester) target.searchParams.set('semester', selectedSemester);
         window.location.assign(target.href);
     });
 });

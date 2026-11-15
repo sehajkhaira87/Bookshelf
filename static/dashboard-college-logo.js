@@ -25,7 +25,8 @@ document.querySelectorAll('.dashboard-college-logo').forEach(button => {
     if (![originalCtx, pencilCtx, maskCtx, colourCtx, strokesCtx].every(Boolean)) return;
 
     const colourImage = new Image();
-    let requested = false, ready = false, hovered = false, focused = false, pinned = false;
+    let requested = false, ready = false, preparing = false;
+    let hovered = false, focused = false, pinned = false;
     let progress = 0, target = 0, velocity = 0, frame = null, lastTime = 0;
     let lastPointer = 'mouse';
     let origin = { x: .28 * size, y: .25 * size };
@@ -114,14 +115,39 @@ document.querySelectorAll('.dashboard-college-logo').forEach(button => {
         }
     }
 
-    function prepare() {
-        if (ready || !viewport.matches || !pencilImage.naturalWidth || !colourImage.naturalWidth) return;
-        originalCtx.drawImage(colourImage, 0, 0, size, size);
-        drawPencil();
-        ready = true;
-        paint();
-        button.classList.add('is-ready');
-        update();
+    function keepPencil() {
+        stop();
+        ready = false;
+        button.classList.remove('is-ready');
+        button.dataset.state = 'unavailable';
+    }
+
+    async function prepare() {
+        // PNG dimensions can arrive before the pixels. Copying that incomplete
+        // image once would leave the colour layer permanently empty on hover.
+        if (ready || preparing || !viewport.matches ||
+            !pencilImage.complete || !pencilImage.naturalWidth ||
+            !colourImage.complete || !colourImage.naturalWidth) return;
+
+        preparing = true;
+        try {
+            await Promise.all([pencilImage, colourImage].map(image =>
+                typeof image.decode === 'function' ? image.decode() : Promise.resolve()
+            ));
+            if (!viewport.matches) return;
+            originalCtx.clearRect(0, 0, size, size);
+            originalCtx.drawImage(colourImage, 0, 0, size, size);
+            drawPencil();
+            ready = true;
+            paint();
+            // Hide the static fallback only after a complete frame is painted.
+            button.classList.add('is-ready');
+            update();
+        } catch {
+            keepPencil();
+        } finally {
+            preparing = false;
+        }
     }
 
     function initialize() {
@@ -166,8 +192,9 @@ document.querySelectorAll('.dashboard-college-logo').forEach(button => {
         update();
     });
     pencilImage.addEventListener('load', prepare);
+    pencilImage.addEventListener('error', keepPencil);
     colourImage.addEventListener('load', prepare);
-    colourImage.addEventListener('error', () => { button.dataset.state = 'unavailable'; });
+    colourImage.addEventListener('error', keepPencil);
     if (mobile) {
         new MutationObserver(() => {
             if (ready) { drawPencil(); paint(); }

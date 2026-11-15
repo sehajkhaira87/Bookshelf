@@ -871,6 +871,11 @@ def assignments():
     return _resource_catalogue('assignment', 'Assignments', 'assignments')
 
 
+@app.route('/mst-papers')
+def mst_papers():
+    return _resource_catalogue('mst', 'MST Papers', 'mst_papers')
+
+
 def _resource_catalogue(category, title, endpoint):
     branch = request.args.get('branch', '').strip().lower()
     semester = request.args.get('semester', '').strip()
