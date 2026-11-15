@@ -147,7 +147,11 @@ export function createCreatorsBook(root, assets) {
     const {open,focus,side,work,withdraw,reveal,showcase}=state;
     const front=clamp(focus*(1-side)/2),backFocus=clamp(focus*(1+side)/2);
     const zoom=1+.025*open+(tuning.focusZoom/100-.025)*focus;
-    const retreat=wave(withdraw);
+    // A focused author's sheet sits on the left behind the selected page.
+    // Tuck it into the book before the cover closes; its slower profile-return
+    // clock would otherwise leave it sticking out behind the closed cover.
+    const sheetWithdraw=withdraw*minimumJerk(phase(open,.12,.70));
+    const retreat=wave(sheetWithdraw);
     const frontProfile=profileStyles(reveal*(1-side)/2,[-100.8,-4.8,96],-2.3,.125,frontendParagraphs.length);
     const backProfile=profileStyles(reveal*(1+side)/2,[-100.8,-9.6,91.2],2,.20,backendParagraphs.length,115);
     const media=minimumJerk(phase(showcase,.22,.64));
@@ -160,7 +164,7 @@ export function createCreatorsBook(root, assets) {
       camera:`translate3d(${-4*(1-open)}px,${-31-5*open}px,0) scale(${zoom})`,
       paper:`translate3d(${425*backFocus}px,${5*backFocus}px,${.4+26*front-14*backFocus}px) rotateY(-180deg)`,
       binding:`translate3d(0,0,${4.7+22*front+26*backFocus}px)`,
-      backend:`translate3d(${-425*withdraw}px,${5*withdraw-8*retreat}px,${.5+4*open+26*backFocus-3*withdraw}px) rotateY(${-2*retreat}deg) rotateZ(${-0.85*withdraw-.6*retreat}deg)`,
+      backend:`translate3d(${-425*sheetWithdraw}px,${5*sheetWithdraw-8*retreat}px,${.5+4*open+26*backFocus-3*sheetWithdraw}px) rotateY(${-2*retreat}deg) rotateZ(${-0.85*sheetWithdraw-.6*retreat}deg)`,
       // The showcase stays below the outgoing sheet, above the page stack.
       // Neither surface crosses the other's depth plane during the handoff.
       work:`translate3d(${8*(1-work)}px,${22*(1-work)}px,1.2px) rotateZ(${.2*(1-work)}deg) scale(${.995+.005*work})`,
