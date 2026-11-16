@@ -3,10 +3,11 @@
 from urllib.parse import urlsplit
 
 from flask import abort, flash, redirect, render_template, request, url_for
+from psycopg2 import Error as DatabaseError
 
 import admin_user_service as moderation
+import contribution_service
 import db_agent
-import storage_agent
 import user_manager_service as service
 from database import get_user_by_email
 from role_access import current_actor_email, role_required
@@ -139,12 +140,13 @@ def register_routes(app, csrf_protected, admin_emails):
         if request.form.get('confirm_delete') != 'yes':
             flash('Confirm permanent deletion before removing a contribution.', 'error')
             return destination()
-        resource = require_resource(resource_id)
-        if not storage_agent.delete_file(resource['blob_url']):
-            flash('The file could not be removed from storage. The contribution was kept.', 'error')
-        elif not db_agent.delete_resource(resource_id):
-            app.logger.error('User manager removed file but could not remove resource record %s', resource_id)
-            flash('The file was removed, but its record could not be cleared. Contact an administrator.', 'error')
+        require_resource(resource_id)
+        try:
+            removed = contribution_service.remove_resource(resource_id)
+        except (DatabaseError, contribution_service.ContributionUnavailable):
+            app.logger.exception('User manager could not remove contribution %s', resource_id)
+            flash('Removal could not be completed. Please try again.', 'error')
         else:
-            flash('Student contribution permanently deleted.', 'success')
+            flash('Contribution removed.' if removed else 'Contribution is already removed or missing.',
+                  'success' if removed else 'error')
         return destination()

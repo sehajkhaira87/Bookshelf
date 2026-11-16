@@ -2,6 +2,8 @@ import os
 import secrets
 import zipfile
 import communications_service
+import contribution_service
+from psycopg2 import Error as DatabaseError
 from communications_routes import register_routes as register_communications_routes
 from role_access import is_administrator, profile_roles, ROLE_LABELS
 from role_routes import register_routes as register_role_routes
@@ -11,6 +13,7 @@ import department_service
 from user_manager_routes import register_routes as register_user_manager_routes
 from ui_editor_routes import register_routes as register_ui_editor_routes
 from collections.abc import Mapping
+from datetime import datetime
 from functools import wraps
 from pathlib import Path
 
@@ -45,7 +48,7 @@ from storage_agent import upload_file, delete_file
 from pyq_service import create_pyq_schema, import_pdf, list_pyqs, get_pyq_summary, rename_pyq, query as pyq_query
 from db_agent import (
     add_resource, get_resources, get_resource_by_id,
-    update_resource_status, delete_resource, get_resource_stats, get_resource_catalogue
+    update_resource_status, get_resource_stats, get_resource_catalogue
 )
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -684,33 +687,23 @@ def toggle_status(resource_id):
 @admin_required
 @csrf_protected
 def admin_delete(resource_id):
-    """Deletes a resource from both Azure Storage and the database."""
-    resource = get_resource_by_id(resource_id)
-    if not resource:
-        flash("Resource not found.", "error")
-        return redirect(url_for('admin_dashboard'))
-
-    # Keep the database record when cloud deletion fails so cleanup can be retried.
-    if not delete_file(resource['blob_url']):
-        flash("Cloud deletion failed; the resource record was kept.", "error")
-        return redirect(url_for('admin_dashboard'))
-
-    blob_url = delete_resource(resource_id)
-    if not blob_url:
-        app.logger.error(
-            "Blob deleted but database cleanup failed for resource %s", resource_id
-        )
-        flash("Failed to delete resource.", "error")
-        return redirect(url_for('admin_dashboard'))
-
-    flash("Resource deleted successfully.", "success")
+    """Remove the file from the library and keep its contribution history."""
+    try:
+        removed = contribution_service.remove_resource(resource_id)
+    except (DatabaseError, contribution_service.ContributionUnavailable):
+        app.logger.exception('Could not remove resource %s', resource_id)
+        flash('Removal could not be completed. Please try again.', 'error')
+    else:
+        flash('Resource removed.' if removed else 'Resource is already removed or missing.',
+              'success' if removed else 'error')
     return redirect(url_for('admin_dashboard'))
 
 
 @app.errorhandler(RequestEntityTooLarge)
 def handle_file_too_large(_error):
     flash("Files must be 50 MB or smaller.", "error")
-    endpoint = 'admin_dashboard' if session.get('is_admin') else 'admin_panel'
+    endpoint = 'contribute' if request.endpoint == 'submit_contribution' else (
+        'admin_dashboard' if session.get('is_admin') else 'admin_panel')
     return redirect(url_for(endpoint))
 
 
@@ -857,6 +850,152 @@ def admin_delete_pyq(paper_id):
 @app.route('/contribute')
 def contribute():
     return render_template('contribute.html')
+
+
+def contribution_account_required(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        email = normalize_email((session.get('user') or {}).get('email'))
+        profile = get_user_by_email(email) if email else None
+        if not profile:
+            return redirect(url_for('login'))
+        if profile.get('is_banned'):
+            abort(403, 'This account cannot access contributions.')
+        return view(email, *args, **kwargs)
+
+    return wrapped
+
+
+@app.post('/contribute')
+@contribution_account_required
+@csrf_protected
+def submit_contribution(email):
+    category = request.form.get('category', '').strip().lower()
+    branch = request.form.get('branch', '').strip().lower()
+    semester = request.form.get('semester', '').strip()
+    subject = request.form.get('subject', '').strip()
+    files = [file for file in request.files.getlist('file') if file.filename]
+    if (category not in {'notes', 'assignment', 'mst'} or semester not in ALLOWED_SEMESTERS
+            or branch not in {item['code'].lower() for item in site_departments()}
+            or not 1 <= len(subject) <= 255 or '\x00' in subject or len(files) != 1):
+        flash('Choose a branch, category, semester and subject, and select one file.', 'error')
+        return redirect(url_for('contribute'))
+
+    file = files[0]
+    filename = secure_filename(file.filename)
+    extension = Path(filename).suffix.lower()
+    if extension not in {'.pdf', '.jpg', '.jpeg', '.png'} or not file_content_matches_extension(file.stream, extension):
+        flash('Choose a valid PDF, JPEG or PNG file.', 'error')
+        return redirect(url_for('contribute'))
+    file.stream.seek(0, os.SEEK_END)
+    size = file.stream.tell()
+    file.stream.seek(0)
+    if not 0 < size <= MAX_UPLOAD_BYTES:
+        flash('Choose a file between 1 byte and 50 MB.', 'error')
+        return redirect(url_for('contribute'))
+
+    uploaded = upload_file(file.stream, filename, category)
+    if not uploaded or not uploaded.get('blob_url'):
+        flash('Your file could not be uploaded. Please try again.', 'error')
+        return redirect(url_for('contribute'))
+    blob_url = uploaded['blob_url']
+    resource_id = add_resource(title=subject, category=category, branch=branch, semester=semester,
+                               blob_url=blob_url, file_name=filename, file_size=size,
+                               status='unverified', uploaded_by=email, subject_name=subject)
+    if not resource_id:
+        if not delete_file(blob_url):
+            app.logger.error('Could not clean up a student upload after its database save failed')
+        flash('Your contribution could not be saved. Please try again.', 'error')
+        return redirect(url_for('contribute'))
+    flash('Contribution submitted for verification.', 'success')
+    return redirect(url_for('my_contributions'))
+
+
+def contribution_page():
+    try:
+        page = int(request.args.get('page', 1))
+        if 1 <= page <= 100000:
+            return page
+    except ValueError:
+        pass
+    abort(400, 'Choose a valid page.')
+
+
+@app.get('/dashboard/contributions')
+@contribution_account_required
+def my_contributions(email):
+    page = contribution_page()
+    try:
+        contributions, total = contribution_service.list_contributions(email, page)
+    except (DatabaseError, contribution_service.ContributionUnavailable):
+        app.logger.exception('Could not load contribution history')
+        return render_template('my-contributions.html', error='Your contribution history is temporarily unavailable.'), 503
+    return render_template('my-contributions.html', contributions=contributions, page=page, total=total,
+                           more=page * contribution_service.PAGE_SIZE < total,
+                           removal_reasons=contribution_service.REMOVAL_REASONS,
+                           max_reason_details_length=contribution_service.MAX_REASON_DETAILS_LENGTH)
+
+
+@app.post('/dashboard/contributions/<int:resource_id>/request-removal')
+@contribution_account_required
+@csrf_protected
+def request_contribution_removal(email, resource_id):
+    page = contribution_page()
+    try:
+        submitted = contribution_service.request_removal(
+            resource_id, email, request.form.get('reason', ''),
+            reason_option=request.form.get('reason_option'))
+    except ValueError as error:
+        flash(str(error), 'error')
+    except (DatabaseError, contribution_service.ContributionUnavailable):
+        app.logger.exception('Could not save removal request for contribution %s', resource_id)
+        flash('Your request could not be saved. Please try again.', 'error')
+    else:
+        flash('Removal request sent for review.' if submitted else 'A new removal request is unavailable for this contribution.',
+              'success' if submitted else 'error')
+    return redirect(url_for('my_contributions', page=page))
+
+
+@app.get('/admin/contributions/removal-requests')
+@admin_required
+def admin_removal_requests():
+    page = contribution_page()
+    try:
+        pending, more = contribution_service.list_removal_requests(page)
+    except (DatabaseError, contribution_service.ContributionUnavailable):
+        app.logger.exception('Could not load contribution removal requests')
+        return render_template('admin-removal-requests.html', error='Removal requests are temporarily unavailable.'), 503
+    return render_template('admin-removal-requests.html', pending=pending, page=page, more=more)
+
+
+@app.post('/admin/contributions/<int:resource_id>/removal-decision')
+@admin_required
+@csrf_protected
+def admin_removal_decision(resource_id):
+    decision = request.form.get('decision')
+    if decision not in ('approve', 'decline'):
+        abort(400, 'Choose a removal decision.')
+    if decision == 'approve' and request.form.get('confirm_delete') != 'yes':
+        abort(400, 'Confirm removal of the contribution file.')
+    try:
+        requested_at = datetime.fromisoformat(request.form.get('requested_at', ''))
+        if requested_at.tzinfo is None:
+            raise ValueError()
+    except ValueError:
+        abort(400, 'Refresh the page and select a removal request.')
+    try:
+        if decision == 'approve':
+            changed = contribution_service.remove_resource(resource_id, requested_at=requested_at)
+            message = 'Request approved. Contribution removed from the library.'
+        else:
+            changed = contribution_service.decline_removal(resource_id, requested_at)
+            message = 'Request declined. Contribution kept.'
+    except (DatabaseError, contribution_service.ContributionUnavailable):
+        app.logger.exception('Could not resolve removal request for contribution %s', resource_id)
+        flash('The decision could not be saved. Please try again.', 'error')
+    else:
+        flash(message if changed else 'This request is no longer pending.', 'success' if changed else 'error')
+    return redirect(url_for('admin_removal_requests'))
 
 @app.route('/books')
 def books():

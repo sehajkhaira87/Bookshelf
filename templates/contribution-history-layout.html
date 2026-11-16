@@ -1,0 +1,47 @@
+{% macro timestamp(value) %}
+    <time datetime="{{ value.isoformat() }}">{{ value.strftime('%d %b %Y, %H:%M') }}</time>
+{% endmacro %}
+{% macro pagination(endpoint, page, more) %}
+    {% if page > 1 or more %}
+    <nav class="history-pagination" aria-label="History pages">
+        {% if page > 1 %}<a href="{{ url_for(endpoint, page=page-1) }}">← Previous</a>{% endif %}
+        <span>Page {{ page }}</span>
+        {% if more %}<a href="{{ url_for(endpoint, page=page+1) }}">Next →</a>{% endif %}
+    </nav>
+    {% endif %}
+{% endmacro %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ self.heading() }} · Bookshelf</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='contribute.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='contribution-history.css') }}">
+    {% include 'site-effects.html' %}
+</head>
+<body>
+    <div class="page-wrapper history-page">
+        <nav class="top-nav" aria-label="Bookshelf navigation">
+            <div class="brand">
+                <img class="nav-logo" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Bookshelf">
+            </div>
+            {% block back %}{% endblock %}
+        </nav>
+        <header class="history-heading page-title">
+            <div>
+                <h1>{% block heading %}{% endblock %}</h1>
+                <p>{% block description %}{% endblock %}</p>
+            </div>
+            {% block primary_action %}{% endblock %}
+        </header>
+        <main>
+            {% for category, message in get_flashed_messages(with_categories=true) %}
+            <p class="history-notice {{ 'is-error' if category == 'error' }}" role="{{ 'alert' if category == 'error' else 'status' }}">{{ message }}</p>
+            {% endfor %}
+            {% if error %}<p class="history-notice is-error" role="alert">{{ error }}</p>
+            {% else %}{% block history %}{% endblock %}{% endif %}
+        </main>
+    </div>
+</body>
+</html>

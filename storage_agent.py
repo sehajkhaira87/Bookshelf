@@ -5,7 +5,10 @@ Handles all Azure Blob Storage operations: upload, delete, list.
 
 import os
 import uuid
+from urllib.parse import unquote, urlsplit
+
 from werkzeug.utils import secure_filename
+from azure.core.exceptions import ResourceNotFoundError
 from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
 
@@ -19,6 +22,7 @@ CATEGORY_CONTAINER_MAP = {
     "assignment": "assignments",
     "book": "notes",
     "notes": "notes",
+    "mst": "notes",
 }
 
 
@@ -97,25 +101,30 @@ def delete_file(blob_url):
     try:
         # Parse container and blob name from the URL
         # URL format: https://<account>.blob.core.windows.net/<container>/<blob_name>
-        parts = blob_url.split(".blob.core.windows.net/")
-        if len(parts) != 2:
-            print(f"[StorageAgent] Could not parse blob URL: {blob_url}")
+        url = urlsplit(blob_url)
+        if url.scheme != 'https' or url.netloc != urlsplit(blob_service.url).netloc:
+            print('[StorageAgent] Refusing to delete a file outside the configured storage account.')
             return False
 
-        path = parts[1]
-        container_name = path.split("/")[0]
-        blob_name = "/".join(path.split("/")[1:])
+        container_name, _, blob_name = unquote(url.path).lstrip('/').partition('/')
+        if not container_name or not blob_name:
+            return False
 
         container_client = blob_service.get_container_client(container_name)
         blob_client = container_client.get_blob_client(blob_name)
-        blob_client.delete_blob()
+        blob_client.delete_blob(connection_timeout=5, read_timeout=10, retry_total=0)
 
         print(f"[StorageAgent] Deleted '{blob_name}' from '{container_name}'")
         return True
 
+    except ResourceNotFoundError as error:
+        # A previous attempt may have deleted the blob before the DB commit.
+        return error.error_code == 'BlobNotFound'
     except Exception as e:
         print(f"[StorageAgent] Delete error: {e}")
         return False
+    finally:
+        blob_service.close()
 
 
 def list_files(container_name):

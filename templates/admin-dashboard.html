@@ -59,9 +59,9 @@
             <a class="nav-btn pyq-nav-link" href="{{ url_for('admin_roles') }}">
                 <span class="nav-icon" aria-hidden="true">⚿</span><span>Role assignments</span>
             </a>
-            <button class="nav-btn nav-btn-disabled" type="button" disabled>
-                <span class="nav-icon" aria-hidden="true">↗</span><span>Contributions</span><span class="badge">Soon</span>
-            </button>
+            <a class="nav-btn pyq-nav-link" href="{{ url_for('admin_removal_requests') }}">
+                <span class="nav-icon" aria-hidden="true">↗</span><span>Removal requests</span>
+            </a>
         </nav>
 
         <div class="sidebar-footer">
@@ -252,6 +252,7 @@
                     <option value="assignment">Assignment</option>
                     <option value="book">Book</option>
                     <option value="notes">Notes</option>
+                    <option value="mst">MST Paper</option>
                 </select>
                 <select id="filterBranch" onchange="filterTable()">
                     <option value="">All Branches</option>
@@ -303,7 +304,7 @@
                                     <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="action-btn action-toggle" title="Toggle status">⟳</button>
                                 </form>
-                                <form action="/admin/delete/{{ r.id }}" method="POST" style="display:inline;" onsubmit="return confirm('Delete this resource permanently?');">
+                                <form action="{{ url_for('admin_delete', resource_id=r.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Permanently delete this file? The contribution history will show it as removed.');">
                                     <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="action-btn action-delete" title="Delete">✕</button>
                                 </form>

@@ -7,7 +7,7 @@ from database import get_connection
 
 
 PAGE_SIZE = 25
-RESOURCE_CATEGORIES = ('notes', 'assignment', 'book')
+RESOURCE_CATEGORIES = ('notes', 'assignment', 'book', 'mst')
 
 
 def normalize_email(value):
@@ -112,7 +112,7 @@ def list_student_resources(search, status, page, admin_emails, actor_email):
                         NULLIF(BTRIM(u.google_name), ''), u.name) AS contributor_name
         FROM resources r
         JOIN users u ON LOWER(BTRIM(u.email)) = LOWER(BTRIM(r.uploaded_by))
-        WHERE {clause} AND r.category = ANY(%s)
+        WHERE {clause} AND r.category = ANY(%s) AND r.removed_at IS NULL
           AND (r.title ILIKE %s OR COALESCE(r.subject_name, '') ILIKE %s
                OR r.uploaded_by ILIKE %s) {status_clause}
         ORDER BY r.created_at DESC, r.id DESC

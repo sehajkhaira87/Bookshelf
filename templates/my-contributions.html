@@ -1,0 +1,77 @@
+{% extends 'contribution-history-layout.html' %}
+{% block heading %}My Contributions{% endblock %}
+{% block description %}
+    {% if total is defined %}<strong>{{ '{:,}'.format(total) }} total contribution{{ '' if total == 1 else 's' }}</strong> · Oldest first.
+    {% else %}Track your uploads and removal requests.{% endif %}
+{% endblock %}
+{% block back %}<a class="back-btn" href="{{ url_for('dashboard') }}"><span aria-hidden="true">←</span> Return to Dashboard</a>{% endblock %}
+{% block primary_action %}<a class="history-button primary" href="{{ url_for('contribute') }}">Add a contribution</a>{% endblock %}
+
+{% block history %}
+{% set categories = {'notes': 'Study Notes', 'assignment': 'Assignment', 'book': 'Digital Book', 'mst': 'MST Paper'} %}
+<ol class="history-list" aria-label="Uploads in chronological order">
+    {% for item in contributions %}
+    <li class="history-card">
+        <div class="history-item">
+            <h2>{{ item.title }}</h2>
+            <p>{{ categories.get(item.category, item.category|capitalize) }} · {{ item.branch|upper }} · Semester {{ item.semester }}</p>
+            <p>{% if item.created_at %}Uploaded {{ timestamp(item.created_at) }}{% else %}Upload date unavailable{% endif %}</p>
+        </div>
+        <dl class="history-states">
+            <div>
+                <dt>Verification</dt>
+                <dd><span class="history-chip {{ 'verified' if item.status == 'verified' }}">{{ 'Verified' if item.status == 'verified' else 'Unverified' }}</span></dd>
+            </div>
+            <div>
+                <dt>Removal</dt>
+                <dd><span class="history-chip {{ 'removed' if item.removed_at }}">{{ 'Removed' if item.removed_at else 'On file' }}</span></dd>
+            </div>
+        </dl>
+        {% if item.removed_at or item.removal_requested_at %}
+        <div class="history-request">
+            {% if item.removed_at %}<p>Removed {{ timestamp(item.removed_at) }}.</p>{% endif %}
+            {% if item.removal_requested_at %}
+                {% if item.removal_declined_at %}<p><strong>Request declined</strong> · {{ timestamp(item.removal_declined_at) }}</p>
+                {% elif not item.removed_at %}<p><strong>Removal requested</strong> · {{ timestamp(item.removal_requested_at) }}. Awaiting review.</p>
+                {% endif %}
+                <p class="history-reason"><strong>Your reason</strong> {{ item.removal_reason }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% if not item.removed_at and (not item.removal_requested_at or item.removal_declined_at) %}
+        <details class="history-action">
+            <summary>Request removal</summary>
+            <form method="post" class="history-form" action="{{ url_for('request_contribution_removal', resource_id=item.id, page=page) }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <label for="reason-option-{{ item.id }}">Why do you want this contribution removed?</label>
+                <select id="reason-option-{{ item.id }}" name="reason_option" required>
+                    <option value="" disabled selected>Choose a reason</option>
+                    {% for value, label in removal_reasons.items() %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                </select>
+                <label for="reason-{{ item.id }}">Additional details</label>
+                <textarea id="reason-{{ item.id }}" name="reason" rows="3" maxlength="{{ max_reason_details_length }}"
+                          aria-describedby="reason-help-{{ item.id }}"></textarea>
+                <small id="reason-help-{{ item.id }}">Required if you choose Other.</small>
+                <button class="history-button primary" type="submit">Send removal request</button>
+            </form>
+        </details>
+        {% endif %}
+    </li>
+    {% else %}
+    <li class="history-card history-empty">
+        <h2>{{ 'No contributions on this page' if page > 1 else 'No contributions yet' }}</h2>
+        <p>{{ 'Go to the previous page to see your uploads.' if page > 1 else 'Your uploads will appear here after you submit them.' }}</p>
+    </li>
+    {% endfor %}
+</ol>
+{{ pagination('my_contributions', page, more) }}
+<script>
+    for (const reasonMenu of document.querySelectorAll('.history-form select[name="reason_option"]')) {
+        const details = reasonMenu.form.elements.namedItem('reason');
+        const updateRequired = () => { details.required = reasonMenu.value === 'other'; };
+        reasonMenu.addEventListener('change', updateRequired);
+        window.addEventListener('pageshow', updateRequired);
+        updateRequired();
+    }
+</script>
+{% endblock %}

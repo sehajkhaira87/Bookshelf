@@ -1,0 +1,42 @@
+{% extends 'contribution-history-layout.html' %}
+{% block heading %}Removal requests{% endblock %}
+{% block description %}Review students’ requests to remove their contributions, oldest first.{% endblock %}
+{% block back %}<a class="back-btn" href="{{ url_for('admin_dashboard') }}"><span aria-hidden="true">←</span> Return to Admin</a>{% endblock %}
+
+{% block history %}
+<ol class="history-list" aria-label="Pending removal requests">
+    {% for item in pending %}
+    <li class="history-card">
+        <div class="history-item">
+            <h2>{{ item.title }}</h2>
+            <p>{{ item.uploaded_by }}</p>
+            <p>Requested {{ timestamp(item.removal_requested_at) }}</p>
+        </div>
+        <div class="history-request">
+            <p class="history-reason"><strong>Student’s reason</strong> {{ item.removal_reason }}</p>
+        </div>
+        <div class="history-action">
+            <details>
+                <summary>Approve removal</summary>
+                <form method="post" class="history-form" action="{{ url_for('admin_removal_decision', resource_id=item.id) }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="decision" value="approve">
+                    <input type="hidden" name="requested_at" value="{{ item.removal_requested_at.isoformat() }}">
+                    <label class="history-confirm"><input type="checkbox" name="confirm_delete" value="yes" required> Permanently delete the file and keep its entry in the student’s history.</label>
+                    <button class="history-button danger" type="submit">Approve and remove</button>
+                </form>
+            </details>
+            <form method="post" action="{{ url_for('admin_removal_decision', resource_id=item.id) }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="decision" value="decline">
+                <input type="hidden" name="requested_at" value="{{ item.removal_requested_at.isoformat() }}">
+                <button class="history-button" type="submit">Decline request</button>
+            </form>
+        </div>
+    </li>
+    {% else %}
+    <li class="history-card history-empty"><h2>No pending requests{% if page > 1 %} on this page{% endif %}</h2></li>
+    {% endfor %}
+</ol>
+{{ pagination('admin_removal_requests', page, more) }}
+{% endblock %}

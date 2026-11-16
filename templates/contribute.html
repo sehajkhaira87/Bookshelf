@@ -30,6 +30,10 @@
             </div>
         </header>
 
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+        <p role="{{ 'alert' if category == 'error' else 'status' }}">{{ message }}</p>
+        {% endfor %}
+
         <main class="split-layout">
             
             <aside class="leaderboard-panel">
@@ -83,7 +87,8 @@
                         <button type="button" id="btn-cancel-file" class="remove-btn" aria-label="Remove selected file">✕</button>
                     </div>
 
-                    <form id="metadata-form" action="{{ url_for('contribute') }}" method="POST" enctype="multipart/form-data">
+                    <form id="metadata-form" action="{{ url_for('submit_contribution') }}" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                         
                         <input type="file" id="native-upload" name="file" accept=".pdf, .jpg, .jpeg, .png" class="hidden">
                         <input type="file" id="native-camera" name="file" accept="image/*" capture="environment" class="hidden">
@@ -120,7 +125,7 @@
                             </select>
                             </label>
                             <label class="form-field">Subject
-                            <input type="text" name="subject" placeholder="e.g., Cyber Security" required class="book-input">
+                            <input type="text" name="subject" placeholder="e.g., Cyber Security" maxlength="255" required class="book-input">
                             </label>
                         </div>
 

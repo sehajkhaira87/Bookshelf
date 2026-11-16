@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleFileSelect = (event) => {
         const file = event.target.files[0];
         if (file) {
+            (event.target === nativeUpload ? nativeCamera : nativeUpload).value = '';
             fileNameDisplay.textContent = file.name;
             stateOptions.classList.add('hidden');
             stateForm.classList.remove('hidden');

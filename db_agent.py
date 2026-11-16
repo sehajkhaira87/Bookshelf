@@ -39,7 +39,7 @@ def get_resource_catalogue(category, branch=None, semester=None, search='', page
     """Read a fresh, paginated student catalogue from verified uploads."""
     if category not in {'notes', 'assignment', 'book', 'mst'}:
         raise ValueError('Invalid resource category.')
-    where = ['category = %s', 'status = %s']
+    where = ['category = %s', 'status = %s', 'removed_at IS NULL']
     params = [category, 'verified']
     if branch:
         where.append('branch = %s')
@@ -80,11 +80,12 @@ def get_resource_catalogue(category, branch=None, semester=None, search='', page
 
 
 def create_resources_table():
-    """Creates the resources table if it does not exist."""
+    """Create the resource catalogue and migrate contribution history fields."""
     conn = get_connection()
     if not conn:
         return
 
+    cur = None
     try:
         cur = conn.cursor()
 
@@ -99,13 +100,35 @@ def create_resources_table():
             file_name VARCHAR(500),
             file_size BIGINT,
             status VARCHAR(20) DEFAULT 'verified',
-            uploaded_by VARCHAR(100) DEFAULT 'admin',
+            uploaded_by VARCHAR(255) DEFAULT 'admin',
             subject_name VARCHAR(255),
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         """
 
         cur.execute(create_table_query)
+        cur.execute("""
+            DO $$ BEGIN
+                IF EXISTS (
+                    SELECT 1 FROM information_schema.columns
+                    WHERE table_schema = current_schema() AND table_name = 'resources'
+                      AND column_name = 'uploaded_by' AND character_maximum_length < 255
+                ) THEN
+                    ALTER TABLE resources ALTER COLUMN uploaded_by TYPE VARCHAR(255);
+                END IF;
+            END $$;
+            ALTER TABLE resources
+                ADD COLUMN IF NOT EXISTS removed_at TIMESTAMPTZ,
+                ADD COLUMN IF NOT EXISTS removal_requested_at TIMESTAMPTZ,
+                ADD COLUMN IF NOT EXISTS removal_reason VARCHAR(1000),
+                ADD COLUMN IF NOT EXISTS removal_declined_at TIMESTAMPTZ;
+            CREATE INDEX IF NOT EXISTS idx_resources_contribution_history
+                ON resources (LOWER(BTRIM(uploaded_by)), created_at, id);
+            CREATE INDEX IF NOT EXISTS idx_resources_pending_removal
+                ON resources (removal_requested_at, id)
+                WHERE removed_at IS NULL AND removal_declined_at IS NULL
+                  AND removal_requested_at IS NOT NULL;
+        """)
         conn.commit()
         print("[DBAgent] Resources table created successfully (or already exists).")
 
@@ -176,7 +199,7 @@ def get_resources(category=None, branch=None, semester=None, status=None):
     try:
         cur = conn.cursor()
 
-        query = "SELECT id, title, category, branch, semester, blob_url, file_name, file_size, status, uploaded_by, subject_name, created_at FROM resources WHERE 1=1"
+        query = "SELECT id, title, category, branch, semester, blob_url, file_name, file_size, status, uploaded_by, subject_name, created_at FROM resources WHERE removed_at IS NULL"
         params = []
 
         if category:
@@ -240,7 +263,7 @@ def get_resource_by_id(resource_id):
     try:
         cur = conn.cursor()
         cur.execute(
-            "SELECT id, title, category, branch, semester, blob_url, file_name, file_size, status, uploaded_by, subject_name, created_at FROM resources WHERE id = %s",
+            "SELECT id, title, category, branch, semester, blob_url, file_name, file_size, status, uploaded_by, subject_name, created_at FROM resources WHERE id = %s AND removed_at IS NULL",
             (resource_id,)
         )
         row = cur.fetchone()
@@ -291,55 +314,17 @@ def update_resource_status(resource_id, new_status):
     try:
         cur = conn.cursor()
         cur.execute(
-            "UPDATE resources SET status = %s WHERE id = %s",
+            "UPDATE resources SET status = %s WHERE id = %s AND removed_at IS NULL",
             (new_status, resource_id)
         )
+        changed = cur.rowcount == 1
         conn.commit()
         print(f"[DBAgent] Resource {resource_id} status updated to '{new_status}'.")
-        return True
+        return changed
 
     except Exception as e:
         print(f"[DBAgent] Error updating status: {e}")
         return False
-    finally:
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
-
-
-def delete_resource(resource_id):
-    """
-    Deletes a resource record from the database.
-
-    Returns:
-        The blob_url of the deleted resource (for cleanup), or None on failure.
-    """
-    conn = get_connection()
-    if not conn:
-        return None
-
-    try:
-        cur = conn.cursor()
-
-        # First get the blob_url so we can delete from Azure too
-        cur.execute("SELECT blob_url FROM resources WHERE id = %s", (resource_id,))
-        row = cur.fetchone()
-        if not row:
-            print(f"[DBAgent] Resource {resource_id} not found.")
-            return None
-
-        blob_url = row[0]
-
-        # Delete the record
-        cur.execute("DELETE FROM resources WHERE id = %s", (resource_id,))
-        conn.commit()
-        print(f"[DBAgent] Resource {resource_id} deleted from database.")
-        return blob_url
-
-    except Exception as e:
-        print(f"[DBAgent] Error deleting resource: {e}")
-        return None
     finally:
         if cur:
             cur.close()
@@ -361,13 +346,13 @@ def get_resource_stats():
     try:
         cur = conn.cursor()
 
-        cur.execute("SELECT COUNT(*) FROM resources")
+        cur.execute("SELECT COUNT(*) FROM resources WHERE removed_at IS NULL")
         total = cur.fetchone()[0]
 
-        cur.execute("SELECT category, COUNT(*) FROM resources GROUP BY category")
+        cur.execute("SELECT category, COUNT(*) FROM resources WHERE removed_at IS NULL GROUP BY category")
         by_category = dict(cur.fetchall())
 
-        cur.execute("SELECT status, COUNT(*) FROM resources GROUP BY status")
+        cur.execute("SELECT status, COUNT(*) FROM resources WHERE removed_at IS NULL GROUP BY status")
         by_status = dict(cur.fetchall())
 
         return {

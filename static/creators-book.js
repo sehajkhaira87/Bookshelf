@@ -57,7 +57,7 @@ export function createCreatorsBook(root, assets) {
   const cast=document.createElement('div');cast.className='authors-paper-cast';cast.setAttribute('aria-hidden','true');book.insertBefore(cast,paperLeaf);
   function makeSheetMesh(host,frontArt,backArt) {
     const surface=document.createElement('div');surface.className='authors-sheet-mesh';surface.hidden=true;surface.inert=true;surface.setAttribute('aria-hidden','true');
-    const count=18,width=418/count,strips=[],frontCopies=[],backCopies=[];
+    const count=18,width=418/count,strips=[],backCopies=[];
     function faceCopy(art,index,isBack) {
       const face=document.createElement('div');face.className='authors-facet-face'+(isBack?' authors-facet-back':'');
       const copy=art.cloneNode(true);copy.classList.add('authors-facet-art');copy.style.left=`${-index*width}px`;copy.style.top='0';copy.style.transform='none';copy.style.visibility='';
@@ -67,7 +67,8 @@ export function createCreatorsBook(root, assets) {
       copy.querySelectorAll('[data-author]').forEach(node=>node.removeAttribute('data-author'));
       copy.querySelectorAll('.authors-read').forEach(button=>button.remove());
       const light=document.createElement('div');light.className='authors-facet-light';
-      face.appendChild(copy);face.appendChild(light);(isBack?backCopies:frontCopies).push(copy);
+      face.appendChild(copy);face.appendChild(light);
+      if(isBack)backCopies.push(copy);
       return {face,light};
     }
     for(let index=0;index<count;index++) {
@@ -77,19 +78,26 @@ export function createCreatorsBook(root, assets) {
       if(back)strip.appendChild(back.face);
       surface.appendChild(strip);strips.push({strip,index,front,back});
     }
-    host.appendChild(surface);return {surface,strips,width,frontCopies,backCopies};
+    host.appendChild(surface);return {surface,strips,width,backCopies};
   }
   const paperMesh=makeSheetMesh(paperLeaf,paperFront,authors.frontend.page);
   const frontendBadge=authors.frontend.page.querySelector('.authors-badge-row');
   const frontendRoleWords=[...authors.frontend.page.querySelectorAll('.authors-role-word')];
   const frontendParagraphs=[...authors.frontend.bio.querySelectorAll('p')];
   const frontendPortrait=authors.frontend.page.querySelector('.authors-portrait');
+  const frontendFacets=paperMesh.backCopies.map(copy=>({
+    portrait:copy.querySelector('.authors-portrait'),
+    badge:copy.querySelector('.authors-badge-row'),
+    roles:[...copy.querySelectorAll('.authors-role-word')],
+    bio:copy.querySelector('.authors-bio'),
+    paragraphs:[...copy.querySelectorAll('.authors-bio p')],
+    shade:copy.querySelector('.authors-page-depth')
+  }));
   const backendBadge=authors.backend.page.querySelector('.authors-badge-row');
   const backendRoleWords=[...authors.backend.page.querySelectorAll('.authors-role-word')];
   const backendParagraphs=[...authors.backend.bio.querySelectorAll('p')];
   const backendPortrait=authors.backend.page.querySelector('.authors-portrait');
-  // One portrait and one set of labels remain on the page throughout the move.
-  // There is no photo replacement, layout crossfade or text-size reflow.
+  // Keep the live portrait and labels on the same layers while focusing a profile.
   const movingLayers=[camera,paperLeaf,gutter,authors.backend.page,workPage,frontendPortrait,frontendBadge,...frontendRoleWords,backendPortrait,backendBadge,...backendRoleWords,workMedia];
   const revealLayers=[...frontendParagraphs,...backendParagraphs,workChapter,workTitle,...workParagraphs,...engineParts];
   movingLayers.forEach(element=>{element.style.willChange='transform';});
@@ -223,6 +231,18 @@ export function createCreatorsBook(root, assets) {
     }
     const openingCurl=.52*wave(paperOpen);
     const paperBends=openingCurl>.0005;
+    if(paperBends){
+      // The curl uses slices of the page. Match the live layout before showing
+      // them so the portrait, labels and bio don't jump to their spread poses.
+      for(const facet of frontendFacets){
+        facet.portrait.style.transform=visual.portrait;
+        facet.badge.style.transform=visual.badge;
+        facet.roles.forEach((element,index)=>{element.style.transform=visual.roles[index];});
+        facet.bio.hidden=authors.frontend.bio.hidden;
+        if(!facet.bio.hidden)facet.paragraphs.forEach((element,index)=>paintReveal(element,visual.bio[index]));
+        facet.shade.style.opacity=String(visual.frontendShade);
+      }
+    }
     const paperDepth=.4+26*frontendFocus-14*backendFocus;
     const paperPosition=`translate3d(${425*backendFocus}px,${5*backendFocus}px,${paperDepth}px)`;
     paperLeaf.style.transform=paperBends?paperPosition:`${paperPosition} rotateY(${-180*paperOpen}deg)`;
@@ -272,7 +292,10 @@ export function createCreatorsBook(root, assets) {
     const time=clamp((now-started)/duration),ease=from.open!==to.open?glide(time):minimumJerk(time);
     if(previousFrame)frameIntervals.push(now-previousFrame);previousFrame=now;
     for(const key of ['open','focus','side'])pose[key]=from[key]+(to[key]-from[key])*ease;
-    for(const key of ['reveal','showcase'])pose[key]=from[key]+(to[key]-from[key])*time;
+    // Settle the frontend layout while its face is still visible on the turn.
+    const revealTime=view==='frontend'&&target==='cover'?phase(time,0,.45):time;
+    pose.reveal=from.reveal+(to.reveal-from.reveal)*revealTime;
+    pose.showcase=from.showcase+(to.showcase-from.showcase)*time;
     // Two overlapping tracks: the outgoing sheet makes room first, while the
     // incoming sheet lifts and has slightly longer to settle. Both stop gently.
     const entering=to.work>from.work;
