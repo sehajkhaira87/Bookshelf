@@ -8,7 +8,7 @@
     <title>Dashboard — Bookshelf</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Canela:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css', v='4') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css', v='9') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='contributor-badges.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='notifications.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='roles.css') }}">
@@ -291,21 +291,23 @@
                 
                 <div class="selection-step" id="step-dept">
                     <div class="dept-squares">
-                        
                         {% for department in site_departments() %}
                         <div class="dept-card" data-dept="{{ department.code|lower }}" role="button" tabindex="0">
                             <img src="{{ url_for('department_icon', code=department.code) if department.has_custom_icon else url_for('static', filename=department.icon_path) }}" class="dept-icon" alt="">
-                            <div>
-                                <div class="card-badge" style="margin-bottom: 8px;">{{ department.code }}</div>
-                                <h3>{{ department.name }}</h3>
+                            <div class="department-card-copy">
+                                <span class="card-badge">{{ department.code }}</span>
+                                <h3 class="department-card-title">{{ department.name }}</h3>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                     <div class="applied-note">
                         <button type="button" class="dept-card applied-card" aria-expanded="false" aria-controls="step-sem">
-                            <svg class="dept-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6m-5 0v6l-6 10a1.3 1.3 0 0 0 1.1 2h13.8A1.3 1.3 0 0 0 20 19L14 9V3M7.2 14h9.6"/></svg>
-                            <span class="applied-copy"><span class="card-badge">AS</span><strong>Applied Science<span class="first-years" hidden> 1st Years</span></strong></span>
+                            <svg class="dept-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6m-5 0v6l-6 10a1.3 1.3 0 0 0 1.1 2h13.8A1.3 1.3 0 0 0 20 19L14 9V3M7.2 14h9.6"/></svg>
+                            <span class="department-card-copy">
+                                <span class="card-badge">AS</span>
+                                <span class="department-card-title">Applied Science<span class="first-years" hidden> 1st Years</span></span>
+                            </span>
                         </button>
                     </div>
                     <button type="button" class="all-departments" hidden><span aria-hidden="true">←</span> All departments</button>
@@ -365,7 +367,7 @@
 
     </div>
     
-    <script src="{{ url_for('static', filename='dashboard.js', v='3') }}"></script>
+    <script src="{{ url_for('static', filename='dashboard.js', v='11') }}"></script>
     <script src="{{ url_for('static', filename='dashboard-college-logo.js', v='3') }}"></script>
     <script src="{{ url_for('static', filename='mobile-dashboard-dock.js') }}"></script>
     <script src="{{ url_for('static', filename='notifications.js') }}"></script>

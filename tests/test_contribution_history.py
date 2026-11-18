@@ -69,6 +69,48 @@ class ContributionRoutesTests(unittest.TestCase):
         self.assertEqual(save.call_args.kwargs['uploaded_by'], 'student@example.test')
         self.assertEqual(save.call_args.kwargs['status'], 'unverified')
 
+    def test_applied_science_contributions_save_the_first_year_branch(self):
+        self.sign_in()
+        for semester in ('1', '2'):
+            with self.subTest(semester=semester), \
+                    patch.object(self.module, 'get_user_by_email', return_value={'is_banned': False}), \
+                    patch.object(self.module, 'upload_file', return_value={'blob_url': 'https://example.test/file.pdf'}), \
+                    patch.object(self.module, 'add_resource', return_value=42) as save:
+                response = self.client.post('/contribute', data={
+                    '_csrf_token': 'test-token', 'category': 'notes', 'branch': 'as', 'semester': semester,
+                    'subject': 'Applied Physics', 'file': (BytesIO(b'%PDF-1.7\ntest'), 'physics.pdf'),
+                })
+                self.assertEqual(response.location, '/dashboard/contributions')
+                self.assertEqual(save.call_args.kwargs['branch'], 'as')
+                self.assertEqual(save.call_args.kwargs['semester'], semester)
+                self.assertEqual(save.call_args.kwargs['status'], 'unverified')
+
+    def test_contribution_semester_must_match_the_branch_before_uploading(self):
+        self.sign_in()
+        branches = [item['code'].lower() for item in department_service.DEFAULT_DEPARTMENTS]
+        invalid_choices = [(branch, semester) for branch in branches for semester in ('1', '2')]
+        invalid_choices += [('as', str(semester)) for semester in range(3, 9)]
+        with patch.object(self.module, 'get_user_by_email', return_value={'is_banned': False}), \
+                patch.object(self.module, 'upload_file') as upload, \
+                patch.object(self.module, 'add_resource') as save:
+            for branch, semester in invalid_choices:
+                with self.subTest(branch=branch, semester=semester):
+                    response = self.client.post('/contribute', data={
+                        '_csrf_token': 'test-token', 'category': 'notes', 'branch': branch,
+                        'semester': semester, 'subject': 'Physics',
+                        'file': (BytesIO(b'%PDF-1.7\ntest'), 'physics.pdf'),
+                    })
+                    self.assertEqual(response.location, '/contribute')
+            upload.assert_not_called()
+            save.assert_not_called()
+
+    def test_applied_science_uploads_are_available_in_the_catalogue(self):
+        with patch.object(self.module, 'get_resource_catalogue', return_value=([], 0)) as catalogue:
+            response = self.client.get('/notes?branch=as&semester=1')
+        self.assertEqual(response.status_code, 200)
+        catalogue.assert_called_once_with('notes', 'as', '1', '', 1)
+        self.assertIn(b'value="as" selected>Applied Science (AS)</option>', response.data)
+
     def test_only_admin_can_approve_the_selected_request(self):
         path = '/admin/contributions/42/removal-decision'
         requested_at = datetime(2026, 11, 16, tzinfo=timezone.utc)

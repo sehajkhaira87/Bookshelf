@@ -875,8 +875,9 @@ def submit_contribution(email):
     semester = request.form.get('semester', '').strip()
     subject = request.form.get('subject', '').strip()
     files = [file for file in request.files.getlist('file') if file.filename]
-    if (category not in {'notes', 'assignment', 'mst'} or semester not in ALLOWED_SEMESTERS
-            or branch not in {item['code'].lower() for item in site_departments()}
+    allowed_semesters = {'1', '2'} if branch == 'as' else ALLOWED_SEMESTERS - {'1', '2'}
+    if (category not in {'notes', 'assignment', 'mst'} or semester not in allowed_semesters
+            or branch not in {item['code'].lower() for item in resource_departments()}
             or not 1 <= len(subject) <= 255 or '\x00' in subject or len(files) != 1):
         flash('Choose a branch, category, semester and subject, and select one file.', 'error')
         return redirect(url_for('contribute'))
@@ -1021,7 +1022,7 @@ def _resource_catalogue(category, title, endpoint):
     search = request.args.get('q', '').strip()[:200]
     try:
         page = int(request.args.get('page', '1'))
-        if not 1 <= page <= 1000000 or (branch and branch not in {item['code'].lower() for item in site_departments()}) or (semester and semester not in ALLOWED_SEMESTERS):
+        if not 1 <= page <= 1000000 or (branch and branch not in {item['code'].lower() for item in resource_departments()}) or (semester and semester not in ALLOWED_SEMESTERS):
             raise ValueError()
     except ValueError:
         abort(400, 'Invalid department, semester or page.')
@@ -1054,6 +1055,13 @@ def site_departments():
     return g.site_departments
 
 
+def resource_departments():
+    departments = list(site_departments())
+    if not any(item['code'].lower() == 'as' for item in departments):
+        departments.append({'code': 'AS', 'name': 'Applied Science'})
+    return departments
+
+
 @app.get('/api/site-effects')
 def site_effects():
     try:
@@ -1070,7 +1078,7 @@ def site_effects():
 @app.context_processor
 def department_context():
     # Lazy: only templates with department controls need a database read.
-    return {'site_departments': site_departments}
+    return {'site_departments': site_departments, 'resource_departments': resource_departments}
 
 
 register_communications_routes(app, admin_required, csrf_protected, ADMIN_EMAILS)

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contribute - BOOKSHELF</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='contribute.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='contribute.css', v='3') }}">
     {% include 'site-effects.html' %}
 </head>
 <body>
@@ -94,36 +94,39 @@
                         <input type="file" id="native-camera" name="file" accept="image/*" capture="environment" class="hidden">
 
                         <div class="form-row">
-                            <label class="form-field">Branch
-                            <select name="branch" required class="book-input">
+                            <div class="form-field picker-field">
+                            <label for="contribution-branch" id="branch-label">Branch</label>
+                            <select id="contribution-branch" name="branch" required class="book-input">
                                 <option value="" disabled selected>Select Branch...</option>
-                                {% for department in site_departments() %}<option value="{{ department.code|lower }}">{{ department.name }} ({{ department.code }})</option>{% endfor %}
+                                {% set departments = resource_departments() %}
+                                <optgroup label="1st Year · All Branches">
+                                    <option value="as">Applied Science</option>
+                                </optgroup>
+                                <optgroup label="2nd–4th Year · Semesters 3–8">
+                                    {% for department in departments if department.code|lower != 'as' %}
+                                    <option value="{{ department.code|lower }}">{{ department.name }} ({{ department.code }})</option>
+                                    {% endfor %}
+                                </optgroup>
                             </select>
-                            </label>
-                            <label class="form-field">Category
-                            <select name="category" required class="book-input">
+                            </div>
+                            <div class="form-field picker-field">
+                            <label for="contribution-category" id="category-label">Category</label>
+                            <select id="contribution-category" name="category" required class="book-input">
                                 <option value="" disabled selected>Select Category...</option>
                                 <option value="mst">MST Papers</option>
                                 <option value="notes">Study Notes</option>
                                 <option value="assignment">Assignment</option>
                             </select>
-                            </label>
+                            </div>
                         </div>
 
                         <div class="form-row">
-                            <label class="form-field">Semester
-                            <select name="semester" required class="book-input">
-                                <option value="" disabled selected>Semester...</option>
-                                <option value="1">Semester 1</option>
-                                <option value="2">Semester 2</option>
-                                <option value="3">Semester 3</option>
-                                <option value="4">Semester 4</option>
-                                <option value="5">Semester 5</option>
-                                <option value="6">Semester 6</option>
-                                <option value="7">Semester 7</option>
-                                <option value="8">Semester 8</option>
+                            <div class="form-field picker-field">
+                            <label for="contribution-semester" id="semester-label">Semester</label>
+                            <select id="contribution-semester" name="semester" required class="book-input" disabled>
+                                <option value="" disabled selected>Select a branch first...</option>
                             </select>
-                            </label>
+                            </div>
                             <label class="form-field">Subject
                             <input type="text" name="subject" placeholder="e.g., Cyber Security" maxlength="255" required class="book-input">
                             </label>
@@ -136,7 +139,7 @@
             </section>
         </main>
     </div>
-<script src="{{ url_for('static', filename='contribute.js') }}"></script>
+<script src="{{ url_for('static', filename='contribute.js', v='4') }}"></script>
 {% include 'student-activity.html' %}
 </body>
 </html>
