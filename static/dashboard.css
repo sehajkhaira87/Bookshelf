@@ -1267,3 +1267,51 @@ body.dark-mode .category-card.selected {
         font-size: 0.95rem !important;
     }
 }
+
+/* The first-year note shares the department row's left edge. */
+#step-dept { position: relative; }
+.dashboard-flow [hidden] { display: none !important; }
+.applied-note {
+    width: min(100%, 256px);
+    margin-top: 24px;
+    position: relative;
+    z-index: 1;
+}
+.applied-note .applied-card {
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    overflow: hidden;
+    border-color: #d7c49c;
+    background: #fffcf5;
+}
+.applied-note .applied-card:hover { transform: none; }
+.applied-copy { display: grid; justify-items: start; gap: 8px; }
+.applied-copy strong { white-space: nowrap; }
+.applied-card:disabled { opacity: 1; color: inherit; cursor: default; }
+.first-year-open .dept-squares { display: none !important; }
+.first-year-open .applied-note { width: 100%; margin-top: 0; }
+.first-year-open .applied-copy strong { font-size: 1.3em; }
+.all-departments {
+    min-height: 44px;
+    padding: 6px 10px;
+    margin-top: 10px;
+    font: inherit;
+    font-size: 14px;
+    color: inherit;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+.first-year-open .all-departments {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    margin: 0;
+    z-index: 2;
+}
+#step-dept[data-moving] .dept-card { transition: none; }
+@media (max-width: 820px) {
+    .applied-note { width: min(64%, 256px); margin-top: 16px; }
+}
